@@ -1,0 +1,32 @@
+{
+  "name": "shadow-play",
+  "displayName": "Shadow Play",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "author": "Shadō Network",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "dev": "bash ./scripts/dev.sh",
+    "start": "bash ./scripts/start.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "@types/yargs": "^17.0.33",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "agent-twitter-client": "^0.0.16",
+    "dotenv": "^16.4.5",
+    "prettier": "^3.3.3",
+    "telegraf": "^4.16.3",
+    "yargs": "^17.7.2"
+  }
+}
