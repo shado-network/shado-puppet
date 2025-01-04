@@ -1,7 +1,7 @@
 export type CoreLog = {
   type: 'SUCCESS' | 'WARNING' | 'ERROR' | 'INFO' | 'LOG'
-  source: 'SERVER' | 'STAGE' | 'PUPPET' | 'WORLD' | 'AGENT' | 'USER'
-  stageId?: string
+  source: 'SERVER' | 'PLAY' | 'PUPPET' | 'WORLD' | 'AGENT' | 'USER'
+  playId?: string
   puppetId?: string
   userId?: string
   message: string
@@ -133,7 +133,7 @@ export class CoreLogger {
   send = ({
     type,
     source,
-    stageId,
+    playId,
     puppetId,
     userId,
     message,
@@ -178,9 +178,9 @@ export class CoreLogger {
           headerStyling = this._getColor('green', '')
           header = '[ SERVER ]'
           break
-        case 'STAGE':
+        case 'PLAY':
           headerStyling = this._getColor('blue', '')
-          header = `[ STAGE / ${stageId.toUpperCase()} ]`
+          header = `[ PLAY / ${playId.toUpperCase()} ]`
           break
         case 'PUPPET':
           headerStyling = this._getColor('magenta', '')
@@ -189,7 +189,7 @@ export class CoreLogger {
         //
         case 'WORLD':
           headerStyling = this._getColor('red', '')
-          header = `< ${stageId.toUpperCase()} >`
+          header = `< ${playId.toUpperCase()} >`
           break
         case 'AGENT':
           headerStyling = this._getColor('yellow', '')

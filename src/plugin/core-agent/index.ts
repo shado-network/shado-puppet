@@ -1,6 +1,7 @@
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 
 import { AnthropicClientPlugin } from '../client-anthropic/index.ts'
+import { OpenAiClientPlugin } from '../client-openai/index.ts'
 import { TelegramClientPlugin } from '../client-telegram/index.ts'
 import { TwitterClientPlugin } from '../client-twitter/index.ts'
 import type { CoreLogger } from '../core-logger/index.ts'
@@ -10,7 +11,7 @@ import { runtimes } from './libs/runtimes.ts'
 
 export class CoreAgentPlugin {
   agentDefinition: PuppetDefinition
-  model: AnthropicClientPlugin
+  model: AnthropicClientPlugin | OpenAiClientPlugin
   telegramClient: TelegramClientPlugin
   twitterClient: TwitterClientPlugin
 
@@ -44,15 +45,19 @@ export class CoreAgentPlugin {
 
   _setModelPlugin = async () => {
     switch (this.agentDefinition.modelProvider) {
-      case 'openai':
-        this._logger.send({
-          type: 'ERROR',
-          source: 'PUPPET',
-          message: 'Puppet model plugin for OpenAI not yet implemented.',
-        })
-        break
+      // MARK: Anthropic
       case 'anthropic':
         this.model = new AnthropicClientPlugin(this._logger)
+        this._logger.send({
+          type: 'SUCCESS',
+          source: 'PUPPET',
+          puppetId: this.agentDefinition.id,
+          message: `Loaded puppet model plugin "${this.agentDefinition.modelProvider}"`,
+        })
+        break
+      // MARK: OpenAI
+      case 'openai':
+        this.model = new OpenAiClientPlugin(this._logger)
         this._logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',

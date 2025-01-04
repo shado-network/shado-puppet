@@ -37,7 +37,7 @@ const telegramRuntime = (
           type: 'LOG',
           source: 'AGENT',
           puppetId: agentDefinition.id,
-          message: 'Got a Telegram message:',
+          message: 'Got a Telegram message',
           payload: {
             message: message.message,
           },

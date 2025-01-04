@@ -70,7 +70,7 @@ export class Puppet {
         this._logger.send({
           type: 'ERROR',
           source: 'PUPPET',
-          message: 'Puppet agent plugin for Eliza not yet implemented.',
+          message: 'Puppet agent plugin for Eliza not yet implemented',
           payload: {
             puppetId: this.puppetId,
           },

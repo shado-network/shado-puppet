@@ -5,7 +5,7 @@ const puppet: PuppetDefinition = {
   name: 'Evil',
   //
   agentProvider: 'shado',
-  modelProvider: 'anthropic',
+  modelProvider: 'openai',
   interfaces: [
     'telegram',
     // 'twitter'

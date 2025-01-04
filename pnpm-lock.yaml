@@ -17,6 +17,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      openai:
+        specifier: ^4.77.3
+        version: 4.77.3
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
@@ -391,6 +394,15 @@ packages:
   object-keys@1.1.1:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
+
+  openai@4.77.3:
+    resolution: {integrity: sha512-wLDy4+KWHz31HRFMW2+9KQuVuT2QWhs0z94w1Gm1h2Ut9vIHr9/rHZggbykZEfyiaJRVgw8ZS9K6AylDWzvPYw==}
+    hasBin: true
+    peerDependencies:
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   otpauth@9.3.5:
     resolution: {integrity: sha512-jQyqOuQExeIl4YIiOUz4TdEcamgAgPX6UYeeS9Iit4lkvs7bwHb0JNDqchGRccbRfvWHV6oRwH36tOsVmc+7hQ==}
@@ -900,6 +912,18 @@ snapshots:
   normalize-path@3.0.0: {}
 
   object-keys@1.1.1: {}
+
+  openai@4.77.3:
+    dependencies:
+      '@types/node': 18.19.65
+      '@types/node-fetch': 2.6.12
+      abort-controller: 3.0.0
+      agentkeepalive: 4.5.0
+      form-data-encoder: 1.7.2
+      formdata-node: 4.4.1
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
 
   otpauth@9.3.5:
     dependencies:
