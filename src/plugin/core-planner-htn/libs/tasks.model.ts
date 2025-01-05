@@ -4,7 +4,7 @@ import type { CoreLogger } from '../../core-logger/index.ts'
 import type { PuppetDefinition } from '../../../core/types/puppet.ts'
 import type { AnthropicClientPlugin } from '../../client-anthropic/index.ts'
 
-export const modelActions = {
+export const modelTasks = {
   generateResponse: async (
     puppetDefinition: PuppetDefinition,
     messages: MessageParam[],

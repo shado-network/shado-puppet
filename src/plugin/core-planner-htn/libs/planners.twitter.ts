@@ -1,8 +1,8 @@
-import { actions } from './actions.ts'
+import { tasks } from './tasks.ts'
 import type { CoreLogger } from '../../core-logger/index.ts'
 import type { Puppet } from '../../../core/types/puppet.ts'
 
-export const twitterRuntime = async (
+export const twitterPlanner = async (
   puppet: Puppet,
   messages,
   _logger: CoreLogger,
@@ -20,7 +20,7 @@ export const twitterRuntime = async (
     }
 
     // MARK: Login
-    await actions.twitter.login(
+    await tasks.twitter.login(
       puppet.definition,
       puppet.interfaces.twitterClient,
       _logger,
@@ -28,7 +28,7 @@ export const twitterRuntime = async (
 
     // TODO: Loop here?
     // MARK: Read
-    const getMessages = await actions.twitter.getMessages(
+    const getMessages = await tasks.twitter.getMessages(
       puppet.definition,
       messages,
       puppet.interfaces.twitterClient,
@@ -39,7 +39,7 @@ export const twitterRuntime = async (
     // MARK: Should reply?
     if (getMessages.shouldReply) {
       // MARK: Write
-      // await actions.model.generateResponse(
+      // await tasks.model.generateResponse(
       //   puppet,
       //   messages,
       //   model,
@@ -64,7 +64,7 @@ export const twitterRuntime = async (
       type: 'ERROR',
       source: 'PUPPET',
       puppetId: puppet.id,
-      message: `Error in agent runtime`,
+      message: `Error in agent planner`,
       payload: { error },
     })
   }

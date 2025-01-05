@@ -1,9 +1,9 @@
-import { actions } from './actions.ts'
+import { tasks } from './tasks.ts'
 import type { CoreLogger } from '../../core-logger/index.ts'
 import type { Puppet } from '../../../core/types/puppet.ts'
 import { AnthropicClientPlugin } from '../../client-anthropic/index.ts'
 
-export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
+export const telegramPlanner = (puppet: Puppet, _logger: CoreLogger) => {
   try {
     if (!puppet.interfaces.telegramClient) {
       _logger.send({
@@ -18,7 +18,7 @@ export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
 
     setInterval(() => {
       // MARK: Read
-      const messages = actions.telegram.getMessages(
+      const messages = tasks.telegram.getMessages(
         puppet.interfaces.telegramClient,
       )
 
@@ -27,10 +27,7 @@ export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
           return
         }
 
-        actions.telegram.markAsRead(
-          message.id,
-          puppet.interfaces.telegramClient,
-        )
+        tasks.telegram.markAsRead(message.id, puppet.interfaces.telegramClient)
 
         _logger.send({
           type: 'LOG',
@@ -83,7 +80,7 @@ export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
 
         if (shouldReply(message.ctx)) {
           // MARK: Write
-          const response = await actions.model.generateResponse(
+          const response = await tasks.model.generateResponse(
             puppet.definition,
             [
               {
@@ -97,7 +94,7 @@ export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
           )
 
           /// MARK: Post
-          await actions.telegram.sendMessage(
+          await tasks.telegram.sendMessage(
             response.content as string,
             message.ctx,
             puppet.interfaces.telegramClient,
@@ -120,7 +117,7 @@ export const telegramRuntime = (puppet: Puppet, _logger: CoreLogger) => {
       type: 'ERROR',
       source: 'PUPPET',
       puppetId: puppet.id,
-      message: `Error in agent runtime`,
+      message: `Error in agent planner`,
       payload: { error },
     })
   }

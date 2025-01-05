@@ -4,8 +4,8 @@ const puppet: PuppetDefinition = {
   id: 'evil',
   name: 'Evil',
   //
-  runtime: {
-    provider: 'core-runtime-htn',
+  planner: {
+    provider: 'core-planner-htn',
     config: {},
   },
   model: {

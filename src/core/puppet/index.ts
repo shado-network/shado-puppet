@@ -1,4 +1,4 @@
-import { CoreRuntimePlugin } from '../../plugin/core-runtime-htn/index.ts'
+import { CorePlannerPlugin } from '../../plugin/core-planner-htn/index.ts'
 import type { Puppet as PuppetType } from '../types/puppet.ts'
 import type { CoreLogger } from '../../plugin/core-logger/index.ts'
 
@@ -8,7 +8,7 @@ import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 
 export class Puppet {
-  runtime: CoreRuntimePlugin
+  planner: CorePlannerPlugin
 
   puppet: any | PuppetType
 
@@ -28,7 +28,7 @@ export class Puppet {
 
       await this._setModelPlugin()
       await this._setInterfacePlugins()
-      await this._setRuntimePlugin()
+      await this._setPlannerPlugin()
 
       await this._debug()
     } catch (error) {
@@ -115,35 +115,35 @@ export class Puppet {
     }
   }
 
-  _setRuntimePlugin = async () => {
-    switch (this.puppet.definition.runtime.provider) {
-      case 'core-runtime-htn':
-        this.runtime = new CoreRuntimePlugin(this.puppet, this._logger)
+  _setPlannerPlugin = async () => {
+    switch (this.puppet.definition.planner.provider) {
+      case 'core-planner-htn':
+        this.planner = new CorePlannerPlugin(this.puppet, this._logger)
 
         this._logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
           puppetId: this.puppet.id,
-          message: `Loaded puppet runtime plugin "${this.puppet.definition.runtime.provider}"`,
+          message: `Loaded puppet planner plugin "${this.puppet.definition.planner.provider}"`,
         })
         break
-      case 'core-runtime-sm':
+      case 'core-planner-sm':
         this._logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           message:
-            'Puppet runtime plugin for State Machines not yet implemented',
+            'Puppet planner plugin for State Machines not yet implemented',
           payload: {
             puppetId: this.puppet.id,
           },
         })
         break
-      case 'core-runtime-bt':
+      case 'core-planner-bt':
         this._logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           message:
-            'Puppet runtime plugin for Behaviour Trees not yet implemented',
+            'Puppet planner plugin for Behaviour Trees not yet implemented',
           payload: {
             puppetId: this.puppet.id,
           },

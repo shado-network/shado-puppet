@@ -4,7 +4,7 @@ import type { TwitterClientPlugin } from '../../client-twitter/index.ts'
 import type { CoreLogger } from '../../core-logger/index.ts'
 import type { PuppetDefinition } from '../../../core/types/puppet.ts'
 
-export const twitterActions = {
+export const twitterTasks = {
   login: async (
     puppetDefinition: PuppetDefinition,
     twitterClient: TwitterClientPlugin,

@@ -19,7 +19,7 @@ export class OpenAiClientPlugin {
   }
 
   clientConfig = {
-    model: 'gpt-4o-mini',
+    model: 'gpt-4o',
     max_tokens: 256,
     temperature: 1,
   }
@@ -33,6 +33,7 @@ export class OpenAiClientPlugin {
   constructor(_logger: CoreLogger) {
     this._logger = _logger
 
+    this.clientConfig = { ...this.clientConfig }
     this.client = new OpenAI(this.clientOptions)
   }
 

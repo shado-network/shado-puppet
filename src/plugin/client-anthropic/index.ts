@@ -36,6 +36,7 @@ export class AnthropicClientPlugin {
   constructor(_logger: CoreLogger) {
     this._logger = _logger
 
+    this.clientConfig = { ...this.clientConfig }
     this.client = new Anthropic(this.clientOptions)
   }
 

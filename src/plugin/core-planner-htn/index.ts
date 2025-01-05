@@ -3,9 +3,9 @@ import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import type { CoreLogger } from '../core-logger/index.ts'
 import type { Puppet } from '../../core/types/puppet.ts'
 
-import { runtimes } from './libs/runtimes.ts'
+import { planners } from './libs/planners.ts'
 
-export class CoreRuntimePlugin {
+export class CorePlannerPlugin {
   puppet: Puppet
 
   messages: MessageParam[] = []
@@ -36,9 +36,9 @@ export class CoreRuntimePlugin {
 
   _debug = async () => {
     // MARK: Telegram
-    runtimes.telegram(this.puppet, this._logger)
+    planners.telegram(this.puppet, this._logger)
 
     // MARK: Twitter
-    runtimes.twitter(this.puppet, this.messages, this._logger)
+    planners.twitter(this.puppet, this.messages, this._logger)
   }
 }

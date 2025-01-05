@@ -10,8 +10,8 @@ export type PuppetDefinition = {
   id: string
   name: string
   //
-  runtime: {
-    provider: 'core-runtime-htn' | 'core-runtime-sm' | 'core-runtime-bt'
+  planner: {
+    provider: 'core-planner-htn' | 'core-planner-sm' | 'core-planner-bt'
     config?: any
   }
   model: {

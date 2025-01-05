@@ -1,6 +1,6 @@
 import type { TelegramClientPlugin } from '../../client-telegram/index.ts'
 
-export const telegramActions = {
+export const telegramTasks = {
   getMessages: (telegramClient: TelegramClientPlugin) => {
     return telegramClient.getMessages()
   },
