@@ -21,32 +21,39 @@ export class TelegramClientPlugin {
 
   //
 
-  agentDefinition: PuppetDefinition
+  puppetDefinition: PuppetDefinition
   messages: any[] = []
 
   _logger: CoreLogger
 
-  constructor(agentDefinition: PuppetDefinition, _logger: CoreLogger) {
+  constructor(puppetDefinition: PuppetDefinition, _logger: CoreLogger) {
     this._logger = _logger
 
-    this.agentDefinition = agentDefinition
+    this.puppetDefinition = puppetDefinition
+
+    this._logger.send({
+      type: 'SUCCESS',
+      source: 'PUPPET',
+      puppetId: this.puppetDefinition.id,
+      message: `Loaded interface plugin "client-telegram"`,
+    })
 
     try {
       this.client = new Telegraf(
-        process.env[`TELEGRAM_${agentDefinition.id.toUpperCase()}_BOT_TOKEN`],
+        process.env[`TELEGRAM_${puppetDefinition.id.toUpperCase()}_BOT_TOKEN`],
       )
 
       this._logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
-        puppetId: this.agentDefinition.id,
+        puppetId: this.puppetDefinition.id,
         message: 'Connected to Telegram bot',
       })
     } catch (error) {
       this._logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.agentDefinition.id,
+        puppetId: this.puppetDefinition.id,
         message: 'Could not connect to Telegram bot',
       })
     }

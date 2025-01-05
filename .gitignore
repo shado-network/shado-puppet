@@ -7,10 +7,10 @@ dist/
 cache/*
 !cache/.gitkeep
 
-include/puppet/*
-!include/puppet/.gitkeep
-!include/puppet/good.ts
-!include/puppet/evil.ts
+include/*
+!include/.gitkeep
+!include/good.ts
+!include/evil.ts
 
 .env*
 !.env.template
