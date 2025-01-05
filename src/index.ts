@@ -12,7 +12,7 @@ console.clear()
 //
 
 console.log('SHADŌ NETWORK')
-console.log('shadow-puppet')
+console.log('shado-puppet')
 console.log('')
 
 console.log(`Started on port ${+process.env.SERVER_PORT || 10110}`)
