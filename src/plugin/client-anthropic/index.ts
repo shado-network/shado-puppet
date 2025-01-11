@@ -42,13 +42,16 @@ export class AnthropicClientPlugin {
 
   //
 
-  getMessagesResponse = async (messages: MessageParam[], persona: string) => {
+  getMessagesResponse = async (
+    messages: MessageParam[],
+    systemPrompt: string,
+  ) => {
     const response = await this.client.messages.create({
       model: this.clientConfig.model,
       max_tokens: this.clientConfig.max_tokens,
       temperature: this.clientConfig.temperature,
       //
-      system: persona,
+      system: systemPrompt,
       //
       messages: messages.slice(-1 * this.config.MAX_MESSAGES),
     })

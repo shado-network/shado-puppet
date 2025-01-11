@@ -19,7 +19,7 @@ export class OpenAiClientPlugin {
   }
 
   clientConfig = {
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini',
     max_tokens: 256,
     temperature: 1,
   }
@@ -41,7 +41,7 @@ export class OpenAiClientPlugin {
 
   getMessagesResponse = async (
     messages: ChatCompletionMessageParam[],
-    persona: string,
+    systemPrompt: string,
   ) => {
     const response = await this.client.chat.completions.create({
       model: this.clientConfig.model,
@@ -51,7 +51,7 @@ export class OpenAiClientPlugin {
       messages: [
         {
           role: 'system',
-          content: persona,
+          content: systemPrompt,
         },
         ...messages.slice(-1 * (this.config.MAX_MESSAGES + 1)),
       ],

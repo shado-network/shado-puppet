@@ -1,6 +1,6 @@
-import type { PuppetDefinition } from '../src/core/types/puppet'
+import type { PuppetConfig } from '../src/core/types/puppet'
 
-const puppet: PuppetDefinition = {
+const puppet: PuppetConfig = {
   id: 'evil',
   name: 'Evil',
   //
@@ -24,7 +24,7 @@ const puppet: PuppetDefinition = {
   },
   interfaces: {
     'client-telegram': {},
-    // 'client-twitter': {},
+    'client-twitter': {},
   },
   //
   bio: [

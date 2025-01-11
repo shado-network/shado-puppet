@@ -24,7 +24,7 @@ export class Puppet {
 
   _init = async () => {
     try {
-      await this._setPuppetDefinition()
+      await this._getPuppetConfig()
 
       await this._setModelPlugin()
       await this._setInterfacePlugins()
@@ -42,22 +42,23 @@ export class Puppet {
     }
   }
 
-  _setPuppetDefinition = async () => {
+  _getPuppetConfig = async () => {
     const puppetFile = await import(`../../../include/${this.puppet.id}.ts`)
-    const definition = puppetFile.default
+    const config = puppetFile.default
 
     this._logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
       puppetId: this.puppet.id,
-      message: `Loaded "${definition.name}"'s puppet definition`,
+      message: `Loaded puppet config "${config.id}"`,
     })
 
-    this.puppet.definition = definition
+    this.puppet.name = config.name
+    this.puppet.config = config
   }
 
   _setModelPlugin = async () => {
-    switch (this.puppet.definition.model.provider) {
+    switch (this.puppet.config.model.provider) {
       // MARK: Anthropic
       case 'client-anthropic':
         this.puppet.model = new AnthropicClientPlugin(this._logger)
@@ -65,8 +66,8 @@ export class Puppet {
         this._logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
-          puppetId: this.puppet.definition.id,
-          message: `Loaded model plugin "${this.puppet.definition.model.provider}"`,
+          puppetId: this.puppet.id,
+          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
         })
         break
       // MARK: OpenAI
@@ -76,15 +77,15 @@ export class Puppet {
         this._logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
-          puppetId: this.puppet.definition.id,
-          message: `Loaded model plugin "${this.puppet.definition.model.provider}"`,
+          puppetId: this.puppet.id,
+          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
         })
         break
       default:
         this._logger.send({
           type: 'ERROR',
           source: 'PUPPET',
-          puppetId: this.puppet.definition.id,
+          puppetId: this.puppet.id,
           message: `No model plugin loaded!"`,
         })
         break
@@ -96,27 +97,25 @@ export class Puppet {
 
     // MARK: Telegram
     if (
-      Object.keys(this.puppet.definition.interfaces).includes('client-telegram')
+      Object.keys(this.puppet.config.interfaces).includes('client-telegram')
     ) {
       this.puppet.interfaces.telegramClient = new TelegramClientPlugin(
-        this.puppet.definition,
+        this.puppet.config,
         this._logger,
       )
     }
 
     // MARK: Twitter
-    if (
-      Object.keys(this.puppet.definition.interfaces).includes('client-twitter')
-    ) {
+    if (Object.keys(this.puppet.config.interfaces).includes('client-twitter')) {
       this.puppet.interfaces.twitterClient = new TwitterClientPlugin(
-        this.puppet.definition,
+        this.puppet.config,
         this._logger,
       )
     }
   }
 
   _setPlannerPlugin = async () => {
-    switch (this.puppet.definition.planner.provider) {
+    switch (this.puppet.config.planner.provider) {
       case 'core-planner-htn':
         this.planner = new CorePlannerPlugin(this.puppet, this._logger)
 
@@ -124,7 +123,7 @@ export class Puppet {
           type: 'SUCCESS',
           source: 'PUPPET',
           puppetId: this.puppet.id,
-          message: `Loaded puppet planner plugin "${this.puppet.definition.planner.provider}"`,
+          message: `Loaded puppet planner plugin "${this.puppet.config.planner.provider}"`,
         })
         break
       case 'core-planner-sm':

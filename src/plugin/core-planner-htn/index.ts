@@ -1,28 +1,35 @@
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 
-import type { CoreLogger } from '../core-logger/index.ts'
-import type { Puppet } from '../../core/types/puppet.ts'
+import { tasks } from './tasks/index.ts'
+import { defaultState } from './libs/state.ts'
+import { defaultGoals } from './libs/goals.ts'
+import { executePlans } from './libs/planner.ts'
 
-import { planners } from './libs/planners.ts'
+import type { Puppet } from '../../core/types/puppet.ts'
+import type { CoreLogger } from '../core-logger/index.ts'
+
+// TODO: Move down! Into memory?
+const currentGoals = {}
+const currentState = {}
 
 export class CorePlannerPlugin {
   puppet: Puppet
+  _logger: CoreLogger
 
   messages: MessageParam[] = []
 
-  _logger: CoreLogger
-
   constructor(puppet: Puppet, _logger: CoreLogger) {
-    this._logger = _logger
-
     this.puppet = puppet
+    this._logger = _logger
 
     this._init()
   }
 
   _init = async () => {
     try {
-      await this._debug()
+      await this._runPlanner()
+
+      // await this._debug()
     } catch (error) {
       this._logger.send({
         type: 'ERROR',
@@ -34,11 +41,17 @@ export class CorePlannerPlugin {
     }
   }
 
-  _debug = async () => {
-    // MARK: Telegram
-    planners.telegram(this.puppet, this._logger)
+  _runPlanner = async () => {
+    currentState[this.puppet.id] = { ...defaultState }
+    currentGoals[this.puppet.id] = [...defaultGoals]
 
-    // MARK: Twitter
-    planners.twitter(this.puppet, this.messages, this._logger)
+    await executePlans(
+      this.puppet,
+      tasks,
+      currentGoals[this.puppet.id],
+      currentState[this.puppet.id],
+    )
   }
+
+  _debug = async () => {}
 }

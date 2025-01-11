@@ -1,12 +1,16 @@
 export type Puppet = {
   id: string
-  definition: PuppetDefinition
+  name: string
+  //
+  config: PuppetConfig
   //
   model: unknown
+  memory?: unknown
+  knowledge?: unknown
   interfaces: any | { name: string; client: unknown }[]
 }
 
-export type PuppetDefinition = {
+export type PuppetConfig = {
   id: string
   name: string
   //

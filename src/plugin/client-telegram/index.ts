@@ -2,9 +2,10 @@ import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 
-import { asyncSleep } from '../../core/libs/utils.ts'
+import type { PuppetConfig } from '../../core/types/puppet.ts'
 import type { CoreLogger } from '../core-logger/index.ts'
-import type { PuppetDefinition } from '../../core/types/puppet.ts'
+
+import { asyncSleep } from '../../core/libs/utils.ts'
 
 dotenv.config()
 
@@ -21,39 +22,39 @@ export class TelegramClientPlugin {
 
   //
 
-  puppetDefinition: PuppetDefinition
+  puppetConfig: PuppetConfig
   messages: any[] = []
 
   _logger: CoreLogger
 
-  constructor(puppetDefinition: PuppetDefinition, _logger: CoreLogger) {
+  constructor(puppetConfig: PuppetConfig, _logger: CoreLogger) {
     this._logger = _logger
 
-    this.puppetDefinition = puppetDefinition
+    this.puppetConfig = puppetConfig
 
     this._logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
-      puppetId: this.puppetDefinition.id,
-      message: `Loaded interface plugin "client-telegram"`,
+      puppetId: this.puppetConfig.id,
+      message: `Loaded client plugin "client-telegram"`,
     })
 
     try {
       this.client = new Telegraf(
-        process.env[`TELEGRAM_${puppetDefinition.id.toUpperCase()}_BOT_TOKEN`],
+        process.env[`TELEGRAM_${puppetConfig.id.toUpperCase()}_BOT_TOKEN`],
       )
 
       this._logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
-        puppetId: this.puppetDefinition.id,
+        puppetId: this.puppetConfig.id,
         message: 'Connected to Telegram bot',
       })
     } catch (error) {
       this._logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetDefinition.id,
+        puppetId: this.puppetConfig.id,
         message: 'Could not connect to Telegram bot',
       })
     }
@@ -84,10 +85,11 @@ export class TelegramClientPlugin {
   }
 
   getMessages = () => {
-    return this.messages
+    return this.messages.filter((message) => !message.isRead)
   }
 
   sendMessage = async (message: string, ctx) => {
+    // TODO: Move to runtime?
     // MARK: Fake a delay for a more "human" response.
     const sleepForInSeconds = message.length * this.config.SECONDS_PER_CHAR
     await asyncSleep(sleepForInSeconds)
@@ -108,5 +110,6 @@ export class TelegramClientPlugin {
     }
 
     message.isRead = true
+    // TODO: Purge
   }
 }
