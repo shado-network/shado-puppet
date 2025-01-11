@@ -3,7 +3,6 @@ import path from 'path'
 
 import dotenv from 'dotenv'
 import { Scraper, SearchMode, Tweet } from 'agent-twitter-client'
-import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.ts'
@@ -155,7 +154,7 @@ export class TwitterClientPlugin {
     }
   }
 
-  getMessages = async (messages: MessageParam[]) => {
+  getMessages = async (messages) => {
     if (await !this.client.isLoggedIn()) {
       return
     }

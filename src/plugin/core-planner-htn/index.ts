@@ -1,5 +1,3 @@
-import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
-
 import { tasks } from './tasks/index.ts'
 import { defaultState } from './libs/state.ts'
 import { defaultGoals } from './libs/goals.ts'
@@ -16,7 +14,7 @@ export class CorePlannerPlugin {
   puppet: Puppet
   _logger: CoreLogger
 
-  messages: MessageParam[] = []
+  messages = []
 
   constructor(puppet: Puppet, _logger: CoreLogger) {
     this.puppet = puppet

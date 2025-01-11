@@ -1,66 +1,39 @@
 import dotenv from 'dotenv'
-import Anthropic from '@anthropic-ai/sdk'
-import type { ClientOptions } from '@anthropic-ai/sdk'
-import type {
-  TextBlock,
-  MessageParam,
-} from '@anthropic-ai/sdk/resources/messages.mjs'
+
+import { ChatAnthropic } from '@langchain/anthropic'
+import type { AnthropicInput } from '@langchain/anthropic'
+import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models'
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { CoreLogger } from '../core-logger'
 
 dotenv.config()
 
 export class AnthropicClientPlugin {
-  config = {
-    MAX_MESSAGES: 100,
-  }
-
-  //
-
-  clientOptions: ClientOptions = {
+  config: AnthropicInput & BaseChatModelParams = {
     apiKey: process.env.ANTHROPIC_API_KEY,
-  }
-
-  clientConfig = {
     model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 256,
-    temperature: 1,
+    // temperature: 1,
+    // maxTokens: 256,
   }
 
-  client: Anthropic
+  client: ChatAnthropic
 
   //
 
   _logger: CoreLogger
 
-  constructor(_logger: CoreLogger) {
-    this._logger = _logger
-
-    this.clientConfig = { ...this.clientConfig }
-    this.client = new Anthropic(this.clientOptions)
-  }
-
   //
 
-  getMessagesResponse = async (
-    messages: MessageParam[],
-    systemPrompt: string,
-  ) => {
-    const response = await this.client.messages.create({
-      model: this.clientConfig.model,
-      max_tokens: this.clientConfig.max_tokens,
-      temperature: this.clientConfig.temperature,
-      //
-      system: systemPrompt,
-      //
-      messages: messages.slice(-1 * this.config.MAX_MESSAGES),
-    })
+  constructor(_logger: CoreLogger) {
+    this.client = new ChatAnthropic(this.config)
+    this._logger = _logger
+  }
 
-    // TODO: What's this array exactly?
-    // TODO: Filter this on TextBlocks?
-    const responseText = (response?.content[0] as TextBlock)?.text || null
+  getMessagesResponse = async (messages: BaseLanguageModelInput) => {
+    const response = await this.client.invoke(messages)
 
-    if (responseText === null) {
+    if (!response || !response.content) {
       this._logger.send({
         type: 'WARNING',
         source: 'SERVER',
@@ -71,6 +44,6 @@ export class AnthropicClientPlugin {
       })
     }
 
-    return responseText
+    return response.content
   }
 }

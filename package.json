@@ -22,10 +22,12 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@langchain/anthropic": "^0.3.11",
+    "@langchain/core": "^0.3.29",
+    "@langchain/openai": "^0.3.17",
     "agent-twitter-client": "^0.0.16",
     "dotenv": "^16.4.5",
-    "openai": "^4.77.3",
+    "langchain": "^0.3.11",
     "prettier": "^3.3.3",
     "telegraf": "^4.16.3",
     "yargs": "^17.7.2"

@@ -25,7 +25,7 @@ export default {
       identifier: 'telegram-get-messages',
       trigger: async (props?: any) => {
         // puppet: Puppet, currentState,
-        const messages = props.puppet.interfaces.telegramClient.getMessages()
+        const messages = props.puppet.interfaces.telegramClient?.getMessages()
         props.currentState['telegram-messages'] = messages
         props.currentState['telegram-has-messages'] =
           props.currentState['telegram-messages'].length > 0

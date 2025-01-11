@@ -1,76 +1,48 @@
 import dotenv from 'dotenv'
-import OpenAI from 'openai'
-import type { ClientOptions } from 'openai'
-import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
+
+import { ChatOpenAI } from '@langchain/openai'
+import type { ChatOpenAIFields } from '@langchain/openai'
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { CoreLogger } from '../core-logger'
 
 dotenv.config()
 
 export class OpenAiClientPlugin {
-  config = {
-    MAX_MESSAGES: 100,
-  }
-
-  //
-
-  clientOptions: ClientOptions = {
+  config: ChatOpenAIFields = {
     apiKey: process.env.OPENAI_API_KEY,
-  }
-
-  clientConfig = {
     model: 'gpt-4o-mini',
-    max_tokens: 256,
-    temperature: 1,
+    // temperature: 1,
+    // maxTokens: 256,
   }
 
-  client: OpenAI
+  client: ChatOpenAI
 
   //
 
   _logger: CoreLogger
 
-  constructor(_logger: CoreLogger) {
-    this._logger = _logger
-
-    this.clientConfig = { ...this.clientConfig }
-    this.client = new OpenAI(this.clientOptions)
-  }
-
   //
 
-  getMessagesResponse = async (
-    messages: ChatCompletionMessageParam[],
-    systemPrompt: string,
-  ) => {
-    const response = await this.client.chat.completions.create({
-      model: this.clientConfig.model,
-      max_tokens: this.clientConfig.max_tokens,
-      temperature: this.clientConfig.temperature,
-      //
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        ...messages.slice(-1 * (this.config.MAX_MESSAGES + 1)),
-      ],
-    })
+  constructor(_logger: CoreLogger) {
+    this.client = new ChatOpenAI(this.config)
+    this._logger = _logger
+  }
 
-    // TODO: What's this array exactly?
-    const responseText = response.choices[0].message.content
+  getMessagesResponse = async (messages: BaseLanguageModelInput) => {
+    const response = await this.client.invoke(messages)
 
-    if (responseText === null) {
+    if (!response || !response.content) {
       this._logger.send({
         type: 'WARNING',
         source: 'SERVER',
         message: 'Error parsing response',
         payload: {
-          content: response,
+          content: response.content,
         },
       })
     }
 
-    return responseText
+    return response.content
   }
 }

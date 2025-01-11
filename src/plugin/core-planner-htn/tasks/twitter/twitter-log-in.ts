@@ -25,7 +25,7 @@ export default {
       trigger: async (props?: any) => {
         // puppet: Puppet, currentState,
 
-        await props.puppet.interfaces.twitterClient.login()
+        await props.puppet.interfaces.twitterClient?.login()
       },
     },
   ],

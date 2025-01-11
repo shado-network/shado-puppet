@@ -1,3 +1,5 @@
+import { HumanMessage, SystemMessage } from '@langchain/core/messages'
+
 import type { Puppet } from '../../../../core/types/puppet.ts'
 import type { Task } from '../types.ts'
 
@@ -40,7 +42,7 @@ export default {
 
           console.log('message', message.message)
 
-          props.puppet.interfaces.telegramClient.markAsRead(message.id)
+          props.puppet.interfaces.telegramClient?.markAsRead(message.id)
           console.log('markasread', message.id)
 
           // _logger.send({
@@ -99,23 +101,20 @@ export default {
 
           if (shouldReply(message.ctx)) {
             // MARK: Write
+
+            const messages = [
+              new SystemMessage(props.puppet.config.bio[0]),
+              new HumanMessage(`${message.from} says: ${message.message}`),
+            ]
+
             const response = await (
               props.puppet.model as any
-            ).getMessagesResponse(
-              [
-                {
-                  role: 'user',
-                  // content: `${message.from} (${message.ctx.message.from.username}) says: ${message.ctx.message.text}`,
-                  content: `${message.from} says: ${message.message}`,
-                },
-              ],
-              props.puppet.config.bio[0],
-            )
+            ).getMessagesResponse(messages)
 
             console.log({ response, message })
 
             // MARK: Post
-            await props.puppet.interfaces.telegramClient.sendMessage(
+            await props.puppet.interfaces.telegramClient?.sendMessage(
               response as string,
               message.ctx,
             )
@@ -134,7 +133,7 @@ export default {
           }
         })
 
-        // return puppet.interfaces.telegramClient.markAsRead(props.messageId)
+        // return puppet.interfaces.telegramClient?.markAsRead(props.messageId)
         props.currentState['telegram-messages'] = []
       },
     },

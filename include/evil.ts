@@ -12,19 +12,19 @@ const puppet: PuppetConfig = {
     // provider: 'client-anthropic',
     // config: {
     //   model: 'claude-3-5-sonnet-20241022',
-    //   max_tokens: 256,
     //   temperature: 1,
+    //   maxTokens: 256,
     // },
     provider: 'client-openai',
     config: {
       model: 'gpt-4o-mini',
-      max_tokens: 256,
       temperature: 1,
+      maxTokens: 256,
     },
   },
   interfaces: {
     'client-telegram': {},
-    'client-twitter': {},
+    // 'client-twitter': {},
   },
   //
   bio: [

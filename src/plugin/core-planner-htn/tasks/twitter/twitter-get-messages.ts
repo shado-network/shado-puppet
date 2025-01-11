@@ -1,5 +1,3 @@
-import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
-
 import type { Puppet } from '../../../../core/types/puppet.ts'
 import type { Task } from '../types.ts'
 
@@ -33,7 +31,7 @@ export default {
 
         const messages = []
         const nmessages =
-          props.puppet.interfaces.twitterClient.getMessages(messages)
+          props.puppet.interfaces.twitterClient?.getMessages(messages)
         props.currentState['twitter-messages'] = nmessages
         // props.currentState['twitter-has-messages'] = props.currentState['twitter-messages'].length > 0
 
