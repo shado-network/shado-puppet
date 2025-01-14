@@ -6,7 +6,7 @@ import { Scraper, SearchMode, Tweet } from 'agent-twitter-client'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.ts'
-import type { CoreLogger } from '../core-logger/index.ts'
+import type { AppContext } from '../../context.ts'
 import type { PuppetConfig } from '../../core/types/puppet.ts'
 
 dotenv.config()
@@ -32,14 +32,16 @@ export class TwitterClientPlugin {
 
   //
 
-  _logger: CoreLogger
+  _app: AppContext
 
-  constructor(puppetConfig: PuppetConfig, _logger: CoreLogger) {
-    this._logger = _logger
+  //
+
+  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+    this._app = _app
 
     this.puppetConfig = puppetConfig
 
-    this._logger.send({
+    this._app.utils.logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
       puppetId: this.puppetConfig.id,
@@ -48,7 +50,7 @@ export class TwitterClientPlugin {
     try {
       this.client = new Scraper()
     } catch (error) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
@@ -72,7 +74,7 @@ export class TwitterClientPlugin {
         const cookieStrings = await cookies.toCookieStrings(cookiesArray)
         await this.client.setCookies(cookieStrings)
 
-        this._logger.send({
+        this._app.utils.logger.send({
           type: 'INFO',
           source: 'PUPPET',
           puppetId: this.puppetConfig.id,
@@ -83,7 +85,7 @@ export class TwitterClientPlugin {
       let loginAttempts = 0
 
       while (true) {
-        this._logger.send({
+        this._app.utils.logger.send({
           type: 'LOG',
           source: 'PUPPET',
           puppetId: this.puppetConfig.id,
@@ -97,7 +99,7 @@ export class TwitterClientPlugin {
         )
 
         if (await this.client.isLoggedIn()) {
-          this._logger.send({
+          this._app.utils.logger.send({
             type: 'SUCCESS',
             source: 'PUPPET',
             puppetId: this.puppetConfig.id,
@@ -108,14 +110,14 @@ export class TwitterClientPlugin {
             const cookiesArray = await this.client.getCookies()
             cookies.store(cookiesArray, cookiesFilepath)
 
-            this._logger.send({
+            this._app.utils.logger.send({
               type: 'SUCCESS',
               source: 'PUPPET',
               puppetId: this.puppetConfig.id,
               message: `Stored it's new Twitter cookies`,
             })
           } catch (error) {
-            this._logger.send({
+            this._app.utils.logger.send({
               type: 'ERROR',
               source: 'PUPPET',
               puppetId: this.puppetConfig.id,
@@ -129,7 +131,7 @@ export class TwitterClientPlugin {
         loginAttempts++
 
         if (loginAttempts > this.config.MAX_LOGIN_ATTEMPTS) {
-          this._logger.send({
+          this._app.utils.logger.send({
             type: 'ERROR',
             source: 'PUPPET',
             puppetId: this.puppetConfig.id,
@@ -143,7 +145,7 @@ export class TwitterClientPlugin {
         )
       }
     } catch (error) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
@@ -200,7 +202,7 @@ export class TwitterClientPlugin {
         tweets.push(parsedTweet)
       }
     } catch (error) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
@@ -208,7 +210,7 @@ export class TwitterClientPlugin {
         payload: error,
       })
     }
-    this._logger.send({
+    this._app.utils.logger.send({
       type: 'LOG',
       source: 'AGENT',
       puppetId: this.puppetConfig.id,
@@ -227,7 +229,7 @@ export class TwitterClientPlugin {
     //   content: message,
     // })
 
-    // this._logger.send({
+    // this._app.utils.logger.send({
     //   type: 'LOG',
     //   source: 'USER',
     //   userId: userId,
@@ -237,7 +239,7 @@ export class TwitterClientPlugin {
     //   },
     // })
 
-    // this._logger.send({
+    // this._app.utils.logger.send({
     //   type: 'LOG',
     //   source: 'PUPPET',
     //   puppetId: puppetConfig.id,

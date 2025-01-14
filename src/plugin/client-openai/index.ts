@@ -3,8 +3,7 @@ import dotenv from 'dotenv'
 import { ChatOpenAI } from '@langchain/openai'
 import type { ChatOpenAIFields } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
-
-import type { CoreLogger } from '../core-logger'
+import type { AppContext } from '../../context'
 
 dotenv.config()
 
@@ -17,19 +16,19 @@ export class OpenAiClientPlugin {
   }
 
   client: ChatOpenAI
+
+  //
+
   _memoryClient
+  _app: AppContext
 
   //
 
-  _logger: CoreLogger
+  constructor(_memoryClient: any, _app: AppContext) {
+    this._app = _app
 
-  //
-
-  constructor(_memoryClient: any, _logger: CoreLogger) {
     this.client = new ChatOpenAI(this.config)
     this._memoryClient = _memoryClient(this.client)
-
-    this._logger = _logger
   }
 
   getMessagesResponse = async (
@@ -42,7 +41,7 @@ export class OpenAiClientPlugin {
     )
 
     if (!response || !response.messages || response.messages.length === 0) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'WARNING',
         source: 'SERVER',
         message: 'Error parsing response',

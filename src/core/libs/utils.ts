@@ -8,6 +8,8 @@ import {
   MemorySaver,
 } from '@langchain/langgraph'
 
+import { _app } from '../../context.ts'
+
 export const asyncForEach = async (array: any[], callback: any) => {
   for (let i = 0; i < array.length; i++) {
     await callback(array[i], i, array)
@@ -33,16 +35,14 @@ export function parseArgs(): {
 
     return args
   } catch (error) {
-    this._logger.send({
+    _app.utils.logger.send({
       type: 'ERROR',
       source: 'SERVER',
       message: `Error parsing CLI arguments`,
       payload: { error },
     })
 
-    return {
-      puppets: null,
-    }
+    return { puppets: null }
   }
 }
 

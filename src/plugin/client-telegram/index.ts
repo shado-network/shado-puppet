@@ -2,10 +2,9 @@ import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 
-import type { PuppetConfig } from '../../core/types/puppet.ts'
-import type { CoreLogger } from '../core-logger/index.ts'
-
 import { asyncSleep } from '../../core/libs/utils.ts'
+import type { AppContext } from '../../context.ts'
+import type { PuppetConfig } from '../../core/types/puppet.ts'
 
 dotenv.config()
 
@@ -19,21 +18,23 @@ export class TelegramClientPlugin {
   clientConfig = {}
 
   client: Telegraf
+  messages: any[] = []
+  threads: string[] = []
 
   //
 
   puppetConfig: PuppetConfig
-  messages: any[] = []
-  threads: string[] = []
 
-  _logger: CoreLogger
+  _app: AppContext
 
-  constructor(puppetConfig: PuppetConfig, _logger: CoreLogger) {
-    this._logger = _logger
+  //
+
+  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+    this._app = _app
 
     this.puppetConfig = puppetConfig
 
-    this._logger.send({
+    this._app.utils.logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
       puppetId: this.puppetConfig.id,
@@ -45,14 +46,14 @@ export class TelegramClientPlugin {
         process.env[`TELEGRAM_${puppetConfig.id.toUpperCase()}_BOT_TOKEN`],
       )
 
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
         message: 'Connected to Telegram bot',
       })
     } catch (error) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,

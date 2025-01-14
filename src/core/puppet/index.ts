@@ -1,6 +1,8 @@
+import { _app } from '../../context.ts'
+import type { AppContext } from '../../context.ts'
+
 import { CorePlannerPlugin } from '../../plugin/core-planner-htn/index.ts'
 import type { Puppet as PuppetType } from '../types/puppet.ts'
-import type { CoreLogger } from '../../plugin/core-logger/index.ts'
 
 import { _memoryClient } from '../libs/utils.ts'
 import { AnthropicClientPlugin } from '../../plugin/client-anthropic/index.ts'
@@ -12,12 +14,18 @@ import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 export class Puppet {
   planner: CorePlannerPlugin
 
+  //
+
   puppet: any | PuppetType
 
-  _logger: CoreLogger
+  //
 
-  constructor(puppetId: string, _logger: CoreLogger) {
-    this._logger = _logger
+  _app: AppContext
+
+  //
+
+  constructor(puppetId: string, _app: AppContext) {
+    this._app = _app
 
     this.puppet = { id: puppetId }
     this.puppet.memory = {
@@ -41,7 +49,7 @@ export class Puppet {
 
       await this._debug()
     } catch (error) {
-      this._logger.send({
+      _app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppet.id,
@@ -55,7 +63,7 @@ export class Puppet {
     const puppetFile = await import(`../../../include/${this.puppet.id}.ts`)
     const config = puppetFile.default
 
-    this._logger.send({
+    _app.utils.logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
       puppetId: this.puppet.id,
@@ -70,12 +78,9 @@ export class Puppet {
     switch (this.puppet.config.model.provider) {
       // MARK: Anthropic
       case 'client-anthropic':
-        this.puppet.model = new AnthropicClientPlugin(
-          _memoryClient,
-          this._logger,
-        )
+        this.puppet.model = new AnthropicClientPlugin(_memoryClient, _app)
 
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
           puppetId: this.puppet.id,
@@ -84,9 +89,9 @@ export class Puppet {
         break
       // MARK: OpenAI
       case 'client-openai':
-        this.puppet.model = new OpenAiClientPlugin(_memoryClient, this._logger)
+        this.puppet.model = new OpenAiClientPlugin(_memoryClient, _app)
 
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
           puppetId: this.puppet.id,
@@ -94,7 +99,7 @@ export class Puppet {
         })
         break
       default:
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           puppetId: this.puppet.id,
@@ -113,7 +118,7 @@ export class Puppet {
     ) {
       this.puppet.interfaces.telegramClient = new TelegramClientPlugin(
         this.puppet.config,
-        this._logger,
+        _app,
       )
     }
 
@@ -121,7 +126,7 @@ export class Puppet {
     if (Object.keys(this.puppet.config.interfaces).includes('client-twitter')) {
       this.puppet.interfaces.twitterClient = new TwitterClientPlugin(
         this.puppet.config,
-        this._logger,
+        _app,
       )
     }
   }
@@ -129,9 +134,9 @@ export class Puppet {
   _setPlannerPlugin = async () => {
     switch (this.puppet.config.planner.provider) {
       case 'core-planner-htn':
-        this.planner = new CorePlannerPlugin(this.puppet, this._logger)
+        this.planner = new CorePlannerPlugin(this.puppet, _app)
 
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
           puppetId: this.puppet.id,
@@ -139,7 +144,7 @@ export class Puppet {
         })
         break
       case 'core-planner-sm':
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           message:
@@ -150,7 +155,7 @@ export class Puppet {
         })
         break
       case 'core-planner-bt':
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           message:
@@ -161,7 +166,7 @@ export class Puppet {
         })
         break
       default:
-        this._logger.send({
+        _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
           puppetId: this.puppet.id,

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 
-import { context } from './context.ts'
+import { _app } from './context.ts'
+
 import { CoreLogger } from './plugin/core-logger/index.ts'
 import { Puppet } from './core/puppet/index.ts'
 import { parseArgs } from './core/libs/utils.ts'
@@ -21,7 +22,7 @@ console.log('')
 
 //
 
-context.core._logger = new CoreLogger(['console'])
+_app.utils.logger = new CoreLogger(['console'])
 
 const args = parseArgs()
 
@@ -34,25 +35,27 @@ const puppetIds = args.puppets
 
 const initPuppets = (puppetIds: string[]) => {
   if (!puppetIds || puppetIds.length === 0) {
-    context.core._logger.send({
+    _app.utils.logger.send({
       type: 'WARNING',
       source: 'SERVER',
       message: 'No puppetIds have been set!',
     })
+
     return
   }
 
   const puppets = []
 
   puppetIds.forEach((puppetId) => {
-    const puppet = new Puppet(puppetId, context.core._logger)
+    const puppet = new Puppet(puppetId, _app)
 
     if (!puppet) {
-      context.core._logger.send({
+      _app.utils.logger.send({
         type: 'ERROR',
         source: 'SERVER',
         message: `Error loading puppet "${puppetId}"`,
       })
+
       return
     }
 
@@ -62,8 +65,8 @@ const initPuppets = (puppetIds: string[]) => {
   return puppets
 }
 
-context.core.puppets = initPuppets(puppetIds)
+_app.core.puppets = initPuppets(puppetIds)
 
 setInterval(() => {
-  // context.core._logger.send({ type: 'INFO', source: 'SERVER', message: 'PING!' })
+  // _app.utils.logger.send({ type: 'INFO', source: 'SERVER', message: 'PING!' })
 }, 1 * 1000)

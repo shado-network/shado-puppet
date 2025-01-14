@@ -58,7 +58,7 @@ export default {
           props.puppet.interfaces.telegramClient.markAsRead(message.id)
           console.log('markAsRead', message.id)
 
-          // _logger.send({
+          // logger.send({
           //   type: 'LOG',
           //   source: 'AGENT',
           //   puppetId: puppet.id,
@@ -70,7 +70,7 @@ export default {
 
           // MARK: Should reply to message?
           if (!shouldReplyToMessage(props, message.ctx)) {
-            // _logger.send({
+            // logger.send({
             //   type: 'LOG',
             //   source: 'AGENT',
             //   puppetId: puppet.id,

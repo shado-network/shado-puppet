@@ -1,18 +1,22 @@
 import type { CoreLogger } from './plugin/core-logger'
 import type { Puppet } from './core/puppet'
 
-type Context = {
+export type AppContext = {
   config: unknown
   core: {
-    _logger: null | CoreLogger
     puppets: Puppet[]
+  }
+  utils: {
+    logger: null | CoreLogger
   }
 }
 
-export const context: Context = {
+export const _app: AppContext = {
   config: {},
   core: {
-    _logger: null,
     puppets: [],
+  },
+  utils: {
+    logger: null,
   },
 }

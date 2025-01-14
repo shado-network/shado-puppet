@@ -3,16 +3,22 @@ import { defaultState } from './libs/state.ts'
 import { defaultGoals } from './libs/goals.ts'
 import { executePlans } from './libs/planner.ts'
 
+import type { AppContext } from '../../context.ts'
 import type { Puppet } from '../../core/types/puppet.ts'
-import type { CoreLogger } from '../core-logger/index.ts'
 
 export class CorePlannerPlugin {
   puppet: Puppet
-  _logger: CoreLogger
 
-  constructor(puppet: Puppet, _logger: CoreLogger) {
+  //
+
+  _app: AppContext
+
+  //
+
+  constructor(puppet: Puppet, _app: AppContext) {
+    this._app = _app
+
     this.puppet = puppet
-    this._logger = _logger
 
     this._init()
   }
@@ -21,7 +27,7 @@ export class CorePlannerPlugin {
     try {
       await this._runPlanner()
     } catch (error) {
-      this._logger.send({
+      this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppet.id,
