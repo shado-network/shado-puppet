@@ -1,6 +1,13 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { START, END } from '@langchain/langgraph'
+import {
+  MessagesAnnotation,
+  StateGraph,
+  MemorySaver,
+} from '@langchain/langgraph'
+
 export const asyncForEach = async (array: any[], callback: any) => {
   for (let i = 0; i < array.length; i++) {
     await callback(array[i], i, array)
@@ -37,4 +44,21 @@ export function parseArgs(): {
       puppets: null,
     }
   }
+}
+
+export const _memoryClient = (client) => {
+  const clientInvoke = async (state: typeof MessagesAnnotation.State) => {
+    const response = await client.invoke(state.messages)
+    return { messages: response }
+  }
+
+  const workflow = new StateGraph(MessagesAnnotation)
+    .addNode('clientInvoke', clientInvoke)
+    .addEdge(START, 'clientInvoke')
+    .addEdge('clientInvoke', END)
+
+  const memory = new MemorySaver()
+  const memoryClient = workflow.compile({ checkpointer: memory })
+
+  return memoryClient
 }

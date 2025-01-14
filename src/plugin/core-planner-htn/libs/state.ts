@@ -1,12 +1,14 @@
 const telegramDefaultState = {
-  'telegram-client': true,
+  'telegram-last-updated': 0,
+  'telegram-has-client': false,
   'telegram-has-messages': false,
   'telegram-messages': [],
-  'telegram-has-replied': false,
+  'telegram-last-replied': 0,
 }
 
 const twitterDefaultState = {
-  'twitter-client': true,
+  'twitter-last-updated': 0,
+  'twitter-has-client': false,
   'twitter-logged-in': false,
   'twitter-has-messages': false,
   'twitter-messages': [],

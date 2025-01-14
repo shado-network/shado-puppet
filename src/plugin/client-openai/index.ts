@@ -17,6 +17,7 @@ export class OpenAiClientPlugin {
   }
 
   client: ChatOpenAI
+  _memoryClient
 
   //
 
@@ -24,15 +25,23 @@ export class OpenAiClientPlugin {
 
   //
 
-  constructor(_logger: CoreLogger) {
+  constructor(_memoryClient: any, _logger: CoreLogger) {
     this.client = new ChatOpenAI(this.config)
+    this._memoryClient = _memoryClient(this.client)
+
     this._logger = _logger
   }
 
-  getMessagesResponse = async (messages: BaseLanguageModelInput) => {
-    const response = await this.client.invoke(messages)
+  getMessagesResponse = async (
+    messages: BaseLanguageModelInput,
+    props: any,
+  ) => {
+    const response = await this._memoryClient.invoke(
+      { messages },
+      { configurable: { thread_id: props.thread } },
+    )
 
-    if (!response || !response.content) {
+    if (!response || !response.messages || response.messages.length === 0) {
       this._logger.send({
         type: 'WARNING',
         source: 'SERVER',
@@ -43,6 +52,6 @@ export class OpenAiClientPlugin {
       })
     }
 
-    return response.content
+    return response.messages[response.messages.length - 1].content
   }
 }

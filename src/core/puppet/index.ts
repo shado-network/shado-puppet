@@ -2,8 +2,10 @@ import { CorePlannerPlugin } from '../../plugin/core-planner-htn/index.ts'
 import type { Puppet as PuppetType } from '../types/puppet.ts'
 import type { CoreLogger } from '../../plugin/core-logger/index.ts'
 
+import { _memoryClient } from '../libs/utils.ts'
 import { AnthropicClientPlugin } from '../../plugin/client-anthropic/index.ts'
 import { OpenAiClientPlugin } from '../../plugin/client-openai/index.ts'
+
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 
@@ -18,6 +20,13 @@ export class Puppet {
     this._logger = _logger
 
     this.puppet = { id: puppetId }
+    this.puppet.memory = {
+      short: {},
+      long: {
+        goals: {},
+        state: {},
+      },
+    }
 
     this._init()
   }
@@ -61,7 +70,10 @@ export class Puppet {
     switch (this.puppet.config.model.provider) {
       // MARK: Anthropic
       case 'client-anthropic':
-        this.puppet.model = new AnthropicClientPlugin(this._logger)
+        this.puppet.model = new AnthropicClientPlugin(
+          _memoryClient,
+          this._logger,
+        )
 
         this._logger.send({
           type: 'SUCCESS',
@@ -72,7 +84,7 @@ export class Puppet {
         break
       // MARK: OpenAI
       case 'client-openai':
-        this.puppet.model = new OpenAiClientPlugin(this._logger)
+        this.puppet.model = new OpenAiClientPlugin(_memoryClient, this._logger)
 
         this._logger.send({
           type: 'SUCCESS',

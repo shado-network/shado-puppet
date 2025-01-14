@@ -5,7 +5,14 @@ export type Puppet = {
   config: PuppetConfig
   //
   model: unknown
-  memory?: unknown
+  memory: {
+    short: {
+      [key: string]: any
+    }
+    long: {
+      [key: string]: any
+    }
+  }
   knowledge?: unknown
   interfaces: any | { name: string; client: unknown }[]
 }

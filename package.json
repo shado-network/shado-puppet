@@ -24,12 +24,14 @@
   "dependencies": {
     "@langchain/anthropic": "^0.3.11",
     "@langchain/core": "^0.3.29",
+    "@langchain/langgraph": "^0.2.39",
     "@langchain/openai": "^0.3.17",
     "agent-twitter-client": "^0.0.16",
     "dotenv": "^16.4.5",
     "langchain": "^0.3.11",
     "prettier": "^3.3.3",
     "telegraf": "^4.16.3",
+    "uuid": "^11.0.5",
     "yargs": "^17.7.2"
   }
 }

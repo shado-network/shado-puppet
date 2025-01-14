@@ -1,32 +1,41 @@
-import type { Puppet } from '../../../../core/types/puppet.ts'
 import type { Task } from '../types.ts'
 
 export default {
   identifier: 'twitter-log-in',
-  conditions: [
-    {
-      identifier: 'twitter-client',
-      value: (props?: unknown) => true,
-    },
-    {
-      identifier: 'twitter-logged-in',
-      value: (props?: unknown) => false,
-    },
-  ],
-  effects: [
-    {
-      identifier: 'twitter-logged-in',
-      value: (props?: unknown) => true,
-    },
-  ],
-  actions: [
-    {
-      identifier: 'twitter-log-in',
-      trigger: async (props?: any) => {
-        // puppet: Puppet, currentState,
+  conditions: {
+    'twitter-has-client': (props) => true,
+    'twitter-logged-in': (props) => false,
+  },
 
-        await props.puppet.interfaces.twitterClient?.login()
+  effects: {
+    'twitter-logged-in': {
+      value: (props) => true,
+      trigger: async (props) => {
+        props.state['twitter-logged-in'] = true
+
+        return {
+          success: true,
+          payload: null,
+        }
       },
     },
-  ],
+  },
+
+  actions: {
+    'twitter-log-in': async (props) => {
+      try {
+        await props.puppet.interfaces.twitterClient.login()
+
+        return {
+          success: true,
+          payload: null,
+        }
+      } catch (error) {
+        return {
+          success: false,
+          payload: error,
+        }
+      }
+    },
+  },
 } satisfies Task

@@ -1,49 +1,62 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
-import type { Puppet } from '../../../../core/types/puppet.ts'
 import type { Task } from '../types.ts'
 
 export default {
   identifier: 'telegram-read-messages',
-  conditions: [
-    {
-      identifier: 'telegram-client',
-      value: (props?: unknown) => true,
-    },
-    {
-      identifier: 'telegram-has-messages',
-      value: (props?: unknown) => true,
-    },
-  ],
-  effects: [
-    {
-      identifier: 'telegram-has-messages',
-      value: (props?: unknown) => false,
-    },
-    {
-      identifier: 'telegram-has-replied',
-      value: () => {
-        return true
+
+  conditions: {
+    'telegram-has-client': (props) =>
+      props.state['telegram-has-client'] === true,
+    'telegram-has-messages': (props) =>
+      props.state['telegram-has-messages'] === true,
+    'telegram-last-replied': (props) =>
+      props.state['telegram-last-replied'] <= Date.now() - 1 * 1000,
+  },
+
+  effects: {
+    'telegram-has-messages': {
+      value: (props) => false,
+      trigger: async (props) => {
+        props.state['telegram-messages'] = []
+        props.state['telegram-has-messages'] = false
+
+        return {
+          success: true,
+          payload: null,
+        }
       },
     },
-  ],
-  actions: [
-    {
-      identifier: 'telegram-read-messages',
-      trigger: async (props?: any) => {
-        // puppet: Puppet, currentState,
+    'telegram-last-replied': {
+      value: (props) =>
+        props.state['telegram-last-replied'] <= Date.now() - 1 * 1000,
+      trigger: async (props) => {
+        props.state['telegram-last-replied'] = Date.now()
 
-        // console.log(currentState['telegram-messages'])
+        return {
+          success: true,
+          payload: null,
+        }
+      },
+    },
+  },
 
-        props.currentState['telegram-messages'].forEach(async (message) => {
+  actions: {
+    'telegram-read-messages': async (props) => {
+      try {
+        const replied = []
+        let messages = []
+        let firstMessageInThread = false
+
+        // NOTE: Loop through messages.
+        props.state['telegram-messages'].forEach(async (message) => {
           if (message.isRead) {
             return
           }
 
-          console.log('message', message.message)
-
-          props.puppet.interfaces.telegramClient?.markAsRead(message.id)
-          console.log('markasread', message.id)
+          // NOTE: Mark message as read.
+          props.puppet.interfaces.telegramClient.markAsRead(message.id)
+          console.log('markAsRead', message.id)
 
           // _logger.send({
           //   type: 'LOG',
@@ -55,70 +68,8 @@ export default {
           //   },
           // })
 
-          // MARK: Should reply?
-          const shouldReply = (ctx) => {
-            // console.log(ctx)
-
-            // MARK: Private chat.
-            const isInPrivateChat = ctx.message.chat.type === 'private'
-
-            // MARK: Mention of self.
-            const isMentioned = ctx.message.text.includes(
-              `@${process.env[`TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`]}`,
-            )
-
-            // MARK: Mention of swarm.
-            const isFromSwarmPuppet = [
-              'aigent_of_good_bot',
-              'aigent_of_evil_bot',
-            ]
-              .filter((handle) => {
-                return !(
-                  handle ===
-                  process.env[
-                    `TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`
-                  ]
-                )
-              })
-              .includes(ctx.message.from.username)
-
-            const filters = [
-              isInPrivateChat,
-              isMentioned,
-              // isFromSwarmPuppet
-            ]
-
-            if (
-              filters.some((filter) => {
-                return filter
-              })
-            ) {
-              return true
-            }
-
-            return false
-          }
-
-          if (shouldReply(message.ctx)) {
-            // MARK: Write
-
-            const messages = [
-              new SystemMessage(props.puppet.config.bio[0]),
-              new HumanMessage(`${message.from} says: ${message.message}`),
-            ]
-
-            const response = await (
-              props.puppet.model as any
-            ).getMessagesResponse(messages)
-
-            console.log({ response, message })
-
-            // MARK: Post
-            await props.puppet.interfaces.telegramClient?.sendMessage(
-              response as string,
-              message.ctx,
-            )
-          } else {
+          // MARK: Should reply to message?
+          if (!shouldReplyToMessage(props, message.ctx)) {
             // _logger.send({
             //   type: 'LOG',
             //   source: 'AGENT',
@@ -128,14 +79,120 @@ export default {
             //     message: message.message,
             //   },
             // })
-            console.error('IGNORE')
-            props.currentState['telegram-has-replied'] = false
+
+            replied.push(false)
+
+            return
           }
+
+          // MARK: Write response.
+
+          // NOTE: Check if this is a new thread.
+          if (
+            !props.puppet.interfaces.telegramClient
+              .getThreads()
+              .includes(`telegram-${message.from_id}`)
+          ) {
+            props.puppet.interfaces.telegramClient.addThread(
+              `telegram-${message.from_id}`,
+            )
+
+            firstMessageInThread = true
+          }
+
+          if (firstMessageInThread) {
+            messages = [
+              new SystemMessage(props.puppet.config.bio[0]),
+              new HumanMessage(message.message),
+            ]
+          } else {
+            messages = [new HumanMessage(message.message)]
+          }
+
+          // NOTE: Generate a response.
+          const response = await (
+            props.puppet.model as any
+          ).getMessagesResponse(messages, {
+            thread: `telegram-${message.from_id}`,
+          })
+
+          // console.log(
+          //   { response, message },
+          //   { thread: `telegram-${message.from_id}` },
+          // )
+
+          // MARK: Send the reply.
+          await props.puppet.interfaces.telegramClient.sendMessage(
+            response as string,
+            message.ctx,
+          )
+
+          replied.push(true)
         })
 
-        // return puppet.interfaces.telegramClient?.markAsRead(props.messageId)
-        props.currentState['telegram-messages'] = []
-      },
+        // NOTE: Check if all messages got a reply.
+        // if (replied.every((reply) => reply === true) && replied.length > 0) {
+        return {
+          success: true,
+          payload: null,
+        }
+        // } else {
+        //   return {
+        //     success: false,
+        //     payload: null,
+        //   }
+        // }
+      } catch (error) {
+        return {
+          success: false,
+          payload: error,
+        }
+      }
     },
-  ],
+  },
 } satisfies Task
+
+const shouldReplyToMessage = (props, ctx) => {
+  // MARK: Check if it's in a private chat.
+  const isInPrivateChat = ctx.message.chat.type === 'private'
+
+  // MARK: Check if they are mentioned.
+  const isMentioned =
+    ctx.message.text.includes(
+      `@${process.env[`TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`]}`,
+    ) ||
+    ctx.message.text.includes(
+      `${process.env[`TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`]}`,
+    ) ||
+    ctx.message.text.includes(`${props.puppet.name}`)
+
+  // MARK: Check if there is a mention of swarm members.
+  // const isFromSwarmPuppet = [
+  //   'aigent_of_good_bot',
+  //   'aigent_of_evil_bot',
+  // ]
+  //   .filter((handle) => {
+  //     return !(
+  //       handle ===
+  //       process.env[
+  //         `TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`
+  //       ]
+  //     )
+  //   })
+  //   .includes(ctx.message.from.username)
+
+  const filters = [
+    isInPrivateChat,
+    isMentioned,
+    // isFromSwarmPuppet
+  ]
+
+  // NOTE: Check if any of the filters pass.
+  if (filters.some((filter) => filter)) {
+    // NOTE: Should reply to message.
+    return true
+  }
+
+  // NOTE: Should not reply to message.
+  return false
+}

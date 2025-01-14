@@ -24,6 +24,7 @@ export class TelegramClientPlugin {
 
   puppetConfig: PuppetConfig
   messages: any[] = []
+  threads: string[] = []
 
   _logger: CoreLogger
 
@@ -74,6 +75,7 @@ export class TelegramClientPlugin {
     const newMessage = {
       id: ctx.message.message_id,
       from: ctx.message.from.first_name,
+      from_id: ctx.message.from.id,
       message: ctx.message.text,
       isRead: false,
       ctx,
@@ -86,6 +88,18 @@ export class TelegramClientPlugin {
 
   getMessages = () => {
     return this.messages.filter((message) => !message.isRead)
+  }
+
+  clearReadMessages = () => {
+    this.messages = this.messages.filter((message) => !message.isRead)
+  }
+
+  getThreads = () => {
+    return this.threads
+  }
+
+  addThread = (threadIdentifier: string) => {
+    this.threads.push(threadIdentifier)
   }
 
   sendMessage = async (message: string, ctx) => {

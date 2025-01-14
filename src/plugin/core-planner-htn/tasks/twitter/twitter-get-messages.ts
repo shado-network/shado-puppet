@@ -1,42 +1,42 @@
-import type { Puppet } from '../../../../core/types/puppet.ts'
 import type { Task } from '../types.ts'
 
 export default {
   identifier: 'twitter-get-messages',
-  conditions: [
-    {
-      identifier: 'twitter-client',
-      value: (props?: unknown) => true,
-    },
-    {
-      identifier: 'twitter-logged-in',
-      value: (props?: unknown) => true,
-    },
-    {
-      identifier: 'twitter-has-messages',
-      value: (props?: unknown) => false,
-    },
-  ],
-  effects: [
-    {
-      identifier: 'twitter-has-messages',
-      value: (props?: unknown) => true,
-    },
-  ],
-  actions: [
-    {
-      identifier: 'telegram-get-messages',
-      trigger: async (props?: any) => {
-        // puppet: Puppet, currentState,
+  conditions: {
+    'twitter-has-client': (props) => true,
+    'twitter-logged-in': (props) => true,
+    'twitter-has-messages': (props) => false,
+  },
+  effects: {
+    'twitter-has-messages': {
+      value: (props) => true,
+      trigger: async (props) => {
+        props.state['twitter-has-messages'] =
+          props.state['twitter-messages'].length > 0
 
-        const messages = []
-        const nmessages =
-          props.puppet.interfaces.twitterClient?.getMessages(messages)
-        props.currentState['twitter-messages'] = nmessages
-        // props.currentState['twitter-has-messages'] = props.currentState['twitter-messages'].length > 0
-
-        return messages
+        return {
+          success: true,
+          payload: null,
+        }
       },
     },
-  ],
+  },
+  actions: {
+    'telegram-get-messages': async (props) => {
+      try {
+        const messages = props.puppet.interfaces.twitterClient.getMessages([])
+        props.state['twitter-messages'] = messages
+
+        return {
+          success: true,
+          payload: messages,
+        }
+      } catch (error) {
+        return {
+          success: false,
+          payload: error,
+        }
+      }
+    },
+  },
 } satisfies Task
