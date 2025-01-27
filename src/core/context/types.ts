@@ -1,4 +1,4 @@
-import type { CoreLogger } from '../../plugin/core-logger'
+import type { ShadoLogger } from '../../plugin/shado-logger'
 import type { Puppet } from '../../core/puppet'
 
 export type AppContext = {
@@ -10,6 +10,6 @@ export type AppContext = {
     puppets: Puppet[]
   }
   utils: {
-    logger: null | CoreLogger
+    logger: null | ShadoLogger
   }
 }

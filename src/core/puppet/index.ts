@@ -1,7 +1,7 @@
 import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types'
 
-import { CorePlannerPlugin } from '../../plugin/core-planner-htn/index.ts'
+import { ShadoPlanner } from '../../plugin/shado-planner-htn/index.ts'
 import type { Puppet as PuppetType } from './types'
 
 import { _memoryClient } from '../libs/utils.ts'
@@ -15,7 +15,7 @@ import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 
 export class Puppet {
-  planner: CorePlannerPlugin
+  planner: ShadoPlanner
 
   //
 
@@ -158,8 +158,8 @@ export class Puppet {
 
   _setPlannerPlugin = async () => {
     switch (this.puppet.config.planner.provider) {
-      case 'core-planner-htn':
-        this.planner = new CorePlannerPlugin(this.puppet, _app)
+      case 'shado-planner-htn':
+        this.planner = new ShadoPlanner(this.puppet, _app)
 
         _app.utils.logger.send({
           type: 'SUCCESS',
@@ -168,7 +168,7 @@ export class Puppet {
           message: `Loaded puppet planner plugin "${this.puppet.config.planner.provider}"`,
         })
         break
-      case 'core-planner-sm':
+      case 'shado-planner-sm':
         _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
@@ -179,7 +179,7 @@ export class Puppet {
           },
         })
         break
-      case 'core-planner-bt':
+      case 'shado-planner-bt':
         _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',

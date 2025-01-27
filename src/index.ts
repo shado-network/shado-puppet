@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 
 import { _app } from './core/context/index.ts'
 
-import { CoreLogger } from './plugin/core-logger/index.ts'
+import { ShadoLogger } from './plugin/shado-logger/index.ts'
 import { Puppet } from './core/puppet/index.ts'
 import { parseArgs } from './core/libs/utils.ts'
 import { SEC_IN_MSEC } from './core/libs/constants.ts'
@@ -23,7 +23,7 @@ console.log('')
 
 //
 
-_app.utils.logger = new CoreLogger(['console'])
+_app.utils.logger = new ShadoLogger(['console'])
 
 const args = parseArgs()
 

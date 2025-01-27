@@ -22,7 +22,7 @@ export type PuppetConfig = {
   name: string
   //
   planner: {
-    provider: 'core-planner-htn' | 'core-planner-sm' | 'core-planner-bt'
+    provider: 'shado-planner-htn' | 'shado-planner-sm' | 'shado-planner-bt'
     config?: any
   }
   model: {

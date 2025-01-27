@@ -1,6 +1,6 @@
 import type { LogMessage } from './types'
 
-export class CoreLogger {
+export class ShadoLogger {
   config = {
     interfaces: {
       console: false,
@@ -63,7 +63,7 @@ export class CoreLogger {
     this.send({
       type: 'SUCCESS',
       source: 'SERVER',
-      message: 'Started CoreLogger',
+      message: 'Started ShadoLogger',
     })
   }
 

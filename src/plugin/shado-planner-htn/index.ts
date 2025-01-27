@@ -6,7 +6,7 @@ import { executePlans } from './libs/planner.ts'
 import type { AppContext } from '../../core/context/types'
 import type { Puppet } from '../../core/puppet/types'
 
-export class CorePlannerPlugin {
+export class ShadoPlanner {
   puppet: Puppet
 
   //

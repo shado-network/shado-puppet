@@ -5,7 +5,7 @@ const puppet: PuppetConfig = {
   name: 'Good',
   //
   planner: {
-    provider: 'core-planner-htn',
+    provider: 'shado-planner-htn',
     config: {},
   },
   model: {
