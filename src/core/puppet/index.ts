@@ -6,9 +6,9 @@ import type { Puppet as PuppetType } from './types'
 
 import { _memoryClient } from '../libs/utils.ts'
 
-import { AnthropicClientPlugin } from '../../plugin/client-anthropic/index.ts'
-import { DeepSeekClientPlugin } from '../../plugin/client-deepseek/index.ts'
-import { OpenAiClientPlugin } from '../../plugin/client-openai/index.ts'
+import { AnthropicAdapterPlugin } from '../../plugin/adapter-anthropic/index.ts'
+import { DeepSeekAdapterPlugin } from '../../plugin/adapter-deepseek/index.ts'
+import { OpenAiAdapterPlugin } from '../../plugin/adapter-openai/index.ts'
 
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts'
@@ -80,8 +80,8 @@ export class Puppet {
   _setModelPlugin = async () => {
     switch (this.puppet.config.model.provider) {
       // NOTE: Anthropic
-      case 'client-anthropic':
-        this.puppet.model = new AnthropicClientPlugin(_memoryClient, _app)
+      case 'adapter-anthropic':
+        this.puppet.model = new AnthropicAdapterPlugin(_memoryClient, _app)
 
         _app.utils.logger.send({
           type: 'SUCCESS',
@@ -92,8 +92,8 @@ export class Puppet {
         break
 
       // NOTE: DeepSeek
-      case 'client-deepseek':
-        this.puppet.model = new DeepSeekClientPlugin(_memoryClient, _app)
+      case 'adapter-deepseek':
+        this.puppet.model = new DeepSeekAdapterPlugin(_memoryClient, _app)
 
         _app.utils.logger.send({
           type: 'SUCCESS',
@@ -104,8 +104,8 @@ export class Puppet {
         break
 
       // NOTE: OpenAI
-      case 'client-openai':
-        this.puppet.model = new OpenAiClientPlugin(_memoryClient, _app)
+      case 'adapter-openai':
+        this.puppet.model = new OpenAiAdapterPlugin(_memoryClient, _app)
 
         _app.utils.logger.send({
           type: 'SUCCESS',

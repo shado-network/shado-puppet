@@ -26,7 +26,7 @@ export type PuppetConfig = {
     config?: any
   }
   model: {
-    provider: 'client-anthropic' | 'client-deepseek' | 'client-openai'
+    provider: 'adapter-anthropic' | 'adapter-deepseek' | 'adapter-openai'
     config?: any
   }
   interfaces: {

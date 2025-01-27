@@ -64,16 +64,16 @@ export function parseArgs(): {
   }
 }
 
-export const _memoryClient = (client) => {
-  const clientInvoke = async (state: typeof MessagesAnnotation.State) => {
-    const response = await client.invoke(state.messages)
+export const _memoryClient = (adapter) => {
+  const adapterInvoke = async (state: typeof MessagesAnnotation.State) => {
+    const response = await adapter.invoke(state.messages)
     return { messages: response }
   }
 
   const workflow = new StateGraph(MessagesAnnotation)
-    .addNode('clientInvoke', clientInvoke)
-    .addEdge(START, 'clientInvoke')
-    .addEdge('clientInvoke', END)
+    .addNode('adapterInvoke', adapterInvoke)
+    .addEdge(START, 'adapterInvoke')
+    .addEdge('adapterInvoke', END)
 
   const memory = new MemorySaver()
   const memoryClient = workflow.compile({ checkpointer: memory })

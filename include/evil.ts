@@ -9,7 +9,7 @@ const puppet: PuppetConfig = {
     config: {},
   },
   model: {
-    provider: 'client-deepseek',
+    provider: 'adapter-deepseek',
     config: {
       model: 'deepseek-chat',
       temperature: 1,

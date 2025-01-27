@@ -8,19 +8,18 @@ import type { AppContext } from '../../core/context/types'
 
 dotenv.config()
 
-export class DeepSeekClientPlugin {
+export class OpenAiAdapterPlugin {
   fields: ChatOpenAIFields = {
-    model: 'deepseek-chat',
+    model: 'gpt-4o-mini',
     temperature: 1,
     maxTokens: 256,
   }
 
   config: ClientOptions = {
-    apiKey: process.env.DEEPSEEK_API_KEY,
-    baseURL: 'https://api.deepseek.com',
+    apiKey: process.env.OPENAI_API_KEY,
   }
 
-  client: ChatOpenAI
+  adapter: ChatOpenAI
 
   //
 
@@ -32,8 +31,8 @@ export class DeepSeekClientPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
-    this.client = new ChatOpenAI(this.fields, this.config)
-    this._memoryClient = _memoryClient(this.client)
+    this.adapter = new ChatOpenAI(this.fields, this.config)
+    this._memoryClient = _memoryClient(this.adapter)
   }
 
   getMessagesResponse = async (

@@ -1,25 +1,23 @@
 import dotenv from 'dotenv'
 
-import { ChatOpenAI } from '@langchain/openai'
-import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
+import { ChatAnthropic } from '@langchain/anthropic'
+import type { AnthropicInput } from '@langchain/anthropic'
+import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
 
 dotenv.config()
 
-export class OpenAiClientPlugin {
-  fields: ChatOpenAIFields = {
-    model: 'gpt-4o-mini',
+export class AnthropicAdapterPlugin {
+  config: AnthropicInput & BaseChatModelParams = {
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: 'claude-3-5-sonnet-20241022',
     temperature: 1,
     maxTokens: 256,
   }
 
-  config: ClientOptions = {
-    apiKey: process.env.OPENAI_API_KEY,
-  }
-
-  client: ChatOpenAI
+  adapter: ChatAnthropic
 
   //
 
@@ -31,8 +29,8 @@ export class OpenAiClientPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
-    this.client = new ChatOpenAI(this.fields, this.config)
-    this._memoryClient = _memoryClient(this.client)
+    this.adapter = new ChatAnthropic(this.config)
+    this._memoryClient = _memoryClient(this.adapter)
   }
 
   getMessagesResponse = async (
