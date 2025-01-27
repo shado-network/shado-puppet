@@ -1,18 +1,22 @@
-import type { Task } from '../types.ts'
+import type { Task } from '../types'
 
 export default {
   identifier: 'twitter-get-messages',
+
   conditions: {
-    'twitter-has-client': (props) => true,
-    'twitter-logged-in': (props) => true,
-    'twitter-has-messages': (props) => false,
+    'twitter-has-client': (props) => props.state['twitter-has-client'] === true,
+    'twitter-has-logged-in': (props) =>
+      props.state['twitter-has-logged-in'] === true,
+    'twitter-has-messages': (props) =>
+      props.state['twitter-has-messages'] === false,
   },
+
   effects: {
     'twitter-has-messages': {
       value: (props) => true,
       trigger: async (props) => {
-        props.state['twitter-has-messages'] =
-          props.state['twitter-messages'].length > 0
+        props.state['twitter-has-messages'] = true
+        // props.state['twitter-has-messages'] = props.state['twitter-messages'].length > 0
 
         return {
           success: true,
@@ -21,6 +25,7 @@ export default {
       },
     },
   },
+
   actions: {
     'telegram-get-messages': async (props) => {
       try {

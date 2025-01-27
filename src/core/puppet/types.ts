@@ -4,7 +4,7 @@ export type Puppet = {
   //
   config: PuppetConfig
   //
-  model: unknown
+  model: null | unknown
   memory: {
     short: {
       [key: string]: any
@@ -26,7 +26,7 @@ export type PuppetConfig = {
     config?: any
   }
   model: {
-    provider: 'client-anthropic' | 'client-openai'
+    provider: 'client-anthropic' | 'client-deepseek' | 'client-openai'
     config?: any
   }
   interfaces: {

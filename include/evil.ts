@@ -1,4 +1,4 @@
-import type { PuppetConfig } from '../src/core/types/puppet'
+import type { PuppetConfig } from '../src/core/puppet/types'
 
 const puppet: PuppetConfig = {
   id: 'evil',
@@ -9,21 +9,16 @@ const puppet: PuppetConfig = {
     config: {},
   },
   model: {
-    // provider: 'client-anthropic',
-    // config: {
-    //   model: 'claude-3-5-sonnet-20241022',
-    //   temperature: 1,
-    //   maxTokens: 256,
-    // },
-    provider: 'client-openai',
+    provider: 'client-deepseek',
     config: {
-      model: 'gpt-4o-mini',
+      model: 'deepseek-chat',
       temperature: 1,
       maxTokens: 256,
     },
   },
   interfaces: {
     'client-telegram': {},
+    'client-twitter-api': {},
     // 'client-twitter': {},
   },
   //

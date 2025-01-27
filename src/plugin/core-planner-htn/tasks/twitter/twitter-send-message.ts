@@ -1,0 +1,99 @@
+import { HumanMessage, SystemMessage } from '@langchain/core/messages'
+
+import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
+import type { Task } from '../types'
+
+export default {
+  identifier: 'twitter-send-message',
+
+  conditions: {
+    'twitter-has-client': (props) => props.state['twitter-has-client'] === true,
+    'twitter-has-logged-in': (props) =>
+      props.state['twitter-has-logged-in'] === true,
+    'twitter-last-sent': (props) =>
+      props.state['twitter-last-sent'] <= Date.now() - 15 * MIN_IN_MSEC,
+  },
+
+  effects: {
+    'twitter-last-sent': {
+      // value: (props) => false,
+      value: (props) =>
+        props.state['twitter-last-sent'] <= Date.now() - 15 * MIN_IN_MSEC,
+      trigger: async (props) => {
+        props.state['twitter-last-sent'] = Date.now()
+
+        return {
+          success: true,
+          payload: null,
+        }
+      },
+    },
+  },
+
+  actions: {
+    'twitter-send-message': async (props) => {
+      try {
+        let messages = []
+        let firstMessageInThread = false
+
+        // TODO: Temp fix!
+        const message = {
+          from_id: 'SELF',
+          message: 'What are you thinking about today?',
+        }
+
+        // NOTE: Write response.
+
+        // NOTE: Check if this is a new thread.
+        if (
+          !props.puppet.interfaces.twitterClient
+            .getMessageThreads()
+            .includes(`twitter-${message.from_id}`)
+        ) {
+          props.puppet.interfaces.twitterClient.addMessageThread(
+            `twitter-${message.from_id}`,
+          )
+
+          firstMessageInThread = true
+        }
+
+        if (firstMessageInThread) {
+          messages = [
+            new SystemMessage(props.puppet.config.bio.join('\n')),
+            new HumanMessage(message.message),
+          ]
+        } else {
+          message.message = 'Could you elaborate?'
+          messages = [new HumanMessage(message.message)]
+        }
+
+        // console.log('!!!', messages, `twitter-${message.from_id}`)
+
+        // NOTE: Generate a response.
+        const response = await (props.puppet.model as any).getMessagesResponse(
+          messages,
+          {
+            thread: `twitter-${message.from_id}`,
+          },
+        )
+
+        // NOTE: Send the message.
+        await props.puppet.interfaces.twitterClient.sendMessage(
+          response as string,
+        )
+
+        // props.puppet.interfaces.twitterClient.markAsRead(message.id)
+
+        return {
+          success: true,
+          payload: response,
+        }
+      } catch (error) {
+        return {
+          success: false,
+          payload: error,
+        }
+      }
+    },
+  },
+} satisfies Task

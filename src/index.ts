@@ -1,10 +1,11 @@
 import dotenv from 'dotenv'
 
-import { _app } from './context.ts'
+import { _app } from './core/context/index.ts'
 
 import { CoreLogger } from './plugin/core-logger/index.ts'
 import { Puppet } from './core/puppet/index.ts'
 import { parseArgs } from './core/libs/utils.ts'
+import { SEC_IN_MSEC } from './core/libs/constants.ts'
 
 dotenv.config()
 
@@ -69,4 +70,4 @@ _app.core.puppets = initPuppets(puppetIds)
 
 setInterval(() => {
   // _app.utils.logger.send({ type: 'INFO', source: 'SERVER', message: 'PING!' })
-}, 1 * 1000)
+}, 1 * SEC_IN_MSEC)

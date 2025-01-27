@@ -2,12 +2,13 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 
 import dotenv from 'dotenv'
-import { Scraper, SearchMode, Tweet } from 'agent-twitter-client'
+import { Scraper, SearchMode } from 'agent-twitter-client'
+import type { Tweet } from 'agent-twitter-client'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.ts'
-import type { AppContext } from '../../context.ts'
-import type { PuppetConfig } from '../../core/types/puppet.ts'
+import type { AppContext } from '../../core/context/types'
+import type { PuppetConfig } from '../../core/puppet/types'
 
 dotenv.config()
 
@@ -19,7 +20,7 @@ const cacheDirectoryPaths = [__dirname, '../../../cache/twitter']
 export class TwitterClientPlugin {
   config = {
     MAX_LOGIN_ATTEMPTS: 3,
-    ATTEMPT_INTERVAL_SECONDS: 2,
+    RETRY_LOGIN_ATTEMPTS_INTERVAL_IN_SECONDS: 2,
   }
 
   //
@@ -29,6 +30,8 @@ export class TwitterClientPlugin {
   clientConfig = {}
 
   client: Scraper
+  threads: string[] = []
+  messages: any[] = []
 
   //
 
@@ -47,6 +50,7 @@ export class TwitterClientPlugin {
       puppetId: this.puppetConfig.id,
       message: `Loaded client plugin "client-twitter"`,
     })
+
     try {
       this.client = new Scraper()
     } catch (error) {
@@ -58,6 +62,22 @@ export class TwitterClientPlugin {
       })
     }
   }
+
+  getMessageThreads = () => {
+    return this.threads
+  }
+
+  addMessageThread = (threadIdentifier: string) => {
+    this.threads.push(threadIdentifier)
+  }
+
+  // getMessages = () => {
+  //   return this.messages.filter((message) => !message.isRead)
+  // }
+
+  // clearReadMessages = () => {
+  //   this.messages = this.messages.filter((message) => !message.isRead)
+  // }
 
   login = async () => {
     cookies.createDirectory(cacheDirectoryPaths)
@@ -137,13 +157,18 @@ export class TwitterClientPlugin {
             puppetId: this.puppetConfig.id,
             message: `Failed to log in to Twitter after ${loginAttempts} attempts`,
           })
+
+          throw `Failed to log in to Twitter after ${loginAttempts} attempts`
           break
         }
 
         await asyncSleep(
-          this.config.ATTEMPT_INTERVAL_SECONDS * (loginAttempts + 1),
+          this.config.RETRY_LOGIN_ATTEMPTS_INTERVAL_IN_SECONDS *
+            (loginAttempts + 1),
         )
       }
+
+      return true
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
@@ -152,10 +177,12 @@ export class TwitterClientPlugin {
         message: `Error logging in to Twitter`,
         payload: { error },
       })
-      return null
+
+      return false
     }
   }
 
+  /*
   getMessages = async (messages) => {
     if (await !this.client.isLoggedIn()) {
       return
@@ -166,12 +193,12 @@ export class TwitterClientPlugin {
     const tweets = []
 
     try {
-      // const rawTweets = this.client.getTweetsAndReplies('Garbage_42069', 120)
-      // const rawTweets = await this.client.getTweets('garbage_42069', 10)
-      // const rawTweets = this.client.getTweetsAndReplies('garbage_42069')
+      // const rawTweets = this.client.getTweetsAndReplies('ShadoNetwork', 120)
+      // const rawTweets = await this.client.getTweets('ShadoNetwork', 10)
+      // const rawTweets = this.client.getTweetsAndReplies('ShadoNetwork')
       // const rawTweets = await this.client.fetchSearchTweets(
       const rawTweets = this.client.searchTweets(
-        '@garbage_42069',
+        '@ShadoNetwork',
         50,
         SearchMode.Latest,
       )
@@ -220,10 +247,6 @@ export class TwitterClientPlugin {
       },
     })
 
-    // const response = await this.client.sendTweet('Hello world!', tweets.at(0).id)
-    // const json = await response.json()
-    // console.log({ json })
-
     // messages.push({
     //   role: userId,
     //   content: message,
@@ -254,5 +277,18 @@ export class TwitterClientPlugin {
       message: message,
       shouldReply: true,
     }
+  }
+  */
+
+  async sendMessage(message: string) {
+    if (this._app.config.sandbox) {
+      console.warn('SANDBOX', 'sendMessage', { message })
+      return
+    }
+
+    const response = await this.client.sendTweet(message)
+    const json = await response.json()
+
+    console.log('sendMessage', { json })
   }
 }

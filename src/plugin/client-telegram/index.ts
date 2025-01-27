@@ -2,9 +2,8 @@ import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 
-import { asyncSleep } from '../../core/libs/utils.ts'
-import type { AppContext } from '../../context.ts'
-import type { PuppetConfig } from '../../core/types/puppet.ts'
+import type { AppContext } from '../../core/context/types'
+import type { PuppetConfig } from '../../core/puppet/types'
 
 dotenv.config()
 
@@ -18,8 +17,8 @@ export class TelegramClientPlugin {
   clientConfig = {}
 
   client: Telegraf
-  messages: any[] = []
   threads: string[] = []
+  messages: any[] = []
 
   //
 
@@ -87,6 +86,14 @@ export class TelegramClientPlugin {
     return newMessage
   }
 
+  getMessageThreads = () => {
+    return this.threads
+  }
+
+  addMessageThread = (threadIdentifier: string) => {
+    this.threads.push(threadIdentifier)
+  }
+
   getMessages = () => {
     return this.messages.filter((message) => !message.isRead)
   }
@@ -95,26 +102,16 @@ export class TelegramClientPlugin {
     this.messages = this.messages.filter((message) => !message.isRead)
   }
 
-  getThreads = () => {
-    return this.threads
-  }
-
-  addThread = (threadIdentifier: string) => {
-    this.threads.push(threadIdentifier)
-  }
-
   sendMessage = async (message: string, ctx) => {
-    // TODO: Move to runtime?
-    // MARK: Fake a delay for a more "human" response.
-    const sleepForInSeconds = message.length * this.config.SECONDS_PER_CHAR
-    await asyncSleep(sleepForInSeconds)
-
     const newCtx = await ctx.reply(message, {
       reply_to_message_id: ctx.message.message_id,
-      // reply_to_message_id: ctx.id,
     })
+  }
 
-    // console.log(newCtx)
+  replyToMessage = async (message: string, ctx) => {
+    const newCtx = await ctx.reply(message, {
+      reply_to_message_id: ctx.message.message_id,
+    })
   }
 
   markAsRead = async (messageId: number) => {

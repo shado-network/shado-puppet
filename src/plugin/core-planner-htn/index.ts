@@ -3,8 +3,8 @@ import { defaultState } from './libs/state.ts'
 import { defaultGoals } from './libs/goals.ts'
 import { executePlans } from './libs/planner.ts'
 
-import type { AppContext } from '../../context.ts'
-import type { Puppet } from '../../core/types/puppet.ts'
+import type { AppContext } from '../../core/context/types'
+import type { Puppet } from '../../core/puppet/types'
 
 export class CorePlannerPlugin {
   puppet: Puppet
@@ -50,6 +50,7 @@ export class CorePlannerPlugin {
       tasks,
       this.puppet.memory.long.goals,
       this.puppet.memory.long.state,
+      this._app,
     )
   }
 

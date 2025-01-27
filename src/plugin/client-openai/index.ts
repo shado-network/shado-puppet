@@ -1,18 +1,22 @@
 import dotenv from 'dotenv'
 
 import { ChatOpenAI } from '@langchain/openai'
-import type { ChatOpenAIFields } from '@langchain/openai'
+import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
-import type { AppContext } from '../../context'
+
+import type { AppContext } from '../../core/context/types'
 
 dotenv.config()
 
 export class OpenAiClientPlugin {
-  config: ChatOpenAIFields = {
-    apiKey: process.env.OPENAI_API_KEY,
+  fields: ChatOpenAIFields = {
     model: 'gpt-4o-mini',
-    // temperature: 1,
-    // maxTokens: 256,
+    temperature: 1,
+    maxTokens: 256,
+  }
+
+  config: ClientOptions = {
+    apiKey: process.env.OPENAI_API_KEY,
   }
 
   client: ChatOpenAI
@@ -27,7 +31,7 @@ export class OpenAiClientPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
-    this.client = new ChatOpenAI(this.config)
+    this.client = new ChatOpenAI(this.fields, this.config)
     this._memoryClient = _memoryClient(this.client)
   }
 

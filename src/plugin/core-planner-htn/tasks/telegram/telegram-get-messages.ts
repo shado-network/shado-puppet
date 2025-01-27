@@ -1,4 +1,4 @@
-import type { Task } from '../types.ts'
+import type { Task } from '../types'
 
 export default {
   identifier: 'telegram-get-messages',

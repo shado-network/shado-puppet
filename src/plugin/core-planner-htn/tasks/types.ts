@@ -1,4 +1,5 @@
-import type { Puppet } from '../../../core/types/puppet'
+import type { AppContext } from '../../../core/context/types'
+import type { Puppet } from '../../../core/puppet/types'
 
 export type Task = {
   identifier: string
@@ -25,6 +26,7 @@ export type GoalProps = {
   state: {
     [key: string]: any
   }
+  _app: AppContext
   [key: string]: any
 }
 
@@ -32,6 +34,7 @@ export type ValueProps = {
   state: {
     [key: string]: any
   }
+  _app: AppContext
   [key: string]: any
 }
 
@@ -40,5 +43,6 @@ export type TriggerProps = {
   state: {
     [key: string]: any
   }
+  _app: AppContext
   [key: string]: any
 }

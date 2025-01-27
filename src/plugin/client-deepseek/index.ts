@@ -1,23 +1,26 @@
 import dotenv from 'dotenv'
 
-import { ChatAnthropic } from '@langchain/anthropic'
-import type { AnthropicInput } from '@langchain/anthropic'
-import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models'
+import { ChatOpenAI } from '@langchain/openai'
+import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
 
 dotenv.config()
 
-export class AnthropicClientPlugin {
-  config: AnthropicInput & BaseChatModelParams = {
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: 'claude-3-5-sonnet-20241022',
+export class DeepSeekClientPlugin {
+  fields: ChatOpenAIFields = {
+    model: 'deepseek-chat',
     temperature: 1,
     maxTokens: 256,
   }
 
-  client: ChatAnthropic
+  config: ClientOptions = {
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: 'https://api.deepseek.com',
+  }
+
+  client: ChatOpenAI
 
   //
 
@@ -29,7 +32,7 @@ export class AnthropicClientPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
-    this.client = new ChatAnthropic(this.config)
+    this.client = new ChatOpenAI(this.fields, this.config)
     this._memoryClient = _memoryClient(this.client)
   }
 

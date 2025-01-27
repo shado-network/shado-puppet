@@ -1,14 +1,16 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { START, END } from '@langchain/langgraph'
 import {
+  START,
+  END,
   MessagesAnnotation,
   StateGraph,
   MemorySaver,
 } from '@langchain/langgraph'
 
-import { _app } from '../../context.ts'
+import { _app } from '../../core/context/index.ts'
+import { SEC_IN_MSEC } from '../libs/constants.ts'
 
 export const asyncForEach = async (array: any[], callback: any) => {
   for (let i = 0; i < array.length; i++) {
@@ -16,9 +18,25 @@ export const asyncForEach = async (array: any[], callback: any) => {
   }
 }
 
+const _asyncFilter = async (array: any[], callback: any) => {
+  return Promise.all(array.map(callback)).then((results) => {
+    return array.filter((_value, index) => {
+      return results[index]
+    })
+  })
+}
+
+export const asyncSome = async (array: any[], callback: any) => {
+  return (await _asyncFilter(array, callback)).length > 0
+}
+
+export const asyncEvery = async (array: any[], callback: any) => {
+  return (await _asyncFilter(array, callback)).length === array.length
+}
+
 export const asyncSleep = async (seconds: number) => {
   return new Promise((resolve) => {
-    return setTimeout(resolve, seconds * 1000)
+    return setTimeout(resolve, seconds * SEC_IN_MSEC)
   })
 }
 

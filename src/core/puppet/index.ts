@@ -1,14 +1,17 @@
-import { _app } from '../../context.ts'
-import type { AppContext } from '../../context.ts'
+import { _app } from '../../core/context/index.ts'
+import type { AppContext } from '../../core/context/types'
 
 import { CorePlannerPlugin } from '../../plugin/core-planner-htn/index.ts'
-import type { Puppet as PuppetType } from '../types/puppet.ts'
+import type { Puppet as PuppetType } from './types'
 
 import { _memoryClient } from '../libs/utils.ts'
+
 import { AnthropicClientPlugin } from '../../plugin/client-anthropic/index.ts'
+import { DeepSeekClientPlugin } from '../../plugin/client-deepseek/index.ts'
 import { OpenAiClientPlugin } from '../../plugin/client-openai/index.ts'
 
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
+import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts'
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 
 export class Puppet {
@@ -76,7 +79,7 @@ export class Puppet {
 
   _setModelPlugin = async () => {
     switch (this.puppet.config.model.provider) {
-      // MARK: Anthropic
+      // NOTE: Anthropic
       case 'client-anthropic':
         this.puppet.model = new AnthropicClientPlugin(_memoryClient, _app)
 
@@ -87,7 +90,20 @@ export class Puppet {
           message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
         })
         break
-      // MARK: OpenAI
+
+      // NOTE: DeepSeek
+      case 'client-deepseek':
+        this.puppet.model = new DeepSeekClientPlugin(_memoryClient, _app)
+
+        _app.utils.logger.send({
+          type: 'SUCCESS',
+          source: 'PUPPET',
+          puppetId: this.puppet.id,
+          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
+        })
+        break
+
+      // NOTE: OpenAI
       case 'client-openai':
         this.puppet.model = new OpenAiClientPlugin(_memoryClient, _app)
 
@@ -112,7 +128,7 @@ export class Puppet {
   _setInterfacePlugins = async () => {
     this.puppet.interfaces = {}
 
-    // MARK: Telegram
+    // NOTE: Telegram
     if (
       Object.keys(this.puppet.config.interfaces).includes('client-telegram')
     ) {
@@ -122,7 +138,16 @@ export class Puppet {
       )
     }
 
-    // MARK: Twitter
+    // NOTE: Twitter
+    if (
+      Object.keys(this.puppet.config.interfaces).includes('client-twitter-api')
+    ) {
+      this.puppet.interfaces.twitterClient = new TwitterApiClientPlugin(
+        this.puppet.config,
+        _app,
+      )
+    }
+
     if (Object.keys(this.puppet.config.interfaces).includes('client-twitter')) {
       this.puppet.interfaces.twitterClient = new TwitterClientPlugin(
         this.puppet.config,

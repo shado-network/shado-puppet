@@ -1,12 +1,4 @@
-export type CoreLog = {
-  type: 'SUCCESS' | 'WARNING' | 'ERROR' | 'INFO' | 'LOG'
-  source: 'SERVER' | 'PLAY' | 'PUPPET' | 'AGENT' | 'USER'
-  playId?: string
-  puppetId?: string
-  userId?: string
-  message: string
-  payload?: null | unknown
-}
+import type { LogMessage } from './types'
 
 export class CoreLogger {
   config = {
@@ -18,7 +10,7 @@ export class CoreLogger {
     showUser: false,
   }
 
-  // MARK: Node.js console colors.
+  // NOTE: Node.js console colors.
   colors = {
     node: {
       fg: {
@@ -110,9 +102,9 @@ export class CoreLogger {
     headerStyling,
     header,
   }: {
-    type: CoreLog['type']
-    message: CoreLog['message']
-    payload: CoreLog['payload']
+    type: LogMessage['type']
+    message: LogMessage['message']
+    payload: LogMessage['payload']
     header: string
     headerStyling: string
     typeStyling: string
@@ -124,7 +116,14 @@ export class CoreLogger {
       headerStyling + header + this._resetColor(),
       typeStyling + ` ${icon}${type} ` + this._resetColor(),
     )
-    payload ? console.log(message, payload) : console.log(message)
+
+    console.log(message)
+
+    if (payload) {
+      console.log('')
+      console.log('PAYLOAD =', payload)
+    }
+
     console.log('')
   }
 
@@ -138,7 +137,8 @@ export class CoreLogger {
     userId,
     message,
     payload = null,
-  }: CoreLog) => {
+  }: LogMessage) => {
+    // Console
     if (this.config.interfaces.console) {
       let typeStyling: string
       let icon: string
@@ -166,6 +166,10 @@ export class CoreLogger {
           typeStyling = this._getColor('default', '')
           icon = this._getIcon(type)
           break
+        case 'SANDBOX':
+          typeStyling = this._getColor('black', 'white')
+          icon = this._getIcon(type)
+          break
         //
         default:
           typeStyling = this._getColor('default', '')
@@ -178,6 +182,7 @@ export class CoreLogger {
           headerStyling = this._getColor('green', '')
           header = '[ SERVER ]'
           break
+        //
         case 'PLAY':
           headerStyling = this._getColor('blue', '')
           header = `[ PLAY / ${playId.toUpperCase()} ]`
