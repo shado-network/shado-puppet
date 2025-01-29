@@ -6,7 +6,7 @@ dotenv.config()
 
 export const _app: AppContext = {
   config: {
-    sandbox: !!process.env['SANDBOX_MODE'] || true,
+    sandboxMode: !!process.env['SANDBOX_MODE'] || true,
   },
   core: {
     puppets: [],

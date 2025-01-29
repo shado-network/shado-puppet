@@ -1,12 +1,24 @@
-import type { LogMessage } from './types'
+import dotenv from 'dotenv'
+
+import { TelegramClientPlugin } from '../client-telegram/index.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetConfig } from '../../core/puppet/types'
+import type { LoggerConfig, LoggerMessage } from './types'
+
+dotenv.config()
 
 export class ShadoLogger {
-  config = {
+  config: LoggerConfig = {
     interfaces: {
       console: false,
       rest: false,
     },
-    icons: false,
+    sandbox: {
+      telegramClient: null,
+      discordClient: null,
+    },
+    //
+    showIcons: false,
     showUser: false,
   }
 
@@ -63,11 +75,48 @@ export class ShadoLogger {
     this.send({
       type: 'SUCCESS',
       source: 'SERVER',
-      message: 'Started ShadoLogger',
+      message: 'Started Shadō Logger',
     })
+
+    this._setSandboxClient()
   }
 
-  _getColor = (fgColorName = '', bgColorName = '') => {
+  _setSandboxClient = () => {
+    try {
+      const sandboxPuppet = {
+        id: 'sandbox',
+        name: 'Shadō Puppet Sandbox',
+        //
+        planner: null,
+        model: null,
+        interfaces: null,
+        //
+        bio: null,
+      } satisfies PuppetConfig
+
+      const sandboxApp = {
+        config: null,
+        core: null,
+        utils: {
+          logger: this,
+        },
+      } satisfies AppContext
+
+      this.config.sandbox.telegramClient = new TelegramClientPlugin(
+        sandboxPuppet,
+        sandboxApp,
+      )
+    } catch (error) {
+      this.send({
+        type: 'ERROR',
+        source: 'SERVER',
+        message: 'Could not start sandbox Telegram client.',
+        payload: { error },
+      })
+    }
+  }
+
+  _getConsoleColor = (fgColorName = '', bgColorName = '') => {
     const fgColor =
       this.colors.node.fg[fgColorName.toLowerCase()] ||
       this.colors.node.fg.white
@@ -78,14 +127,14 @@ export class ShadoLogger {
     return `${fgColor}${bgColor}`
   }
 
-  _resetColor = () => {
+  _resetConsoleColor = () => {
     return this.colors.node.fg.clear
   }
 
   _getIcon = (type: string) => {
     const icon = this.icons[type.toLowerCase()] || this.icons.default
 
-    if (this.config.icons) {
+    if (this.config.showIcons) {
       return `${icon} `
     } else {
       return ''
@@ -102,19 +151,19 @@ export class ShadoLogger {
     headerStyling,
     header,
   }: {
-    type: LogMessage['type']
-    message: LogMessage['message']
-    payload: LogMessage['payload']
+    type: LoggerMessage['type']
+    message: LoggerMessage['message']
+    payload: LoggerMessage['payload']
     header: string
     headerStyling: string
     typeStyling: string
     icon: string
   }) => {
-    // console.log(typeStyling + ` ${icon}${type} ` + this._resetColor())
+    // console.log(typeStyling + ` ${icon}${type} ` + this._resetConsoleColor())
 
     console.log(
-      headerStyling + header + this._resetColor(),
-      typeStyling + ` ${icon}${type} ` + this._resetColor(),
+      headerStyling + header + this._resetConsoleColor(),
+      typeStyling + ` ${icon}${type} ` + this._resetConsoleColor(),
     )
 
     console.log(message)
@@ -137,7 +186,17 @@ export class ShadoLogger {
     userId,
     message,
     payload = null,
-  }: LogMessage) => {
+  }: LoggerMessage) => {
+    // SANDBOX
+    if (type === 'SANDBOX') {
+      this.config.sandbox.telegramClient.sendMessage(
+        `[ PUPPET / ${puppetId?.toUpperCase()} ]\n
+${message}\n
+PAYLOAD = ${JSON.stringify(payload, null, 2)}`,
+        process.env['TELEGRAM_SANDBOX_CHAT_ID'],
+      )
+    }
+
     // Console
     if (this.config.interfaces.console) {
       let typeStyling: string
@@ -147,62 +206,62 @@ export class ShadoLogger {
 
       switch (type) {
         case 'SUCCESS':
-          typeStyling = this._getColor('black', 'green')
+          typeStyling = this._getConsoleColor('black', 'green')
           icon = this._getIcon(type)
           break
         case 'WARNING':
-          typeStyling = this._getColor('black', 'yellow')
+          typeStyling = this._getConsoleColor('black', 'yellow')
           icon = this._getIcon(type)
           break
         case 'ERROR':
-          typeStyling = this._getColor('black', 'red')
+          typeStyling = this._getConsoleColor('black', 'red')
           icon = this._getIcon(type)
           break
         case 'INFO':
-          typeStyling = this._getColor('black', 'blue')
+          typeStyling = this._getConsoleColor('black', 'blue')
           icon = this._getIcon(type)
           break
         case 'LOG':
-          typeStyling = this._getColor('default', '')
+          typeStyling = this._getConsoleColor('default', '')
           icon = this._getIcon(type)
           break
         case 'SANDBOX':
-          typeStyling = this._getColor('black', 'white')
+          typeStyling = this._getConsoleColor('black', 'white')
           icon = this._getIcon(type)
           break
         //
         default:
-          typeStyling = this._getColor('default', '')
+          typeStyling = this._getConsoleColor('default', '')
           icon = this._getIcon('default')
           break
       }
 
       switch (source) {
         case 'SERVER':
-          headerStyling = this._getColor('green', '')
+          headerStyling = this._getConsoleColor('green', '')
           header = '[ SERVER ]'
           break
         //
         case 'PLAY':
-          headerStyling = this._getColor('blue', '')
+          headerStyling = this._getConsoleColor('blue', '')
           header = `[ PLAY / ${playId.toUpperCase()} ]`
           break
         case 'PUPPET':
-          headerStyling = this._getColor('magenta', '')
+          headerStyling = this._getConsoleColor('magenta', '')
           header = `[ PUPPET / ${puppetId.toUpperCase()} ]`
           break
         //
         case 'AGENT':
-          headerStyling = this._getColor('yellow', '')
+          headerStyling = this._getConsoleColor('yellow', '')
           header = `< ${puppetId.toUpperCase()} >`
           break
         case 'USER':
-          headerStyling = this._getColor('cyan', '')
+          headerStyling = this._getConsoleColor('cyan', '')
           header = `< ${userId.toUpperCase()} >`
           break
         //
         default:
-          headerStyling = this._getColor('default', '')
+          headerStyling = this._getConsoleColor('default', '')
           header = '[ LOG ]'
           break
       }

@@ -182,6 +182,27 @@ export class TwitterClientPlugin {
     }
   }
 
+  sendMessage = async (message: string) => {
+    if (this._app.config.sandboxMode) {
+      this._app.utils.logger.send({
+        type: 'SANDBOX',
+        source: 'PUPPET',
+        puppetId: this.puppetConfig.id,
+        message: 'client-twitter | sendMessage()',
+        payload: {
+          message: message,
+        },
+      })
+
+      return
+    }
+
+    const response = await this.client.sendTweet(message)
+    const json = await response.json()
+
+    console.log('client-twitter | sendMessage()', { json })
+  }
+
   /*
   getMessages = async (messages) => {
     if (await !this.client.isLoggedIn()) {
@@ -279,16 +300,4 @@ export class TwitterClientPlugin {
     }
   }
   */
-
-  async sendMessage(message: string) {
-    if (this._app.config.sandbox) {
-      console.warn('SANDBOX', 'sendMessage', { message })
-      return
-    }
-
-    const response = await this.client.sendTweet(message)
-    const json = await response.json()
-
-    console.log('sendMessage', { json })
-  }
 }

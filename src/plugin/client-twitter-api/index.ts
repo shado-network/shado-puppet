@@ -91,6 +91,26 @@ export class TwitterApiClientPlugin {
     this.threads.push(threadIdentifier)
   }
 
+  sendMessage = async (message: string) => {
+    if (this._app.config.sandboxMode) {
+      this._app.utils.logger.send({
+        type: 'SANDBOX',
+        source: 'PUPPET',
+        puppetId: this.puppetConfig.id,
+        message: 'client-twitter-api | sendMessage()',
+        payload: {
+          message: message,
+        },
+      })
+
+      return
+    }
+
+    const response = await this.client.v2.tweet(message)
+
+    console.log('client-twitter | sendMessage()', { response })
+  }
+
   // getMessages = () => {
   //   return this.messages.filter((message) => !message.isRead)
   // }
@@ -161,23 +181,4 @@ export class TwitterApiClientPlugin {
     }
   }
   */
-
-  async sendMessage(message: string) {
-    if (this._app.config.sandbox) {
-      this._app.utils.logger.send({
-        type: 'SANDBOX',
-        source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
-        message: 'client-twitter-api | sendMessage()',
-        payload: {
-          message: message,
-        },
-      })
-
-      return
-    }
-
-    const response = await this.client.v2.tweet(message)
-    // console.log('sendMessage', { response })
-  }
 }

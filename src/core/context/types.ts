@@ -3,7 +3,7 @@ import type { Puppet } from '../../core/puppet'
 
 export type AppContext = {
   config: {
-    sandbox: boolean
+    sandboxMode: boolean
     [key: string]: unknown
   }
   core: {
