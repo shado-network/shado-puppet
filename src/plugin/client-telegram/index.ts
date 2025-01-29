@@ -102,10 +102,8 @@ export class TelegramClientPlugin {
     this.messages = this.messages.filter((message) => !message.isRead)
   }
 
-  sendMessage = async (message: string, ctx) => {
-    const newCtx = await ctx.reply(message, {
-      reply_to_message_id: ctx.message.message_id,
-    })
+  sendMessage = async (message: string, chatId: string) => {
+    const newCtx = await this.client.telegram.sendMessage(chatId, message)
   }
 
   replyToMessage = async (message: string, ctx) => {
@@ -122,6 +120,6 @@ export class TelegramClientPlugin {
     }
 
     message.isRead = true
-    // TODO: Purge
+    // TODO: Purge?
   }
 }

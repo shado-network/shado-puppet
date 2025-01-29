@@ -34,8 +34,4 @@ export type PuppetConfig = {
   }
   //
   bio: string[]
-  //
-  twitter?: {
-    username: string
-  }
 }

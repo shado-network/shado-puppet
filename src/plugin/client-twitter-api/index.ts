@@ -168,7 +168,7 @@ export class TwitterApiClientPlugin {
         type: 'SANDBOX',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
-        message: 'sendMessage:',
+        message: 'client-twitter-api | sendMessage()',
         payload: {
           message: message,
         },
