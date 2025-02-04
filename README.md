@@ -11,12 +11,21 @@ This framework is a work in progress! Breaking changes might occur, use at your 
 
 ## Configuration
 
+_App_
+
 - Create a new `.env` file in the root directory and update it with the correct config and secrets
   - See the `.env.template` file for reference
+
+_Puppet(s)_
+
 - Create a new puppet file inside the `./include/` folder
+  - Name it after the puppet's id for easy reference
+    - Eg. `./include/{puppet_id}.ts`
   - See the puppet example files for reference:
     - `./include/good.ts`
     - `./include/evil.ts`
+  - Optionally create a `.env.{puppet_id}` to separate puppet secrets:
+    - See the `.env.puppetid.template` file for reference
 
 ## Getting started
 
