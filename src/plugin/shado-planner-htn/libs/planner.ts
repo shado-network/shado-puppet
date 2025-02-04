@@ -5,6 +5,7 @@ import {
 } from '../../../core/libs/utils.ts'
 import type { AppContext } from '../../../core/context/types'
 import type { Puppet } from '../../../core/puppet/types'
+import type { PuppetState } from '../types'
 import type { Task } from '../tasks/types'
 
 const config = {
@@ -16,7 +17,7 @@ export const executePlans = async (
   puppet: Puppet,
   tasks: any,
   goals: any,
-  state: any,
+  state: PuppetState,
   _app: AppContext,
 ) => {
   // NOTE: Disable for debugging purposes.
@@ -194,6 +195,7 @@ export const executePlans = async (
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
   }
 
+  // NOTE: Enter the planning loop after timeout.
   executePlans(puppet, tasks, goals, state, _app)
 }
 

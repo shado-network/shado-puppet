@@ -1,4 +1,7 @@
-const telegramDefaultState = {
+import { PuppetState } from '../types'
+
+// TODO: Move to... plugin?
+const telegramDefaultState: PuppetState = {
   'telegram-last-updated': 0,
   //
   'telegram-has-client': false,
@@ -8,8 +11,8 @@ const telegramDefaultState = {
   'telegram-messages': [],
   'telegram-last-replied': 0,
 }
-
-const twitterDefaultState = {
+// TODO: Move to... plugin?
+const twitterDefaultState: PuppetState = {
   'twitter-last-updated': 0,
   //
   'twitter-has-client': false,
@@ -23,7 +26,8 @@ const twitterDefaultState = {
   // 'twitter-last-replied': 0,
 }
 
-export const defaultState = {
+export const defaultState: PuppetState = {
+  'last-started': 0,
   'last-updated': 0,
   //
   ...telegramDefaultState,
