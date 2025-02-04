@@ -1,13 +1,9 @@
-import dotenv from 'dotenv'
-
 import { ChatAnthropic } from '@langchain/anthropic'
 import type { AnthropicInput } from '@langchain/anthropic'
 import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
-
-dotenv.config()
 
 export class AnthropicAdapterPlugin {
   config: AnthropicInput & BaseChatModelParams = {

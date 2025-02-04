@@ -1,27 +1,23 @@
-import dotenv from 'dotenv'
 import { TwitterApi } from 'twitter-api-v2'
 import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
 
-dotenv.config()
-
 export class TwitterApiClientPlugin {
   config = {}
 
   //
 
-  puppetConfig: PuppetConfig
-
-  clientConfig = {}
-
   client: TwitterApi
+  clientConfig: any = {}
+
   threads: string[] = []
   messages: any[] = []
 
   //
 
+  puppetConfig: PuppetConfig
   _app: AppContext
 
   //
@@ -30,6 +26,13 @@ export class TwitterApiClientPlugin {
     this._app = _app
 
     this.puppetConfig = puppetConfig
+
+    this.clientConfig = {
+      ...this.clientConfig,
+      ...this.puppetConfig.clients.find((client: any) => {
+        return client.identifier === 'client-twitter-api'
+      }),
+    }
 
     this._app.utils.logger.send({
       type: 'SUCCESS',
@@ -42,22 +45,10 @@ export class TwitterApiClientPlugin {
   login = async () => {
     try {
       const credentials: TwitterApiTokens = {
-        appKey:
-          process.env[
-            `TWITTER_${this.puppetConfig.id.toUpperCase()}_CONSUMER_KEY`
-          ],
-        appSecret:
-          process.env[
-            `TWITTER_${this.puppetConfig.id.toUpperCase()}_CONSUMER_SECRET`
-          ],
-        accessToken:
-          process.env[
-            `TWITTER_${this.puppetConfig.id.toUpperCase()}_ACCESS_TOKEN`
-          ],
-        accessSecret:
-          process.env[
-            `TWITTER_${this.puppetConfig.id.toUpperCase()}_ACCESS_SECRET`
-          ],
+        appKey: this.clientConfig.secrets.appKey,
+        appSecret: this.clientConfig.secrets.appSecret,
+        accessToken: this.clientConfig.secrets.accessToken,
+        accessSecret: this.clientConfig.secrets.accessSecret,
       }
 
       const settings: Partial<IClientSettings> = {}

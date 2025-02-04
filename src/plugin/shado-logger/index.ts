@@ -1,22 +1,18 @@
-import dotenv from 'dotenv'
-
 import { TelegramClientPlugin } from '../client-telegram/index.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetConfig } from '../../core/puppet/types'
 import type { LoggerConfig, LoggerMessage } from './types'
 
-dotenv.config()
-
 export class ShadoLogger {
   config: LoggerConfig = {
-    interfaces: {
+    clients: {
       sandbox: false,
       console: false,
       rest: false,
     },
     sandbox: {
-      telegramClient: null,
-      discordClient: null,
+      telegram: null,
+      discord: null,
     },
     //
     showIcons: false,
@@ -69,14 +65,14 @@ export class ShadoLogger {
 
   //
 
-  constructor(interfaceIds: string[]) {
-    if (interfaceIds.includes('sandbox')) {
-      this.config.interfaces.sandbox = true
+  constructor(clients: string[]) {
+    if (clients.includes('sandbox')) {
+      this.config.clients.sandbox = true
       this._setSandboxClients()
     }
 
-    if (interfaceIds.includes('console')) {
-      this.config.interfaces.console = true
+    if (clients.includes('console')) {
+      this.config.clients.console = true
     }
 
     this.send({
@@ -94,7 +90,16 @@ export class ShadoLogger {
         //
         planner: null,
         model: null,
-        interfaces: null,
+        clients: [
+          {
+            identifier: 'client-telegram',
+            config: {},
+            secrets: {
+              botHandle: process.env['SANDBOX_TELEGRAM_BOT_HANDLE'],
+              botToken: process.env['SANDBOX_TELEGRAM_BOT_TOKEN'],
+            },
+          },
+        ],
         //
         bio: null,
       } satisfies PuppetConfig
@@ -108,7 +113,7 @@ export class ShadoLogger {
       } satisfies AppContext
 
       // NOTE: Telegram sandbox client.
-      this.config.sandbox.telegramClient = new TelegramClientPlugin(
+      this.config.sandbox.telegram = new TelegramClientPlugin(
         sandboxPuppet,
         sandboxApp,
       )
@@ -146,9 +151,9 @@ PAYLOAD:
 ${JSON.stringify(loggerMessage.payload || null, null, 2)}
 \`\`\``
 
-    this.config.sandbox.telegramClient.sendMessage(
+    this.config.sandbox.telegram.sendMessage(
       sandboxMessage,
-      process.env['TELEGRAM_SANDBOX_CHAT_ID'],
+      process.env['SANDBOX_TELEGRAM_CHAT_ID'],
     )
   }
 
@@ -259,11 +264,11 @@ ${JSON.stringify(loggerMessage.payload || null, null, 2)}
   //
 
   send = (loggerMessage: LoggerMessage) => {
-    if (this.config.interfaces.sandbox && loggerMessage.type === 'SANDBOX') {
+    if (this.config.clients.sandbox && loggerMessage.type === 'SANDBOX') {
       this._composeSandboxMessage(loggerMessage)
     }
 
-    if (this.config.interfaces.console) {
+    if (this.config.clients.console) {
       this._composeConsoleMessage(loggerMessage)
     }
   }

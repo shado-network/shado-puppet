@@ -1,12 +1,11 @@
-import dotenv from 'dotenv'
-
 import { _app } from './core/context/index.ts'
-
 import { ShadoLogger } from './plugin/shado-logger/index.ts'
+
 import { Puppet } from './core/puppet/index.ts'
 import { parseArgs } from './core/libs/utils.ts'
 import { SEC_IN_MSEC } from './core/libs/constants.ts'
 
+import dotenv from 'dotenv'
 dotenv.config()
 
 console.clear()
@@ -15,10 +14,6 @@ console.clear()
 
 console.log('SHADŌ NETWORK')
 console.log('shado-puppet')
-console.log('')
-
-console.log(`Started on port ${+process.env.SERVER_PORT || 10110}`)
-console.log(`http://localhost:${+process.env.SERVER_PORT || 10110}`)
 console.log('')
 
 //

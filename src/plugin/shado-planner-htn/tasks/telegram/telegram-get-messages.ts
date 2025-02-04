@@ -27,7 +27,7 @@ export default {
   actions: {
     'telegram-get-messages': async (props) => {
       try {
-        const messages = props.puppet.interfaces.telegramClient.getMessages()
+        const messages = props.puppet.clients.telegram.getMessages()
         props.state['telegram-messages'] = messages
         return {
           success: true,

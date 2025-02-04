@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'url'
 import path from 'path'
 
-import dotenv from 'dotenv'
 import { Scraper, SearchMode } from 'agent-twitter-client'
 import type { Tweet } from 'agent-twitter-client'
 
@@ -9,8 +8,6 @@ import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.ts'
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
-
-dotenv.config()
 
 // TODO: Find a better way.
 const __filename = fileURLToPath(import.meta.url)
@@ -25,16 +22,15 @@ export class TwitterClientPlugin {
 
   //
 
-  puppetConfig: PuppetConfig
-
-  clientConfig = {}
-
   client: Scraper
+  clientConfig: any = {}
+
   threads: string[] = []
   messages: any[] = []
 
   //
 
+  puppetConfig: PuppetConfig
   _app: AppContext
 
   //
@@ -43,6 +39,13 @@ export class TwitterClientPlugin {
     this._app = _app
 
     this.puppetConfig = puppetConfig
+
+    this.clientConfig = {
+      ...this.clientConfig,
+      ...this.puppetConfig.clients.find((client: any) => {
+        return client.identifier === 'client-twitter'
+      }),
+    }
 
     this._app.utils.logger.send({
       type: 'SUCCESS',
@@ -113,9 +116,9 @@ export class TwitterClientPlugin {
         })
 
         await this.client.login(
-          process.env[`TWITTER_${this.puppetConfig.id.toUpperCase()}_USERNAME`],
-          process.env[`TWITTER_${this.puppetConfig.id.toUpperCase()}_PASSWORD`],
-          process.env[`TWITTER_${this.puppetConfig.id.toUpperCase()}_EMAIL`],
+          this.clientConfig.secrets.username,
+          this.clientConfig.secrets.password,
+          this.clientConfig.secrets.email,
         )
 
         if (await this.client.isLoggedIn()) {

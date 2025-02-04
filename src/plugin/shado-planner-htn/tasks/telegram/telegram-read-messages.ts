@@ -56,7 +56,7 @@ export default {
           }
 
           // NOTE: Mark message as read.
-          props.puppet.interfaces.telegramClient.markAsRead(message.id)
+          props.puppet.clients.telegram.markAsRead(message.id)
 
           props._app.utils.logger.send({
             type: 'LOG',
@@ -89,11 +89,11 @@ export default {
 
           // NOTE: Check if this is a new thread.
           if (
-            !props.puppet.interfaces.telegramClient
+            !props.puppet.clients.telegram
               .getMessageThreads()
               .includes(`telegram-${message.from_id}`)
           ) {
-            props.puppet.interfaces.telegramClient.addMessageThread(
+            props.puppet.clients.telegram.addMessageThread(
               `telegram-${message.from_id}`,
             )
 
@@ -122,7 +122,7 @@ export default {
           // )
 
           // NOTE: Send the reply.
-          await props.puppet.interfaces.telegramClient.replyToMessage(
+          await props.puppet.clients.telegram.replyToMessage(
             response as string,
             message.ctx,
           )

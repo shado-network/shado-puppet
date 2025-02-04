@@ -14,7 +14,9 @@ export type Puppet = {
     }
   }
   knowledge?: unknown
-  interfaces: any | { name: string; client: unknown }[]
+  clients: {
+    [key: string]: any
+  }
 }
 
 export type PuppetConfig = {
@@ -29,9 +31,13 @@ export type PuppetConfig = {
     provider: 'adapter-anthropic' | 'adapter-deepseek' | 'adapter-openai'
     config?: any
   }
-  interfaces: {
+  clients: {
+    identifier: string
+    config: any
+    secrets?: any
     [index: string]: any
-  }
+  }[]
+
   //
   bio: string[]
 }

@@ -1,11 +1,8 @@
-import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
-
-dotenv.config()
 
 export class TelegramClientPlugin {
   config = {
@@ -14,16 +11,15 @@ export class TelegramClientPlugin {
 
   //
 
-  clientConfig = {}
-
   client: Telegraf
+  clientConfig: any = {}
+
   threads: string[] = []
   messages: any[] = []
 
   //
 
   puppetConfig: PuppetConfig
-
   _app: AppContext
 
   //
@@ -33,6 +29,13 @@ export class TelegramClientPlugin {
 
     this.puppetConfig = puppetConfig
 
+    this.clientConfig = {
+      ...this.clientConfig,
+      ...this.puppetConfig.clients.find((client: any) => {
+        return client.identifier === 'client-telegram'
+      }),
+    }
+
     this._app.utils.logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
@@ -41,9 +44,7 @@ export class TelegramClientPlugin {
     })
 
     try {
-      this.client = new Telegraf(
-        process.env[`TELEGRAM_${puppetConfig.id.toUpperCase()}_BOT_TOKEN`],
-      )
+      this.client = new Telegraf(this.clientConfig.secrets.botToken)
 
       this._app.utils.logger.send({
         type: 'SUCCESS',

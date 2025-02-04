@@ -4,7 +4,7 @@ import type { AppContext } from '../../core/context/types'
 import { ShadoPlanner } from '../../plugin/shado-planner-htn/index.ts'
 import type { Puppet as PuppetType } from './types'
 
-import { _memoryClient } from '../libs/utils.ts'
+import { _memoryClient, asyncForEach } from '../libs/utils.ts'
 
 import { AnthropicAdapterPlugin } from '../../plugin/adapter-anthropic/index.ts'
 import { DeepSeekAdapterPlugin } from '../../plugin/adapter-deepseek/index.ts'
@@ -19,7 +19,7 @@ export class Puppet {
 
   //
 
-  puppet: any | PuppetType
+  puppet: Partial<PuppetType> | PuppetType | any
 
   //
 
@@ -79,7 +79,7 @@ export class Puppet {
 
   _setModelPlugin = async () => {
     switch (this.puppet.config.model.provider) {
-      // NOTE: Anthropic
+      // Anthropic
       case 'adapter-anthropic':
         this.puppet.model = new AnthropicAdapterPlugin(_memoryClient, _app)
 
@@ -91,7 +91,7 @@ export class Puppet {
         })
         break
 
-      // NOTE: DeepSeek
+      // DeepSeek
       case 'adapter-deepseek':
         this.puppet.model = new DeepSeekAdapterPlugin(_memoryClient, _app)
 
@@ -103,7 +103,7 @@ export class Puppet {
         })
         break
 
-      // NOTE: OpenAI
+      // OpenAI
       case 'adapter-openai':
         this.puppet.model = new OpenAiAdapterPlugin(_memoryClient, _app)
 
@@ -126,34 +126,32 @@ export class Puppet {
   }
 
   _setInterfacePlugins = async () => {
-    this.puppet.interfaces = {}
+    this.puppet.clients = {}
 
-    // NOTE: Telegram
-    if (
-      Object.keys(this.puppet.config.interfaces).includes('client-telegram')
-    ) {
-      this.puppet.interfaces.telegramClient = new TelegramClientPlugin(
-        this.puppet.config,
-        _app,
-      )
-    }
+    await asyncForEach(this.puppet.config.clients, async (client: any) => {
+      // Telegram
+      if (client.identifier === 'client-telegram') {
+        this.puppet.clients.telegram = new TelegramClientPlugin(
+          this.puppet.config,
+          _app,
+        )
+      }
 
-    // NOTE: Twitter
-    if (
-      Object.keys(this.puppet.config.interfaces).includes('client-twitter-api')
-    ) {
-      this.puppet.interfaces.twitterClient = new TwitterApiClientPlugin(
-        this.puppet.config,
-        _app,
-      )
-    }
+      // Twitter
+      if (client.identifier === 'client-twitter-api') {
+        this.puppet.clients.twitter = new TwitterApiClientPlugin(
+          this.puppet.config,
+          _app,
+        )
+      }
 
-    if (Object.keys(this.puppet.config.interfaces).includes('client-twitter')) {
-      this.puppet.interfaces.twitterClient = new TwitterClientPlugin(
-        this.puppet.config,
-        _app,
-      )
-    }
+      if (client.identifier === 'client-twitter') {
+        this.puppet.clients.twitter = new TwitterClientPlugin(
+          this.puppet.config,
+          _app,
+        )
+      }
+    })
   }
 
   _setPlannerPlugin = async () => {

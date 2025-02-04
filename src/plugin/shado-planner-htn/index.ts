@@ -41,8 +41,8 @@ export class ShadoPlanner {
     this.puppet.memory.long.goals = { ...defaultGoals }
     this.puppet.memory.long.state = {
       ...defaultState,
-      'telegram-has-client': Boolean(this.puppet.interfaces.telegramClient),
-      'twitter-has-client': Boolean(this.puppet.interfaces.twitterClient),
+      'telegram-has-client': Boolean(this.puppet.clients.telegram),
+      'twitter-has-client': Boolean(this.puppet.clients.twitter),
     }
 
     await executePlans(
