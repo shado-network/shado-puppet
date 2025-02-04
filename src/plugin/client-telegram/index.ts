@@ -1,5 +1,6 @@
 import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
+import type { FmtString } from 'telegraf/format'
 
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
@@ -70,6 +71,9 @@ export class TelegramClientPlugin {
     })
 
     this.client.launch()
+
+    process.once('SIGINT', () => this.client.stop('SIGINT'))
+    process.once('SIGTERM', () => this.client.stop('SIGTERM'))
   }
 
   _storeMessage = async (ctx) => {
@@ -103,7 +107,7 @@ export class TelegramClientPlugin {
     this.messages = this.messages.filter((message) => !message.isRead)
   }
 
-  sendMessage = async (message: string, chatId: string) => {
+  sendMessage = async (message: string | FmtString, chatId: string) => {
     const newCtx = await this.client.telegram.sendMessage(chatId, message)
   }
 

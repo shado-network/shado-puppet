@@ -1,4 +1,6 @@
+import { fmt, code } from 'telegraf/format'
 import { TelegramClientPlugin } from '../client-telegram/index.ts'
+
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetConfig } from '../../core/puppet/types'
 import type { LoggerConfig, LoggerMessage } from './types'
@@ -143,14 +145,13 @@ export class ShadoLogger {
 
     // NOTE: Logging.
     // TODO: Check if there is a payload.
-    const sandboxMessage = `[ PUPPET / ${loggerMessage.puppetId?.toUpperCase()} ]
+    const sandboxMessage = fmt`
+[ PUPPET / ${loggerMessage.puppetId?.toUpperCase()} ]
 ${loggerMessage.message}
 
 PAYLOAD: 
-\`\`\`
-${JSON.stringify(loggerMessage.payload || null, null, 2)}
-\`\`\``
-
+${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
+`
     this.config.sandbox.telegram.sendMessage(
       sandboxMessage,
       process.env['SANDBOX_TELEGRAM_CHAT_ID'],
