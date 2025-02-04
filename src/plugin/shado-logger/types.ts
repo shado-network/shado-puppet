@@ -2,6 +2,8 @@ import type { TelegramClientPlugin } from '../client-telegram'
 
 export type LoggerConfig = {
   interfaces: {
+    sandbox: boolean
+    console: boolean
     [key: string]: boolean
   }
   sandbox: {
@@ -15,9 +17,10 @@ export type LoggerConfig = {
 export type LoggerMessage = {
   type: 'SUCCESS' | 'WARNING' | 'ERROR' | 'INFO' | 'LOG' | 'SANDBOX'
   source: 'SERVER' | 'PLAY' | 'PUPPET' | 'AGENT' | 'USER'
+  message: string
+  payload?: null | unknown
+  //
   playId?: string
   puppetId?: string
   userId?: string
-  message: string
-  payload?: null | unknown
 }

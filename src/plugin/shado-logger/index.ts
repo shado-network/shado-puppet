@@ -10,6 +10,7 @@ dotenv.config()
 export class ShadoLogger {
   config: LoggerConfig = {
     interfaces: {
+      sandbox: false,
       console: false,
       rest: false,
     },
@@ -22,8 +23,9 @@ export class ShadoLogger {
     showUser: false,
   }
 
-  // NOTE: Node.js console colors.
+  // TODO: Move to console method?
   colors = {
+    // NOTE: Node.js console colors.
     node: {
       fg: {
         black: '\x1b[30m',
@@ -68,6 +70,11 @@ export class ShadoLogger {
   //
 
   constructor(interfaceIds: string[]) {
+    if (interfaceIds.includes('sandbox')) {
+      this.config.interfaces.sandbox = true
+      this._setSandboxClients()
+    }
+
     if (interfaceIds.includes('console')) {
       this.config.interfaces.console = true
     }
@@ -77,11 +84,9 @@ export class ShadoLogger {
       source: 'SERVER',
       message: 'Started Shadō Logger',
     })
-
-    this._setSandboxClient()
   }
 
-  _setSandboxClient = () => {
+  _setSandboxClients = () => {
     try {
       const sandboxPuppet = {
         id: 'sandbox',
@@ -102,6 +107,7 @@ export class ShadoLogger {
         },
       } satisfies AppContext
 
+      // NOTE: Telegram sandbox client.
       this.config.sandbox.telegramClient = new TelegramClientPlugin(
         sandboxPuppet,
         sandboxApp,
@@ -110,13 +116,45 @@ export class ShadoLogger {
       this.send({
         type: 'ERROR',
         source: 'SERVER',
-        message: 'Could not start sandbox Telegram client.',
+        message: 'Could not start sandbox clients.',
         payload: { error },
       })
     }
   }
 
-  _getConsoleColor = (fgColorName = '', bgColorName = '') => {
+  _getIcon = (type: string) => {
+    const icon = this.icons[type.toLowerCase()] || this.icons.default
+
+    if (this.config.showIcons) {
+      return `${icon} `
+    } else {
+      return ''
+    }
+  }
+
+  _composeSandboxMessage = (loggerMessage: LoggerMessage) => {
+    // NOTE: Styling.
+    // TODO: Make same stylistic choices as the console logger.
+
+    // NOTE: Logging.
+    // TODO: Check if there is a payload.
+    const sandboxMessage = `[ PUPPET / ${loggerMessage.puppetId?.toUpperCase()} ]
+${loggerMessage.message}
+
+PAYLOAD: 
+\`\`\`
+${JSON.stringify(loggerMessage.payload || null, null, 2)}
+\`\`\``
+
+    this.config.sandbox.telegramClient.sendMessage(
+      sandboxMessage,
+      process.env['TELEGRAM_SANDBOX_CHAT_ID'],
+    )
+  }
+
+  //
+
+  _setConsoleColor = (fgColorName = '', bgColorName = '') => {
     const fgColor =
       this.colors.node.fg[fgColorName.toLowerCase()] ||
       this.colors.node.fg.white
@@ -131,46 +169,88 @@ export class ShadoLogger {
     return this.colors.node.fg.clear
   }
 
-  _getIcon = (type: string) => {
-    const icon = this.icons[type.toLowerCase()] || this.icons.default
+  _composeConsoleMessage = (loggerMessage: LoggerMessage) => {
+    // NOTE: Styling.
+    let typeStyling: string
+    let icon: string
+    let headerStyling: string
+    let header: string
 
-    if (this.config.showIcons) {
-      return `${icon} `
-    } else {
-      return ''
+    switch (loggerMessage.type) {
+      case 'SUCCESS':
+        typeStyling = this._setConsoleColor('black', 'green')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      case 'WARNING':
+        typeStyling = this._setConsoleColor('black', 'yellow')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      case 'ERROR':
+        typeStyling = this._setConsoleColor('black', 'red')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      case 'INFO':
+        typeStyling = this._setConsoleColor('black', 'blue')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      case 'LOG':
+        typeStyling = this._setConsoleColor('default', '')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      case 'SANDBOX':
+        typeStyling = this._setConsoleColor('black', 'white')
+        icon = this._getIcon(loggerMessage.type)
+        break
+      //
+      default:
+        typeStyling = this._setConsoleColor('default', '')
+        icon = this._getIcon('default')
+        break
     }
-  }
 
-  _writeConsoleMessage = ({
-    type,
-    message,
-    payload,
-    //
-    typeStyling,
-    icon,
-    headerStyling,
-    header,
-  }: {
-    type: LoggerMessage['type']
-    message: LoggerMessage['message']
-    payload: LoggerMessage['payload']
-    header: string
-    headerStyling: string
-    typeStyling: string
-    icon: string
-  }) => {
-    // console.log(typeStyling + ` ${icon}${type} ` + this._resetConsoleColor())
+    switch (loggerMessage.source) {
+      case 'SERVER':
+        headerStyling = this._setConsoleColor('green', '')
+        header = '[ SERVER ]'
+        break
+      //
+      case 'PLAY':
+        headerStyling = this._setConsoleColor('blue', '')
+        header = `[ PLAY / ${loggerMessage.playId.toUpperCase()} ]`
+        break
+      case 'PUPPET':
+        headerStyling = this._setConsoleColor('magenta', '')
+        header = `[ PUPPET / ${loggerMessage.puppetId.toUpperCase()} ]`
+        break
+      //
+      case 'AGENT':
+        headerStyling = this._setConsoleColor('yellow', '')
+        header = `< ${loggerMessage.puppetId.toUpperCase()} >`
+        break
+      case 'USER':
+        headerStyling = this._setConsoleColor('cyan', '')
+        header = `< ${loggerMessage.userId.toUpperCase()} >`
+        break
+      //
+      default:
+        headerStyling = this._setConsoleColor('default', '')
+        header = '[ LOG ]'
+        break
+    }
 
+    // NOTE: Logging.
     console.log(
       headerStyling + header + this._resetConsoleColor(),
-      typeStyling + ` ${icon}${type} ` + this._resetConsoleColor(),
+      typeStyling +
+        ` ${icon}${loggerMessage.type} ` +
+        this._resetConsoleColor(),
     )
 
-    console.log(message)
+    console.log(loggerMessage.message)
 
-    if (payload) {
+    if (loggerMessage.payload && loggerMessage.payload !== null) {
       console.log('')
-      console.log('PAYLOAD =', payload)
+      console.log('PAYLOAD =', loggerMessage.payload)
     }
 
     console.log('')
@@ -178,103 +258,13 @@ export class ShadoLogger {
 
   //
 
-  send = ({
-    type,
-    source,
-    playId,
-    puppetId,
-    userId,
-    message,
-    payload = null,
-  }: LoggerMessage) => {
-    // SANDBOX
-    if (type === 'SANDBOX') {
-      this.config.sandbox.telegramClient.sendMessage(
-        `[ PUPPET / ${puppetId?.toUpperCase()} ]\n
-${message}\n
-PAYLOAD = ${JSON.stringify(payload, null, 2)}`,
-        process.env['TELEGRAM_SANDBOX_CHAT_ID'],
-      )
+  send = (loggerMessage: LoggerMessage) => {
+    if (this.config.interfaces.sandbox && loggerMessage.type === 'SANDBOX') {
+      this._composeSandboxMessage(loggerMessage)
     }
 
-    // Console
     if (this.config.interfaces.console) {
-      let typeStyling: string
-      let icon: string
-      let headerStyling: string
-      let header: string
-
-      switch (type) {
-        case 'SUCCESS':
-          typeStyling = this._getConsoleColor('black', 'green')
-          icon = this._getIcon(type)
-          break
-        case 'WARNING':
-          typeStyling = this._getConsoleColor('black', 'yellow')
-          icon = this._getIcon(type)
-          break
-        case 'ERROR':
-          typeStyling = this._getConsoleColor('black', 'red')
-          icon = this._getIcon(type)
-          break
-        case 'INFO':
-          typeStyling = this._getConsoleColor('black', 'blue')
-          icon = this._getIcon(type)
-          break
-        case 'LOG':
-          typeStyling = this._getConsoleColor('default', '')
-          icon = this._getIcon(type)
-          break
-        case 'SANDBOX':
-          typeStyling = this._getConsoleColor('black', 'white')
-          icon = this._getIcon(type)
-          break
-        //
-        default:
-          typeStyling = this._getConsoleColor('default', '')
-          icon = this._getIcon('default')
-          break
-      }
-
-      switch (source) {
-        case 'SERVER':
-          headerStyling = this._getConsoleColor('green', '')
-          header = '[ SERVER ]'
-          break
-        //
-        case 'PLAY':
-          headerStyling = this._getConsoleColor('blue', '')
-          header = `[ PLAY / ${playId.toUpperCase()} ]`
-          break
-        case 'PUPPET':
-          headerStyling = this._getConsoleColor('magenta', '')
-          header = `[ PUPPET / ${puppetId.toUpperCase()} ]`
-          break
-        //
-        case 'AGENT':
-          headerStyling = this._getConsoleColor('yellow', '')
-          header = `< ${puppetId.toUpperCase()} >`
-          break
-        case 'USER':
-          headerStyling = this._getConsoleColor('cyan', '')
-          header = `< ${userId.toUpperCase()} >`
-          break
-        //
-        default:
-          headerStyling = this._getConsoleColor('default', '')
-          header = '[ LOG ]'
-          break
-      }
-
-      this._writeConsoleMessage({
-        type,
-        message,
-        payload,
-        typeStyling,
-        icon,
-        headerStyling,
-        header,
-      })
+      this._composeConsoleMessage(loggerMessage)
     }
   }
 }

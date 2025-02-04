@@ -23,7 +23,7 @@ console.log('')
 
 //
 
-_app.utils.logger = new ShadoLogger(['console'])
+_app.utils.logger = new ShadoLogger(['sandbox', 'console'])
 
 const args = parseArgs()
 
