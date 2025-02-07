@@ -27,6 +27,12 @@ const puppet: PuppetConfig = {
   },
   clients: [
     {
+      identifier: 'shado-comms',
+      config: {
+        port: 10101,
+      },
+    },
+    {
       identifier: 'client-telegram',
       config: {},
       secrets: {

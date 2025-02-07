@@ -10,6 +10,7 @@ import { AnthropicAdapterPlugin } from '../../plugin/adapter-anthropic/index.ts'
 import { DeepSeekAdapterPlugin } from '../../plugin/adapter-deepseek/index.ts'
 import { OpenAiAdapterPlugin } from '../../plugin/adapter-openai/index.ts'
 
+import { ShadoCommsPlugin } from '../../plugin/shado-comms/index.ts'
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts'
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
@@ -47,7 +48,7 @@ export class Puppet {
       await this._getPuppetConfig()
 
       await this._setModelPlugin()
-      await this._setInterfacePlugins()
+      await this._setClientPlugins()
       await this._setPlannerPlugin()
 
       await this._debug()
@@ -125,10 +126,18 @@ export class Puppet {
     }
   }
 
-  _setInterfacePlugins = async () => {
+  _setClientPlugins = async () => {
     this.puppet.clients = {}
 
     await asyncForEach(this.puppet.config.clients, async (client: any) => {
+      // Shadō
+      if (client.identifier === 'shado-comms') {
+        this.puppet.clients.shadoComms = new ShadoCommsPlugin(
+          this.puppet.config,
+          _app,
+        )
+      }
+
       // Telegram
       if (client.identifier === 'client-telegram') {
         this.puppet.clients.telegram = new TelegramClientPlugin(
