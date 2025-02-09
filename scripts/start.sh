@@ -1,4 +1,4 @@
-echo "START"
-echo "arguments: $*"
+echo "scripts/START"
+echo "$*"
 
-tsc && nodemon --exec 'node --loader ts-node/esm' src/index.ts -- $*
+tsc && node --loader ts-node/esm src/index.ts $*
