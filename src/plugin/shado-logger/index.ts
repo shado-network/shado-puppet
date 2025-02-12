@@ -5,7 +5,7 @@ import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetConfig } from '../../core/puppet/types'
 import type { LoggerConfig, LoggerMessage } from './types'
 
-class ShadoLogger {
+class ShadoLoggerPlugin {
   config: LoggerConfig = {
     clients: {
       sandbox: false,
@@ -279,5 +279,5 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
 export default {
   identifier: 'shado-logger',
   description: 'First party logging utility.',
-  plugin: ShadoLogger,
+  plugin: ShadoLoggerPlugin,
 }

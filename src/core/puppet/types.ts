@@ -1,4 +1,4 @@
-export type Puppet = {
+export type PuppetInstance = {
   id: string
   name: string
   //
@@ -10,10 +10,13 @@ export type Puppet = {
       [key: string]: any
     }
     long: {
+      goals: any
+      state: any
       [key: string]: any
     }
   }
   knowledge?: unknown
+  //
   clients: {
     [key: string]: any
   }

@@ -6,7 +6,7 @@ import { executePlans } from './libs/planner.ts'
 import type { AppContext } from '../../core/context/types'
 import type { Puppet } from '../../core/puppet/types'
 
-export class ShadoPlanner {
+class ShadoPlannerHtnPlugin {
   puppet: Puppet
 
   //
@@ -19,8 +19,6 @@ export class ShadoPlanner {
     this._app = _app
 
     this.puppet = puppet
-
-    this._init()
   }
 
   _init = async () => {
@@ -31,7 +29,7 @@ export class ShadoPlanner {
         type: 'ERROR',
         source: 'PUPPET',
         puppetId: this.puppet.id,
-        message: `Error in agent initialization`,
+        message: `Error in planner initialization`,
         payload: { error },
       })
     }
@@ -53,6 +51,10 @@ export class ShadoPlanner {
       this._app,
     )
   }
+}
 
-  _debug = async () => {}
+export default {
+  identifier: 'shado-planner-htn',
+  description: 'First party runtime planner utility.',
+  plugin: ShadoPlannerHtnPlugin,
 }

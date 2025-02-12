@@ -1,22 +1,18 @@
 import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types'
-
-import { ShadoPlanner } from '../../plugin/shado-planner-htn/index.ts'
-import type { Puppet as PuppetType } from './types'
+import type { PuppetInstance } from './types'
 
 import { _memoryClient, asyncForEach } from '../libs/utils.ts'
 
-import { ShadoCommsPlugin } from '../../plugin/shado-comms/index.ts'
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts'
 import { TwitterClientPlugin } from '../../plugin/client-twitter/index.ts'
 
 export class Puppet {
-  planner: ShadoPlanner
+  puppet: PuppetInstance
 
-  //
-
-  puppet: Partial<PuppetType> | PuppetType | any
+  // TODO: Update to the proper type from the plugin.
+  planner: any
 
   //
 
@@ -27,13 +23,25 @@ export class Puppet {
   constructor(puppetId: string, _app: AppContext) {
     this._app = _app
 
-    this.puppet = { id: puppetId }
-    this.puppet.memory = {
-      short: {},
-      long: {
-        goals: {},
-        state: {},
+    // NOTE: Puppet instance scaffold.
+    // TODO: Improve upon this?
+    this.puppet = {
+      id: puppetId,
+      name: undefined,
+      //
+      config: undefined,
+      //
+      model: undefined,
+      memory: {
+        short: {},
+        long: {
+          goals: {},
+          state: {},
+        },
       },
+      knowledge: undefined,
+      //
+      clients: undefined,
     }
 
     this._init()
@@ -43,11 +51,13 @@ export class Puppet {
     try {
       await this._getPuppetConfig()
 
+      // NOTE: Register plugins.
+      await this._setPlannerPlugin()
       await this._setModelPlugin()
       await this._setClientPlugins()
-      await this._setPlannerPlugin()
 
-      await this._debug()
+      // NOTE: Run the planner loop.
+      this.planner._init()
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
@@ -72,6 +82,30 @@ export class Puppet {
 
     this.puppet.name = config.name
     this.puppet.config = config
+  }
+
+  _setPlannerPlugin = async () => {
+    try {
+      this.planner = new _app.plugins[this.puppet.config.planner.provider](
+        this.puppet,
+        _app,
+      )
+
+      _app.utils.logger.send({
+        type: 'SUCCESS',
+        source: 'PUPPET',
+        puppetId: this.puppet.id,
+        message: `Loaded planner plugin "${this.puppet.config.planner.provider}"`,
+      })
+    } catch (error) {
+      _app.utils.logger.send({
+        type: 'ERROR',
+        source: 'PUPPET',
+        puppetId: this.puppet.id,
+        message: `No planner plugin loaded!"`,
+        payload: error,
+      })
+    }
   }
 
   _setModelPlugin = async () => {
@@ -104,7 +138,7 @@ export class Puppet {
     await asyncForEach(this.puppet.config.clients, async (client: any) => {
       // Shadō
       if (client.identifier === 'shado-comms') {
-        this.puppet.clients.shadoComms = new ShadoCommsPlugin(
+        this.puppet.clients.shadoComms = new _app.plugins['shado-comms'](
           this.puppet.config,
           _app,
         )
@@ -134,51 +168,4 @@ export class Puppet {
       }
     })
   }
-
-  _setPlannerPlugin = async () => {
-    switch (this.puppet.config.planner.provider) {
-      case 'shado-planner-htn':
-        this.planner = new ShadoPlanner(this.puppet, _app)
-
-        _app.utils.logger.send({
-          type: 'SUCCESS',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Loaded puppet planner plugin "${this.puppet.config.planner.provider}"`,
-        })
-        break
-      case 'shado-planner-sm':
-        _app.utils.logger.send({
-          type: 'ERROR',
-          source: 'PUPPET',
-          message:
-            'Puppet planner plugin for State Machines not yet implemented',
-          payload: {
-            puppetId: this.puppet.id,
-          },
-        })
-        break
-      case 'shado-planner-bt':
-        _app.utils.logger.send({
-          type: 'ERROR',
-          source: 'PUPPET',
-          message:
-            'Puppet planner plugin for Behaviour Trees not yet implemented',
-          payload: {
-            puppetId: this.puppet.id,
-          },
-        })
-        break
-      default:
-        _app.utils.logger.send({
-          type: 'ERROR',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `No puppet model plugin loaded!"`,
-        })
-        break
-    }
-  }
-
-  _debug = async () => {}
 }

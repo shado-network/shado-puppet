@@ -6,7 +6,7 @@ import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
 import type { ShadoCommsResponse } from './types'
 
-export class ShadoCommsPlugin {
+class ShadoCommsPlugin {
   config = {}
 
   //
@@ -69,7 +69,7 @@ export class ShadoCommsPlugin {
         type: 'SUCCESS',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
-        message: 'Started Shadō Comms server',
+        message: `Started Shadō Comms server at port ${this.serverConfig.config.port}`,
       })
     } catch (error) {
       this._app.utils.logger.send({
@@ -139,4 +139,10 @@ export class ShadoCommsPlugin {
       }
     })
   }
+}
+
+export default {
+  identifier: 'shado-comms',
+  description: 'First party intra-communication utility.',
+  plugin: ShadoCommsPlugin,
 }
