@@ -4,7 +4,7 @@ import type { BaseLanguageModelInput } from '@langchain/core/language_models/bas
 
 import type { AppContext } from '../../core/context/types'
 
-export class DeepSeekAdapterPlugin {
+class DeepSeekAdapterPlugin {
   fields: ChatOpenAIFields = {
     model: 'deepseek-chat',
     temperature: 1,
@@ -54,4 +54,10 @@ export class DeepSeekAdapterPlugin {
 
     return response.messages[response.messages.length - 1].content
   }
+}
+
+export default {
+  identifier: 'adapter-deepseek',
+  description: 'Wrapper for DeepSeek interaction through LangChain.',
+  plugin: DeepSeekAdapterPlugin,
 }

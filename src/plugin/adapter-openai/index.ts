@@ -4,7 +4,7 @@ import type { BaseLanguageModelInput } from '@langchain/core/language_models/bas
 
 import type { AppContext } from '../../core/context/types'
 
-export class OpenAiAdapterPlugin {
+class OpenAiAdapterPlugin {
   fields: ChatOpenAIFields = {
     model: 'gpt-4o-mini',
     temperature: 1,
@@ -53,4 +53,10 @@ export class OpenAiAdapterPlugin {
 
     return response.messages[response.messages.length - 1].content
   }
+}
+
+export default {
+  identifier: 'adapter-openai',
+  description: 'Wrapper for OpenAI interaction through LangChain.',
+  plugin: OpenAiAdapterPlugin,
 }

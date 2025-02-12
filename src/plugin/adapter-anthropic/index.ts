@@ -5,7 +5,7 @@ import type { BaseLanguageModelInput } from '@langchain/core/language_models/bas
 
 import type { AppContext } from '../../core/context/types'
 
-export class AnthropicAdapterPlugin {
+class AnthropicAdapterPlugin {
   config: AnthropicInput & BaseChatModelParams = {
     apiKey: process.env.ANTHROPIC_API_KEY,
     model: 'claude-3-5-sonnet-20241022',
@@ -51,4 +51,10 @@ export class AnthropicAdapterPlugin {
 
     return response.messages[response.messages.length - 1].content
   }
+}
+
+export default {
+  identifier: 'adapter-anthropic',
+  description: 'Wrapper for Anthropic Claude interaction through LangChain.',
+  plugin: AnthropicAdapterPlugin,
 }

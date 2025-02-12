@@ -1,5 +1,6 @@
 import { _app } from './core/context/index.ts'
-import { ShadoLogger } from './plugin/shado-logger/index.ts'
+
+import { importPlugins } from './core/libs/utils.plugins.ts'
 
 import { Puppet } from './core/puppet/index.ts'
 import { parseArgs } from './core/libs/utils.ts'
@@ -18,7 +19,30 @@ console.log('')
 
 //
 
-_app.utils.logger = new ShadoLogger(['sandbox', 'console'])
+const registerPlugins = async (pluginsPath: string) => {
+  const plugins = {}
+
+  const imports = await importPlugins(pluginsPath)
+
+  imports.forEach((importedPlugin) => {
+    if (!importedPlugin) {
+      return
+    }
+
+    plugins[importedPlugin.identifier] = importedPlugin.plugin
+  })
+
+  return plugins
+}
+
+_app.plugins = await registerPlugins(_app.config.pluginsPath)
+
+//
+
+// TODO: Update to the proper type from the plugin.
+_app.utils.logger = new _app.plugins['shado-logger'](['sandbox', 'console'])
+
+//
 
 const args = parseArgs()
 

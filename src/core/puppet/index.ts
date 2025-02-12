@@ -6,10 +6,6 @@ import type { Puppet as PuppetType } from './types'
 
 import { _memoryClient, asyncForEach } from '../libs/utils.ts'
 
-import { AnthropicAdapterPlugin } from '../../plugin/adapter-anthropic/index.ts'
-import { DeepSeekAdapterPlugin } from '../../plugin/adapter-deepseek/index.ts'
-import { OpenAiAdapterPlugin } from '../../plugin/adapter-openai/index.ts'
-
 import { ShadoCommsPlugin } from '../../plugin/shado-comms/index.ts'
 import { TelegramClientPlugin } from '../../plugin/client-telegram/index.ts'
 import { TwitterApiClientPlugin } from '../../plugin/client-twitter-api/index.ts'
@@ -79,50 +75,26 @@ export class Puppet {
   }
 
   _setModelPlugin = async () => {
-    switch (this.puppet.config.model.provider) {
-      // Anthropic
-      case 'adapter-anthropic':
-        this.puppet.model = new AnthropicAdapterPlugin(_memoryClient, _app)
+    try {
+      this.puppet.model = new _app.plugins[this.puppet.config.model.provider](
+        _memoryClient,
+        _app,
+      )
 
-        _app.utils.logger.send({
-          type: 'SUCCESS',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
-        })
-        break
-
-      // DeepSeek
-      case 'adapter-deepseek':
-        this.puppet.model = new DeepSeekAdapterPlugin(_memoryClient, _app)
-
-        _app.utils.logger.send({
-          type: 'SUCCESS',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
-        })
-        break
-
-      // OpenAI
-      case 'adapter-openai':
-        this.puppet.model = new OpenAiAdapterPlugin(_memoryClient, _app)
-
-        _app.utils.logger.send({
-          type: 'SUCCESS',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
-        })
-        break
-      default:
-        _app.utils.logger.send({
-          type: 'ERROR',
-          source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `No model plugin loaded!"`,
-        })
-        break
+      _app.utils.logger.send({
+        type: 'SUCCESS',
+        source: 'PUPPET',
+        puppetId: this.puppet.id,
+        message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
+      })
+    } catch (error) {
+      _app.utils.logger.send({
+        type: 'ERROR',
+        source: 'PUPPET',
+        puppetId: this.puppet.id,
+        message: `No model plugin loaded!"`,
+        payload: error,
+      })
     }
   }
 
