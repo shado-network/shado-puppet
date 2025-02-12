@@ -1,5 +1,5 @@
 import type { AppContext } from '../../../core/context/types'
-import type { Puppet } from '../../../core/puppet/types'
+import type { PuppetInstance } from '../../../core/puppet/types'
 
 export type Task = {
   identifier: string
@@ -39,7 +39,7 @@ export type ValueProps = {
 }
 
 export type TriggerProps = {
-  puppet: Puppet
+  puppet: PuppetInstance
   state: {
     [key: string]: any
   }

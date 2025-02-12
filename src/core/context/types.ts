@@ -1,4 +1,5 @@
 import type { Puppet } from '../../core/puppet'
+import type { AppPlugin } from '../../plugin/types'
 
 export type AppContext = {
   config: {
@@ -10,7 +11,7 @@ export type AppContext = {
     puppets: Puppet[]
   }
   plugins: {
-    [key: string]: any
+    [key: string]: AppPlugin
   }
   utils: {
     // TODO: Update to the proper type from the plugin.

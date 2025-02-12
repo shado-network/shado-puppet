@@ -3,6 +3,7 @@ import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types'
 
 class DeepSeekAdapterPlugin {
   fields: ChatOpenAIFields = {
@@ -59,5 +60,6 @@ class DeepSeekAdapterPlugin {
 export default {
   identifier: 'adapter-deepseek',
   description: 'Wrapper for DeepSeek interaction through LangChain.',
+  key: 'llm',
   plugin: DeepSeekAdapterPlugin,
-}
+} satisfies AppPlugin

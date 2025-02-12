@@ -2,10 +2,11 @@ import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 import type { FmtString } from 'telegraf/format'
 
-import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
+import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types'
 
-export class TelegramClientPlugin {
+class TelegramClientPlugin {
   config = {
     SECONDS_PER_CHAR: 0.0125,
   }
@@ -14,6 +15,7 @@ export class TelegramClientPlugin {
 
   client: Telegraf
   clientConfig: any = {}
+  clientSecrets: any = {}
 
   threads: string[] = []
   messages: any[] = []
@@ -25,27 +27,28 @@ export class TelegramClientPlugin {
 
   //
 
-  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+  constructor(
+    clientConfig: any,
+    clientSecrets: any,
+    puppetConfig: PuppetConfig,
+    _app: AppContext,
+  ) {
     this._app = _app
 
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {
       ...this.clientConfig,
-      ...this.puppetConfig.clients.find((client: any) => {
-        return client.identifier === 'client-telegram'
-      }),
+      ...clientConfig,
     }
 
-    this._app.utils.logger.send({
-      type: 'SUCCESS',
-      source: 'PUPPET',
-      puppetId: this.puppetConfig.id,
-      message: `Loaded client plugin "client-telegram"`,
-    })
+    this.clientSecrets = {
+      ...this.clientSecrets,
+      ...clientSecrets,
+    }
 
     try {
-      this.client = new Telegraf(this.clientConfig.secrets.botToken)
+      this.client = new Telegraf(this.clientSecrets.botToken)
 
       this._app.utils.logger.send({
         type: 'SUCCESS',
@@ -128,3 +131,10 @@ export class TelegramClientPlugin {
     // TODO: Purge?
   }
 }
+
+export default {
+  identifier: 'client-telegram',
+  description: 'Wrapper for OpenAI interaction through LangChain.',
+  key: 'telegram',
+  plugin: TelegramClientPlugin,
+} satisfies AppPlugin

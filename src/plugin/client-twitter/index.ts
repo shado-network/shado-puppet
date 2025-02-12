@@ -6,15 +6,16 @@ import type { Tweet } from 'agent-twitter-client'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.ts'
-import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
+import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types.ts'
 
 // TODO: Find a better way.
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const cacheDirectoryPaths = [__dirname, '../../../cache/twitter']
 
-export class TwitterClientPlugin {
+class TwitterClientPlugin {
   config = {
     MAX_LOGIN_ATTEMPTS: 3,
     RETRY_LOGIN_ATTEMPTS_INTERVAL_IN_SECONDS: 2,
@@ -24,6 +25,7 @@ export class TwitterClientPlugin {
 
   client: Scraper
   clientConfig: any = {}
+  clientSecrets: any = {}
 
   threads: string[] = []
   messages: any[] = []
@@ -35,24 +37,25 @@ export class TwitterClientPlugin {
 
   //
 
-  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+  constructor(
+    clientConfig: any,
+    clientSecrets: any,
+    puppetConfig: PuppetConfig,
+    _app: AppContext,
+  ) {
     this._app = _app
 
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {
       ...this.clientConfig,
-      ...this.puppetConfig.clients.find((client: any) => {
-        return client.identifier === 'client-twitter'
-      }),
+      ...clientConfig,
     }
 
-    this._app.utils.logger.send({
-      type: 'SUCCESS',
-      source: 'PUPPET',
-      puppetId: this.puppetConfig.id,
-      message: `Loaded client plugin "client-twitter"`,
-    })
+    this.clientSecrets = {
+      ...this.clientSecrets,
+      ...clientSecrets,
+    }
 
     try {
       this.client = new Scraper()
@@ -116,9 +119,9 @@ export class TwitterClientPlugin {
         })
 
         await this.client.login(
-          this.clientConfig.secrets.username,
-          this.clientConfig.secrets.password,
-          this.clientConfig.secrets.email,
+          this.clientSecrets.username,
+          this.clientSecrets.password,
+          this.clientSecrets.email,
         )
 
         if (await this.client.isLoggedIn()) {
@@ -258,7 +261,7 @@ export class TwitterClientPlugin {
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
         message: 'Error',
-        payload: error,
+        payload: { error },
       })
     }
     this._app.utils.logger.send({
@@ -304,3 +307,10 @@ export class TwitterClientPlugin {
   }
   */
 }
+
+export default {
+  identifier: 'client-twitter',
+  description: 'Wrapper for OpenAI interaction through LangChain.',
+  key: 'twitter',
+  plugin: TwitterClientPlugin,
+} satisfies AppPlugin

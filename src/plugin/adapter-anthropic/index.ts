@@ -4,6 +4,7 @@ import type { BaseChatModelParams } from '@langchain/core/language_models/chat_m
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types'
 
 class AnthropicAdapterPlugin {
   config: AnthropicInput & BaseChatModelParams = {
@@ -56,5 +57,6 @@ class AnthropicAdapterPlugin {
 export default {
   identifier: 'adapter-anthropic',
   description: 'Wrapper for Anthropic Claude interaction through LangChain.',
+  key: 'llm',
   plugin: AnthropicAdapterPlugin,
-}
+} satisfies AppPlugin

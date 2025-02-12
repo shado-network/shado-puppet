@@ -29,7 +29,7 @@ const registerPlugins = async (pluginsPath: string) => {
       return
     }
 
-    plugins[importedPlugin.identifier] = importedPlugin.plugin
+    plugins[importedPlugin.identifier] = importedPlugin
   })
 
   return plugins
@@ -40,7 +40,10 @@ _app.plugins = await registerPlugins(_app.config.pluginsPath)
 //
 
 // TODO: Update to the proper type from the plugin.
-_app.utils.logger = new _app.plugins['shado-logger'](['sandbox', 'console'])
+_app.utils.logger = new _app.plugins['shado-logger'].plugin([
+  'sandbox',
+  'console',
+])
 
 //
 

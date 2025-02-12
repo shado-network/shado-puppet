@@ -1,8 +1,10 @@
 import { fmt, code } from 'telegraf/format'
-import { TelegramClientPlugin } from '../client-telegram/index.ts'
 
-import type { AppContext } from '../../core/context/types.ts'
+import TelegramClientPlugin from '../client-telegram/index.ts'
+
 import type { PuppetConfig } from '../../core/puppet/types'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
 import type { LoggerConfig, LoggerMessage } from './types'
 
 class ShadoLoggerPlugin {
@@ -86,7 +88,13 @@ class ShadoLoggerPlugin {
 
   _setSandboxClients = () => {
     try {
-      const sandboxPuppet = {
+      const sandboxClientConfig = {}
+      const sandboxClientSecrets = {
+        botHandle: process.env['SANDBOX_TELEGRAM_BOT_HANDLE'],
+        botToken: process.env['SANDBOX_TELEGRAM_BOT_TOKEN'],
+      }
+
+      const sandboxPuppetConfig = {
         id: 'sandbox',
         name: 'Shadō Puppet Sandbox',
         //
@@ -95,11 +103,8 @@ class ShadoLoggerPlugin {
         clients: [
           {
             identifier: 'client-telegram',
-            config: {},
-            secrets: {
-              botHandle: process.env['SANDBOX_TELEGRAM_BOT_HANDLE'],
-              botToken: process.env['SANDBOX_TELEGRAM_BOT_TOKEN'],
-            },
+            config: sandboxClientConfig,
+            secrets: sandboxClientSecrets,
           },
         ],
         //
@@ -116,8 +121,10 @@ class ShadoLoggerPlugin {
       } satisfies AppContext
 
       // NOTE: Telegram sandbox client.
-      this.config.sandbox.telegram = new TelegramClientPlugin(
-        sandboxPuppet,
+      this.config.sandbox.telegram = new TelegramClientPlugin.plugin(
+        sandboxClientConfig,
+        sandboxClientSecrets,
+        sandboxPuppetConfig,
         sandboxApp,
       )
     } catch (error) {
@@ -279,5 +286,6 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
 export default {
   identifier: 'shado-logger',
   description: 'First party logging utility.',
+  key: 'logger',
   plugin: ShadoLoggerPlugin,
-}
+} satisfies AppPlugin

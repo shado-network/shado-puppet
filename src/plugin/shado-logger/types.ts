@@ -1,5 +1,3 @@
-import type { TelegramClientPlugin } from '../client-telegram'
-
 export type LoggerConfig = {
   clients: {
     sandbox: boolean
@@ -7,7 +5,8 @@ export type LoggerConfig = {
     [key: string]: boolean
   }
   sandbox: {
-    telegram: null | TelegramClientPlugin
+    // TODO: Update to the proper type from the plugin.
+    telegram: null | any
     [key: string]: any
   }
   //

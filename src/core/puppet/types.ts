@@ -28,17 +28,17 @@ export type PuppetConfig = {
   //
   planner: {
     provider: 'shado-planner-htn' | 'shado-planner-sm' | 'shado-planner-bt'
-    config?: any
+    config?: { [key: string]: any }
   }
   model: {
     provider: 'adapter-anthropic' | 'adapter-deepseek' | 'adapter-openai'
-    config?: any
+    config?: { [key: string]: any }
   }
   clients: {
     identifier: string
-    config: any
-    secrets?: any
-    [index: string]: any
+    config: { [key: string]: any }
+    secrets: { [key: string]: any }
+    [key: string]: any
   }[]
 
   //

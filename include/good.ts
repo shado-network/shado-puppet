@@ -31,6 +31,7 @@ const puppet: PuppetConfig = {
       config: {
         port: 10101,
       },
+      secrets: {},
     },
     {
       identifier: 'client-telegram',

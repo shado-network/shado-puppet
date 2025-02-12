@@ -3,14 +3,16 @@ import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
+import { AppPlugin } from '../types'
 
-export class TwitterApiClientPlugin {
+class TwitterApiClientPlugin {
   config = {}
 
   //
 
   client: TwitterApi
   clientConfig: any = {}
+  clientSecrets: any = {}
 
   threads: string[] = []
   messages: any[] = []
@@ -22,16 +24,24 @@ export class TwitterApiClientPlugin {
 
   //
 
-  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+  constructor(
+    clientConfig: any,
+    clientSecrets: any,
+    puppetConfig: PuppetConfig,
+    _app: AppContext,
+  ) {
     this._app = _app
 
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {
       ...this.clientConfig,
-      ...this.puppetConfig.clients.find((client: any) => {
-        return client.identifier === 'client-twitter-api'
-      }),
+      ...clientConfig,
+    }
+
+    this.clientSecrets = {
+      ...this.clientSecrets,
+      ...clientSecrets,
     }
 
     this._app.utils.logger.send({
@@ -45,10 +55,10 @@ export class TwitterApiClientPlugin {
   login = async () => {
     try {
       const credentials: TwitterApiTokens = {
-        appKey: this.clientConfig.secrets.appKey,
-        appSecret: this.clientConfig.secrets.appSecret,
-        accessToken: this.clientConfig.secrets.accessToken,
-        accessSecret: this.clientConfig.secrets.accessSecret,
+        appKey: this.clientSecrets.appKey,
+        appSecret: this.clientSecrets.appSecret,
+        accessToken: this.clientSecrets.accessToken,
+        accessSecret: this.clientSecrets.accessSecret,
       }
 
       const settings: Partial<IClientSettings> = {}
@@ -59,6 +69,13 @@ export class TwitterApiClientPlugin {
       // console.log({ current })
 
       // this.client.login()
+
+      this._app.utils.logger.send({
+        type: 'SUCCESS',
+        source: 'PUPPET',
+        puppetId: this.puppetConfig.id,
+        message: `Connected to Twitter bot`,
+      })
 
       return true
     } catch (error) {
@@ -125,7 +142,7 @@ export class TwitterApiClientPlugin {
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
         message: 'Error',
-        payload: error,
+        payload: { error },
       })
     }
     this._app.utils.logger.send({
@@ -173,3 +190,10 @@ export class TwitterApiClientPlugin {
   }
   */
 }
+
+export default {
+  identifier: 'client-twitter-api',
+  description: 'Wrapper for OpenAI interaction through LangChain.',
+  key: 'twitter',
+  plugin: TwitterApiClientPlugin,
+} satisfies AppPlugin

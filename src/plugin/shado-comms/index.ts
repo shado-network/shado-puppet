@@ -2,8 +2,9 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import type { FastifyInstance } from 'fastify'
 
-import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig } from '../../core/puppet/types'
+import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types'
 import type { ShadoCommsResponse } from './types'
 
 class ShadoCommsPlugin {
@@ -13,6 +14,7 @@ class ShadoCommsPlugin {
 
   server: FastifyInstance
   serverConfig: any = {}
+  serverSecrets: any = {}
 
   //
 
@@ -21,16 +23,24 @@ class ShadoCommsPlugin {
 
   //
 
-  constructor(puppetConfig: PuppetConfig, _app: AppContext) {
+  constructor(
+    clientConfig: any,
+    clientSecrets: any,
+    puppetConfig: PuppetConfig,
+    _app: AppContext,
+  ) {
     this._app = _app
 
     this.puppetConfig = puppetConfig
 
     this.serverConfig = {
       ...this.serverConfig,
-      ...this.puppetConfig.clients.find((client: any) => {
-        return client.identifier === 'shado-comms'
-      }),
+      ...clientConfig,
+    }
+
+    this.serverSecrets = {
+      ...this.serverSecrets,
+      ...clientSecrets,
     }
 
     try {
@@ -39,13 +49,6 @@ class ShadoCommsPlugin {
       })
       this.server.register(cors, {
         allowedHeaders: '*',
-      })
-
-      this._app.utils.logger.send({
-        type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
-        message: 'Created Shadō Comms server',
       })
     } catch (error) {
       this._app.utils.logger.send({
@@ -63,13 +66,13 @@ class ShadoCommsPlugin {
     this._addRoutes()
 
     try {
-      await this.server.listen({ port: this.serverConfig.config.port })
+      await this.server.listen({ port: this.serverConfig.port })
 
       this._app.utils.logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
         puppetId: this.puppetConfig.id,
-        message: `Started Shadō Comms server at port ${this.serverConfig.config.port}`,
+        message: `Started Shadō Comms server at port ${this.serverConfig.port}`,
       })
     } catch (error) {
       this._app.utils.logger.send({
@@ -144,5 +147,6 @@ class ShadoCommsPlugin {
 export default {
   identifier: 'shado-comms',
   description: 'First party intra-communication utility.',
+  key: 'comms',
   plugin: ShadoCommsPlugin,
-}
+} satisfies AppPlugin

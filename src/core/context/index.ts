@@ -15,7 +15,7 @@ export const _app: AppContext = {
   core: {
     puppets: [],
   },
-  plugins: [],
+  plugins: {},
   utils: {
     logger: null,
   },

@@ -3,6 +3,7 @@ import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types'
+import type { AppPlugin } from '../types'
 
 class OpenAiAdapterPlugin {
   fields: ChatOpenAIFields = {
@@ -58,5 +59,6 @@ class OpenAiAdapterPlugin {
 export default {
   identifier: 'adapter-openai',
   description: 'Wrapper for OpenAI interaction through LangChain.',
+  key: 'llm',
   plugin: OpenAiAdapterPlugin,
-}
+} satisfies AppPlugin

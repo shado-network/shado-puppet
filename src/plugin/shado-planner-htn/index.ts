@@ -3,11 +3,12 @@ import { defaultState } from './libs/state.ts'
 import { defaultGoals } from './libs/goals.ts'
 import { executePlans } from './libs/planner.ts'
 
+import type { PuppetInstance } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
-import type { Puppet } from '../../core/puppet/types'
+import type { AppPlugin } from '../types.ts'
 
 class ShadoPlannerHtnPlugin {
-  puppet: Puppet
+  puppet: PuppetInstance
 
   //
 
@@ -15,7 +16,7 @@ class ShadoPlannerHtnPlugin {
 
   //
 
-  constructor(puppet: Puppet, _app: AppContext) {
+  constructor(puppet: PuppetInstance, _app: AppContext) {
     this._app = _app
 
     this.puppet = puppet
@@ -56,5 +57,6 @@ class ShadoPlannerHtnPlugin {
 export default {
   identifier: 'shado-planner-htn',
   description: 'First party runtime planner utility.',
+  key: 'planner',
   plugin: ShadoPlannerHtnPlugin,
-}
+} satisfies AppPlugin
