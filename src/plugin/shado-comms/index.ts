@@ -133,7 +133,7 @@ class ShadoCommsPlugin {
               id: this.puppetConfig.id,
               name: this.puppetConfig.name,
               image: null,
-              port: this.serverConfig.config.port,
+              port: this.serverConfig.port,
             },
           },
         } satisfies ShadoCommsResponse
