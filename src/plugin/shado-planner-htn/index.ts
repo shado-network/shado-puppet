@@ -1,6 +1,6 @@
 import { tasks } from './tasks/index.ts'
 import { defaultState } from './libs/state.ts'
-import { plannerLoop } from './libs/planner.ts'
+import { plannerLoop } from './libs/planner.loop.ts'
 
 import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
