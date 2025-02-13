@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { Task } from '../types'
+import type { HtnTask } from '../types'
 
 export default {
   identifier: 'twitter-send-message',
@@ -46,11 +46,11 @@ export default {
 
         // NOTE: Check if this is a new thread.
         if (
-          !props.puppet.clients['twitter']
+          !props.puppetRuntime.clients['twitter']
             .getMessageThreads()
             .includes(`twitter-${message.from_id}`)
         ) {
-          props.puppet.clients['twitter'].addMessageThread(
+          props.puppetRuntime.clients['twitter'].addMessageThread(
             `twitter-${message.from_id}`,
           )
 
@@ -70,19 +70,20 @@ export default {
         // console.log('!!!', messages, `twitter-${message.from_id}`)
 
         // NOTE: Generate a response.
-        const response = await (props.puppet.model as any).getMessagesResponse(
-          messages,
-          {
-            thread: `twitter-${message.from_id}`,
-          },
-        )
+        const response = await (
+          props.puppetRuntime.model as any
+        ).getMessagesResponse(messages, {
+          thread: `twitter-${message.from_id}`,
+        })
 
-        // console.log('???', props.puppet.clients['twitter'].sendMessage)
+        // console.log('???', props.puppetRuntime.clients['twitter'].sendMessage)
 
         // NOTE: Send the message.
-        await props.puppet.clients['twitter'].sendMessage(response as string)
+        await props.puppetRuntime.clients['twitter'].sendMessage(
+          response as string,
+        )
 
-        // props.puppet.clients['twitter'].markAsRead(message.id)
+        // props.puppetRuntime.clients['twitter'].markAsRead(message.id)
 
         return {
           success: true,
@@ -96,4 +97,4 @@ export default {
       }
     },
   },
-} satisfies Task
+} satisfies HtnTask

@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { SEC_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { Task } from '../types'
+import type { HtnTask } from '../types'
 
 export default {
   identifier: 'telegram-read-messages',
@@ -56,7 +56,7 @@ export default {
           }
 
           // NOTE: Mark message as read.
-          props.puppet.clients['telegram'].markAsRead(message.id)
+          props.puppetRuntime.clients['telegram'].markAsRead(message.id)
 
           props._app.utils.logger.send({
             type: 'LOG',
@@ -69,7 +69,7 @@ export default {
           })
 
           // NOTE: Should reply to message?
-          if (!shouldReplyToMessage(props, message.ctx)) {
+          if (!_shouldReplyToMessage(props, message.ctx)) {
             props._app.utils.logger.send({
               type: 'LOG',
               source: 'AGENT',
@@ -89,11 +89,11 @@ export default {
 
           // NOTE: Check if this is a new thread.
           if (
-            !props.puppet.clients['telegram']
+            !props.puppetRuntime.clients['telegram']
               .getMessageThreads()
               .includes(`telegram-${message.from_id}`)
           ) {
-            props.puppet.clients['telegram'].addMessageThread(
+            props.puppetRuntime.clients['telegram'].addMessageThread(
               `telegram-${message.from_id}`,
             )
 
@@ -111,7 +111,7 @@ export default {
 
           // NOTE: Generate a response.
           const response = await (
-            props.puppet.model as any
+            props.puppetRuntime.model as any
           ).getMessagesResponse(messages, {
             thread: `telegram-${message.from_id}`,
           })
@@ -122,7 +122,7 @@ export default {
           // )
 
           // NOTE: Send the reply.
-          await props.puppet.clients['telegram'].replyToMessage(
+          await props.puppetRuntime.clients['telegram'].replyToMessage(
             response as string,
             message.ctx,
           )
@@ -155,9 +155,9 @@ export default {
       }
     },
   },
-} satisfies Task
+} satisfies HtnTask
 
-const shouldReplyToMessage = (props, ctx) => {
+const _shouldReplyToMessage = (props, ctx) => {
   // NOTE: Check if it's in a private chat.
   const isInPrivateChat = ctx.message.chat.type === 'private'
 

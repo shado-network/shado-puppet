@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import { asyncForEach } from './utils.ts'
+import { asyncForEach } from './utils.async.ts'
 
 export const importPlugins = async (pluginsPath: string) => {
   const imports = []

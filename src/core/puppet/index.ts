@@ -2,7 +2,8 @@ import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types'
 import type { PuppetConfig, PuppetRuntime } from './types'
 
-import { _memoryClient, asyncForEach } from '../libs/utils.ts'
+import { _memoryClient } from '../libs/utils.ts'
+import { asyncForEach } from '../libs/utils.async.ts'
 
 export class Puppet {
   runtime: null | PuppetRuntime
@@ -61,7 +62,7 @@ export class Puppet {
     try {
       // NOTE: Start the planner loop.
       this.planner.init()
-      await this.planner.startPlanner()
+      this.planner.startPlanner()
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',

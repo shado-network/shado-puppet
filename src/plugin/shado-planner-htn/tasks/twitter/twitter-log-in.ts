@@ -1,5 +1,5 @@
 import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { Task } from '../types'
+import type { HtnTask } from '../types'
 
 export default {
   identifier: 'twitter-log-in',
@@ -44,7 +44,7 @@ export default {
       props.state['twitter-last-log-in-attempt'] = Date.now()
 
       try {
-        const result = await props.puppet.clients['twitter'].login()
+        const result = await props.puppetRuntime.clients['twitter'].login()
 
         if (result === true) {
           return {
@@ -65,4 +65,4 @@ export default {
       }
     },
   },
-} satisfies Task
+} satisfies HtnTask

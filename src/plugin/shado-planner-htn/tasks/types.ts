@@ -1,7 +1,7 @@
 import type { AppContext } from '../../../core/context/types'
 import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
 
-export type Task = {
+export type HtnTask = {
   identifier: string
   conditions: {
     [key: string]: (props: ValueProps) => boolean

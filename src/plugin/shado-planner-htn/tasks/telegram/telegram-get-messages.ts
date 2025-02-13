@@ -1,4 +1,4 @@
-import type { Task } from '../types'
+import type { HtnTask } from '../types'
 
 export default {
   identifier: 'telegram-get-messages',
@@ -27,7 +27,7 @@ export default {
   actions: {
     'telegram-get-messages': async (props) => {
       try {
-        const messages = props.puppet.clients['telegram'].getMessages()
+        const messages = props.puppetRuntime.clients['telegram'].getMessages()
         props.state['telegram-messages'] = messages
         return {
           success: true,
@@ -41,4 +41,4 @@ export default {
       }
     },
   },
-} satisfies Task
+} satisfies HtnTask

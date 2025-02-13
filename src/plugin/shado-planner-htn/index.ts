@@ -1,6 +1,6 @@
 import { tasks } from './tasks/index.ts'
 import { defaultState } from './libs/state.ts'
-import { executePlansLoop } from './libs/planner.ts'
+import { plannerLoop } from './libs/planner.ts'
 
 import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
@@ -29,15 +29,21 @@ class ShadoPlannerHtnPlugin {
   init = () => {
     try {
       this.puppetRuntime.memory.goals = {
+        ...this.puppetRuntime.memory.goals,
         // TODO: Make this nicer?
         ...this.puppetConfig.planner.config.goals,
       }
 
+      // console.log('!!!', {
+      //   'telegram-has-client': Boolean(this.puppetRuntime.clients['telegram']),
+      //   'twitter-has-client': Boolean(this.puppetRuntime.clients['twitter']),
+      // })
+
       this.puppetRuntime.memory.state = {
         ...defaultState,
+        ...this.puppetRuntime.memory.state,
         // TODO: Move to plugin?!
         'telegram-has-client': Boolean(this.puppetRuntime.clients['telegram']),
-        // TODO: Move to plugin?!
         'twitter-has-client': Boolean(this.puppetRuntime.clients['twitter']),
       }
     } catch (error) {
@@ -51,8 +57,11 @@ class ShadoPlannerHtnPlugin {
     }
   }
 
-  startPlanner = async () => {
-    await executePlansLoop(
+  startPlanner = () => {
+    const date = new Date()
+    this.puppetRuntime.memory.state['last-started'] = date.valueOf()
+
+    plannerLoop(
       this.puppetRuntime,
       this.puppetConfig,
       tasks,
