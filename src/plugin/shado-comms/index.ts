@@ -30,7 +30,6 @@ class ShadoCommsPlugin {
     _app: AppContext,
   ) {
     this._app = _app
-
     this.puppetConfig = puppetConfig
 
     this.serverConfig = {

@@ -34,7 +34,6 @@ class TelegramClientPlugin {
     _app: AppContext,
   ) {
     this._app = _app
-
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {
@@ -50,12 +49,12 @@ class TelegramClientPlugin {
     try {
       this.client = new Telegraf(this.clientSecrets.botToken)
 
-      this._app.utils.logger.send({
-        type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
-        message: 'Connected to Telegram bot',
-      })
+      // this._app.utils.logger.send({
+      //   type: 'SUCCESS',
+      //   source: 'PUPPET',
+      //   puppetId: this.puppetConfig.id,
+      //   message: 'Connected to Telegram bot',
+      // })
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',

@@ -14,7 +14,7 @@ class ShadoLoggerPlugin {
       console: false,
       rest: false,
     },
-    sandbox: {
+    sandboxClients: {
       telegram: null,
       discord: null,
     },
@@ -121,7 +121,7 @@ class ShadoLoggerPlugin {
       } satisfies AppContext
 
       // NOTE: Telegram sandbox client.
-      this.config.sandbox.telegram = new TelegramClientPlugin.plugin(
+      this.config.sandboxClients['telegram'] = new TelegramClientPlugin.plugin(
         sandboxClientConfig,
         sandboxClientSecrets,
         sandboxPuppetConfig,
@@ -160,7 +160,7 @@ ${loggerMessage.message}
 PAYLOAD: 
 ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
 `
-    this.config.sandbox.telegram.sendMessage(
+    this.config.sandboxClients['telegram'].sendMessage(
       sandboxMessage,
       process.env['SANDBOX_TELEGRAM_CHAT_ID'],
     )

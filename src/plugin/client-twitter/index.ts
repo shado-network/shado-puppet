@@ -44,7 +44,6 @@ class TwitterClientPlugin {
     _app: AppContext,
   ) {
     this._app = _app
-
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {

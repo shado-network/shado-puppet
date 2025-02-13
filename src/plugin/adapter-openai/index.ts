@@ -6,12 +6,14 @@ import type { AppContext } from '../../core/context/types'
 import type { AppPlugin } from '../types'
 
 class OpenAiAdapterPlugin {
+  // TODO: Get from puppet file.
   fields: ChatOpenAIFields = {
     model: 'gpt-4o-mini',
     temperature: 1,
     maxTokens: 256,
   }
 
+  // TODO: Get from puppet file.
   config: ClientOptions = {
     apiKey: process.env.OPENAI_API_KEY,
   }
@@ -28,6 +30,7 @@ class OpenAiAdapterPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
+    // TODO: Merge with puppet file config.
     this.adapter = new ChatOpenAI(this.fields, this.config)
     this._memoryClient = _memoryClient(this.adapter)
   }

@@ -4,7 +4,7 @@ export type LoggerConfig = {
     console: boolean
     [key: string]: boolean
   }
-  sandbox: {
+  sandboxClients: {
     // TODO: Update to the proper type from the plugin.
     telegram: null | any
     [key: string]: any

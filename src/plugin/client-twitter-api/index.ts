@@ -31,7 +31,6 @@ class TwitterApiClientPlugin {
     _app: AppContext,
   ) {
     this._app = _app
-
     this.puppetConfig = puppetConfig
 
     this.clientConfig = {
@@ -70,12 +69,12 @@ class TwitterApiClientPlugin {
 
       // this.client.login()
 
-      this._app.utils.logger.send({
-        type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
-        message: `Connected to Twitter bot`,
-      })
+      // this._app.utils.logger.send({
+      //   type: 'SUCCESS',
+      //   source: 'PUPPET',
+      //   puppetId: this.puppetConfig.id,
+      //   message: `Connected to Twitter bot`,
+      // })
 
       return true
     } catch (error) {

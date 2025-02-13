@@ -6,12 +6,14 @@ import type { AppContext } from '../../core/context/types'
 import type { AppPlugin } from '../types'
 
 class DeepSeekAdapterPlugin {
+  // TODO: Get from puppet file.
   fields: ChatOpenAIFields = {
     model: 'deepseek-chat',
     temperature: 1,
     maxTokens: 256,
   }
 
+  // TODO: Get from puppet file.
   config: ClientOptions = {
     apiKey: process.env.DEEPSEEK_API_KEY,
     baseURL: 'https://api.deepseek.com',
@@ -29,6 +31,7 @@ class DeepSeekAdapterPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
+    // TODO: Merge with puppet file config.
     this.adapter = new ChatOpenAI(this.fields, this.config)
     this._memoryClient = _memoryClient(this.adapter)
   }

@@ -44,7 +44,7 @@ export default {
       props.state['twitter-last-log-in-attempt'] = Date.now()
 
       try {
-        const result = await props.puppet.clients.twitter.login()
+        const result = await props.puppet.clients['twitter'].login()
 
         if (result === true) {
           return {

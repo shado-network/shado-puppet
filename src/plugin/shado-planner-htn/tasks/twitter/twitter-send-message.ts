@@ -46,11 +46,11 @@ export default {
 
         // NOTE: Check if this is a new thread.
         if (
-          !props.puppet.clients.twitter
+          !props.puppet.clients['twitter']
             .getMessageThreads()
             .includes(`twitter-${message.from_id}`)
         ) {
-          props.puppet.clients.twitter.addMessageThread(
+          props.puppet.clients['twitter'].addMessageThread(
             `twitter-${message.from_id}`,
           )
 
@@ -77,12 +77,12 @@ export default {
           },
         )
 
-        // console.log('???', props.puppet.clients.twitter.sendMessage)
+        // console.log('???', props.puppet.clients['twitter'].sendMessage)
 
         // NOTE: Send the message.
-        await props.puppet.clients.twitter.sendMessage(response as string)
+        await props.puppet.clients['twitter'].sendMessage(response as string)
 
-        // props.puppet.clients.twitter.markAsRead(message.id)
+        // props.puppet.clients['twitter'].markAsRead(message.id)
 
         return {
           success: true,

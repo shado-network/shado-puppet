@@ -7,6 +7,7 @@ import type { AppContext } from '../../core/context/types'
 import type { AppPlugin } from '../types'
 
 class AnthropicAdapterPlugin {
+  // TODO: Get from puppet file.
   config: AnthropicInput & BaseChatModelParams = {
     apiKey: process.env.ANTHROPIC_API_KEY,
     model: 'claude-3-5-sonnet-20241022',
@@ -26,6 +27,7 @@ class AnthropicAdapterPlugin {
   constructor(_memoryClient: any, _app: AppContext) {
     this._app = _app
 
+    // TODO: Merge with puppet file config.
     this.adapter = new ChatAnthropic(this.config)
     this._memoryClient = _memoryClient(this.adapter)
   }
