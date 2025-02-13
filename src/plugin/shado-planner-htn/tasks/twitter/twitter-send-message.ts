@@ -59,7 +59,7 @@ export default {
 
         if (firstMessageInThread) {
           messages = [
-            new SystemMessage(props.puppet.config.bio.join('\n')),
+            new SystemMessage(props.puppetConfig.bio.join('\n')),
             new HumanMessage(message.message),
           ]
         } else {

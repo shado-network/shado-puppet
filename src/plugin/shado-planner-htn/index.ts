@@ -1,14 +1,14 @@
 import { tasks } from './tasks/index.ts'
 import { defaultState } from './libs/state.ts'
-import { defaultGoals } from './libs/goals.ts'
-import { executePlans } from './libs/planner.ts'
+import { executePlansLoop } from './libs/planner.ts'
 
-import type { PuppetInstance } from '../../core/puppet/types'
+import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
 import type { AppPlugin } from '../types.ts'
 
 class ShadoPlannerHtnPlugin {
-  puppet: PuppetInstance
+  puppetRuntime: PuppetRuntime
+  puppetConfig: PuppetConfig
 
   //
 
@@ -16,39 +16,48 @@ class ShadoPlannerHtnPlugin {
 
   //
 
-  constructor(puppet: PuppetInstance, _app: AppContext) {
+  constructor(
+    puppetRuntime: PuppetRuntime,
+    puppetConfig: PuppetConfig,
+    _app: AppContext,
+  ) {
     this._app = _app
-
-    this.puppet = puppet
+    this.puppetRuntime = puppetRuntime
+    this.puppetConfig = puppetConfig
   }
 
-  _init = async () => {
+  init = () => {
     try {
-      await this._runPlanner()
+      this.puppetRuntime.memory.goals = {
+        // TODO: Make this nicer?
+        ...this.puppetConfig.planner.config.goals,
+      }
+
+      this.puppetRuntime.memory.state = {
+        ...defaultState,
+        // TODO: Move to plugin?!
+        'telegram-has-client': Boolean(this.puppetRuntime.clients['telegram']),
+        // TODO: Move to plugin?!
+        'twitter-has-client': Boolean(this.puppetRuntime.clients['twitter']),
+      }
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppet.id,
+        puppetId: this.puppetRuntime.id,
         message: `Error in planner initialization`,
         payload: { error },
       })
     }
   }
 
-  _runPlanner = async () => {
-    this.puppet.memory.long.goals = { ...defaultGoals }
-    this.puppet.memory.long.state = {
-      ...defaultState,
-      'telegram-has-client': Boolean(this.puppet.clients.telegram),
-      'twitter-has-client': Boolean(this.puppet.clients.twitter),
-    }
-
-    await executePlans(
-      this.puppet,
+  startPlanner = async () => {
+    await executePlansLoop(
+      this.puppetRuntime,
+      this.puppetConfig,
       tasks,
-      this.puppet.memory.long.goals,
-      this.puppet.memory.long.state,
+      this.puppetRuntime.memory.goals,
+      this.puppetRuntime.memory.state,
       this._app,
     )
   }

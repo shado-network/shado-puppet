@@ -4,7 +4,7 @@ import {
   asyncSleep,
 } from '../../../core/libs/utils.ts'
 import type { AppContext } from '../../../core/context/types'
-import type { PuppetInstance } from '../../../core/puppet/types'
+import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
 import type { PuppetState } from '../types'
 import type { Task } from '../tasks/types'
 
@@ -13,29 +13,30 @@ const config = {
   RETRY_PLANNING_IN_X_SECONDS: 5,
 }
 
-export const executePlans = async (
-  puppet: PuppetInstance,
+export const executePlansLoop = async (
+  puppetRuntime: PuppetRuntime,
+  puppetConfig: PuppetConfig,
   tasks: any,
   goals: any,
   state: PuppetState,
   _app: AppContext,
 ) => {
   // NOTE: Disable for debugging purposes.
-  console.clear()
+  // console.clear()
 
   const date = new Date()
   state['last-updated'] = date.valueOf()
 
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppet.id,
+    puppetId: puppetRuntime.id,
     type: 'LOG',
     message: date.toLocaleString(),
   })
 
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppet.id,
+    puppetId: puppetRuntime.id,
     type: 'LOG',
     message: 'Generating plans',
   })
@@ -47,7 +48,7 @@ export const executePlans = async (
   if (!plans || plans.length === 0) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppet.id,
+      puppetId: puppetRuntime.id,
       type: 'LOG',
       message: 'No plan found for current goals',
       payload: {
@@ -57,7 +58,7 @@ export const executePlans = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    executePlans(puppet, tasks, goals, state, _app)
+    executePlansLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
 
     return
   }
@@ -71,7 +72,7 @@ export const executePlans = async (
   if (!rawPlan || rawPlan.length === 0) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppet.id,
+      puppetId: puppetRuntime.id,
       type: 'LOG',
       message: 'No plan found for current goals',
       payload: {
@@ -81,7 +82,7 @@ export const executePlans = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    executePlans(puppet, tasks, goals, state, _app)
+    executePlansLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
 
     return
   }
@@ -93,7 +94,7 @@ export const executePlans = async (
 
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppet.id,
+    puppetId: puppetRuntime.id,
     type: 'INFO',
     message: 'Executing plan',
     payload: { currentPlan: pickedPlan },
@@ -104,7 +105,7 @@ export const executePlans = async (
   const planResult = await asyncEvery(pickedPlan, async (task: Task) => {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppet.id,
+      puppetId: puppetRuntime.id,
       type: 'LOG',
       message: `Executing task '${task.identifier}'`,
       payload: {
@@ -121,7 +122,7 @@ export const executePlans = async (
     ) {
       _app.utils.logger.send({
         source: 'PUPPET',
-        puppetId: puppet.id,
+        puppetId: puppetRuntime.id,
         type: 'WARNING',
         message: `Task '${task.identifier}' skipped. Conditions have not been met. Something changed?`,
       })
@@ -136,7 +137,8 @@ export const executePlans = async (
       Object.keys(task.actions),
       async (actionIdentifier: string) => {
         const result = await task.actions[actionIdentifier]({
-          puppet,
+          puppetRuntime,
+          puppetConfig,
           state,
           _app,
         })
@@ -162,7 +164,8 @@ export const executePlans = async (
       Object.keys(task.effects),
       async (effectIdentifier: string) => {
         const result = await task.effects[effectIdentifier].trigger({
-          puppet,
+          puppetRuntime,
+          puppetConfig,
           state,
           _app,
         })
@@ -176,7 +179,7 @@ export const executePlans = async (
   if (planResult) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppet.id,
+      puppetId: puppetRuntime.id,
       type: 'INFO',
       message: 'Plan executed successfully',
       payload: { currentState: state },
@@ -186,7 +189,7 @@ export const executePlans = async (
   } else {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppet.id,
+      puppetId: puppetRuntime.id,
       type: 'WARNING',
       message: 'Plan skipped',
       payload: { currentState: state },
@@ -196,7 +199,7 @@ export const executePlans = async (
   }
 
   // NOTE: Enter the planning loop after timeout.
-  executePlans(puppet, tasks, goals, state, _app)
+  executePlansLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
 }
 
 export const generatePlansForGoals = async (

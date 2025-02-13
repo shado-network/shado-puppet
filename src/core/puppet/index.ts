@@ -1,14 +1,15 @@
 import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types'
-import type { PuppetInstance } from './types'
+import type { PuppetConfig, PuppetRuntime } from './types'
 
 import { _memoryClient, asyncForEach } from '../libs/utils.ts'
 
 export class Puppet {
-  puppet: PuppetInstance
+  runtime: null | PuppetRuntime
+  config: null | PuppetConfig
 
   // TODO: Update to the proper type from the plugin.
-  planner: any
+  planner: null | any
 
   //
 
@@ -18,142 +19,171 @@ export class Puppet {
 
   constructor(puppetId: string, _app: AppContext) {
     this._app = _app
-
-    // NOTE: Puppet instance scaffold.
-    // TODO: Improve upon this?
-    this.puppet = {
-      id: puppetId,
-      name: undefined,
-      //
-      config: undefined,
-      //
-      model: undefined,
-      memory: {
-        short: {},
-        long: {
-          goals: {},
-          state: {},
-        },
-      },
-      knowledge: undefined,
-      //
-      clients: undefined,
-    }
-
-    this._init()
+    this._init(puppetId)
   }
 
-  _init = async () => {
+  _init = async (puppetId: string) => {
+    // TODO: Improve upon this?
+    // NOTE: Puppet instance scaffold.
+    this.runtime = {
+      id: puppetId,
+      //
+      planner: undefined,
+      model: undefined,
+      clients: undefined,
+      //
+      memory: {
+        goals: {},
+        state: {},
+      },
+      knowledge: undefined,
+    }
+
     try {
-      await this._getPuppetConfig()
+      this.config = await this._getPuppetConfig(puppetId)
 
       // NOTE: Register plugins.
-      await this._setPlannerPlugin()
-      await this._setModelPlugin()
-      await this._setClientPlugins()
-
-      // NOTE: Run the planner loop.
-      this.planner._init()
+      this.planner = await this._setPlannerPlugin(this.config.planner.provider)
+      this.runtime.model = await this._setModelPlugin(
+        this.config.model.provider,
+      )
+      this.runtime.clients = await this._setClientPlugins(this.config.clients)
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppet.id,
+        puppetId: this.runtime.id,
         message: `Error in puppet initialization`,
         payload: { error },
       })
     }
-  }
 
-  _getPuppetConfig = async () => {
-    const puppetFile = await import(`../../../include/${this.puppet.id}.ts`)
-    const config = puppetFile.default
-
-    _app.utils.logger.send({
-      type: 'SUCCESS',
-      source: 'PUPPET',
-      puppetId: this.puppet.id,
-      message: `Loaded puppet config "${config.id}"`,
-    })
-
-    this.puppet.name = config.name
-    this.puppet.config = config
-  }
-
-  _setPlannerPlugin = async () => {
     try {
-      this.planner = new _app.plugins[
-        this.puppet.config.planner.provider
-      ].plugin(this.puppet, _app)
-
-      _app.utils.logger.send({
-        type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.puppet.id,
-        message: `Loaded planner plugin "${this.puppet.config.planner.provider}"`,
-      })
+      // NOTE: Start the planner loop.
+      this.planner.init()
+      await this.planner.startPlanner()
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppet.id,
+        puppetId: this.runtime.id,
+        message: `Error in puppet runner loop`,
+        payload: { error },
+      })
+    }
+  }
+
+  _getPuppetConfig = async (puppetId: string) => {
+    try {
+      const puppetFile = await import(`../../../include/${puppetId}.ts`)
+      const config = puppetFile.default
+
+      _app.utils.logger.send({
+        type: 'SUCCESS',
+        source: 'PUPPET',
+        puppetId: config.id,
+        message: `Loaded puppet config "${config.id}"`,
+      })
+
+      return config
+    } catch (error) {
+      _app.utils.logger.send({
+        type: 'ERROR',
+        source: 'PUPPET',
+        puppetId: this.runtime.id,
+        message: `No puppet config loaded!"`,
+        payload: { error },
+      })
+
+      return null
+    }
+  }
+
+  _setPlannerPlugin = async (plannerProvider: string) => {
+    try {
+      const planner = new _app.plugins[plannerProvider].plugin(
+        this.runtime,
+        this.config,
+        _app,
+      )
+
+      _app.utils.logger.send({
+        type: 'SUCCESS',
+        source: 'PUPPET',
+        puppetId: this.runtime.id,
+        message: `Loaded planner plugin "${plannerProvider}"`,
+      })
+
+      return planner
+    } catch (error) {
+      _app.utils.logger.send({
+        type: 'ERROR',
+        source: 'PUPPET',
+        puppetId: this.runtime.id,
         message: `No planner plugin loaded!"`,
         payload: { error },
       })
+
+      return null
     }
   }
 
-  _setModelPlugin = async () => {
+  _setModelPlugin = async (modelProvider: string) => {
     try {
-      this.puppet.model = new _app.plugins[
-        this.puppet.config.model.provider
-      ].plugin(_memoryClient, _app)
+      const model = new _app.plugins[modelProvider].plugin(_memoryClient, _app)
 
       _app.utils.logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
-        puppetId: this.puppet.id,
-        message: `Loaded model plugin "${this.puppet.config.model.provider}"`,
+        puppetId: this.runtime.id,
+        message: `Loaded model plugin "${modelProvider}"`,
       })
+
+      return model
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppet.id,
+        puppetId: this.runtime.id,
         message: `No model plugin loaded!"`,
         payload: { error },
       })
+
+      return null
     }
   }
 
-  _setClientPlugins = async () => {
-    this.puppet.clients = {}
+  _setClientPlugins = async (clientPlugins: any) => {
+    const clients = {}
 
-    await asyncForEach(this.puppet.config.clients, async (client: any) => {
+    await asyncForEach(clientPlugins, async (clientPlugin: any) => {
       try {
-        this.puppet.clients[_app.plugins[client.identifier].key] =
-          new _app.plugins[client.identifier].plugin(
-            client.config,
-            client.secrets || {},
-            this.puppet.config,
-            _app,
-          )
+        const plugin = new _app.plugins[clientPlugin.identifier].plugin(
+          clientPlugin.config,
+          clientPlugin.secrets || {},
+          this.config,
+          _app,
+        )
+
+        clients[_app.plugins[clientPlugin.identifier].key] = plugin
 
         _app.utils.logger.send({
           type: 'SUCCESS',
           source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Loaded client plugin "${client.identifier}"`,
+          puppetId: this.runtime.id,
+          message: `Loaded client plugin "${clientPlugin.identifier}"`,
         })
       } catch (error) {
         _app.utils.logger.send({
           type: 'ERROR',
           source: 'PUPPET',
-          puppetId: this.puppet.id,
-          message: `Could not load client plugin "${client.identifier}"!`,
+          puppetId: this.runtime.id,
+          message: `Could not load client plugin "${clientPlugin.identifier}"!`,
           payload: { error },
         })
       }
     })
+
+    return clients
   }
 }

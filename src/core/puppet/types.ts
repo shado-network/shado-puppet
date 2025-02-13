@@ -1,25 +1,25 @@
 export type PuppetInstance = {
-  id: string
-  name: string
-  //
+  runtime: PuppetRuntime
   config: PuppetConfig
+}
+
+export type PuppetRuntime = {
+  id: string
   //
+  planner?: null | unknown
   model: null | unknown
-  memory: {
-    short: {
-      [key: string]: any
-    }
-    long: {
-      goals: any
-      state: any
-      [key: string]: any
-    }
-  }
-  knowledge?: unknown
-  //
   clients: {
     [key: string]: any
   }
+  //
+  memory: {
+    state: any
+    goals: {
+      [key: string]: (props: any) => boolean
+    }
+    [key: string]: any
+  }
+  knowledge?: unknown
 }
 
 export type PuppetConfig = {
@@ -28,7 +28,12 @@ export type PuppetConfig = {
   //
   planner: {
     provider: 'shado-planner-htn' | 'shado-planner-sm' | 'shado-planner-bt'
-    config?: { [key: string]: any }
+    config: {
+      goals: {
+        [key: string]: (props: any) => boolean
+      }
+      [key: string]: any
+    }
   }
   model: {
     provider: 'adapter-anthropic' | 'adapter-deepseek' | 'adapter-openai'

@@ -61,7 +61,7 @@ export default {
           props._app.utils.logger.send({
             type: 'LOG',
             source: 'AGENT',
-            puppetId: props.puppet.id,
+            puppetId: props.puppetRuntime.id,
             message: 'Got a Telegram message',
             payload: {
               message: message.message,
@@ -73,7 +73,7 @@ export default {
             props._app.utils.logger.send({
               type: 'LOG',
               source: 'AGENT',
-              puppetId: props.puppet.id,
+              puppetId: props.puppetRuntime.id,
               message: 'Chose to ignore Telegram message:',
               payload: {
                 message: message.message,
@@ -102,7 +102,7 @@ export default {
 
           if (firstMessageInThread) {
             messages = [
-              new SystemMessage(props.puppet.config.bio.join('\n')),
+              new SystemMessage(props.puppetConfig.bio.join('\n')),
               new HumanMessage(message.message),
             ]
           } else {
@@ -161,15 +161,16 @@ const shouldReplyToMessage = (props, ctx) => {
   // NOTE: Check if it's in a private chat.
   const isInPrivateChat = ctx.message.chat.type === 'private'
 
+  // TODO: Do not get from .env directly.
   // NOTE: Check if they are mentioned.
   const isMentioned =
     ctx.message.text.includes(
-      `@${process.env[`TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`]}`,
+      `@${process.env[`TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
     ctx.message.text.includes(
-      `${process.env[`TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`]}`,
+      `${process.env[`TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
-    ctx.message.text.includes(`${props.puppet.name}`)
+    ctx.message.text.includes(`${props.puppetConfig.name}`)
 
   // NOTE: Check if there is a mention of swarm members.
   // const isFromSwarmPuppet = [
@@ -180,7 +181,7 @@ const shouldReplyToMessage = (props, ctx) => {
   //     return !(
   //       handle ===
   //       process.env[
-  //         `TELEGRAM_${props.puppet.id.toUpperCase()}_BOT_HANDLE`
+  //         `TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`
   //       ]
   //     )
   //   })

@@ -3,13 +3,17 @@ import type { PuppetConfig } from '../src/core/puppet/types'
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.good' })
 
-const puppet: PuppetConfig = {
+const puppetConfig: PuppetConfig = {
   id: 'good',
   name: 'Good',
   //
   planner: {
     provider: 'shado-planner-htn',
-    config: {},
+    config: {
+      // TODO: How to make this more low to no-code?
+      // TODO: How will devs know about tasks that can fulfill the goals?
+      goals: {},
+    },
   },
   model: {
     provider: 'adapter-deepseek',
@@ -67,4 +71,4 @@ const puppet: PuppetConfig = {
   ],
 }
 
-export default puppet
+export default puppetConfig
