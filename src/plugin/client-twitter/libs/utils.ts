@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { PuppetConfig } from '../../../core/puppet/types'
+import type { PuppetConfig } from '../../../core/puppet/types.ts'
 
 export const cookies = {
   retrieve: (cookiesFilepath: string) => {

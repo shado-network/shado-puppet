@@ -1,4 +1,4 @@
-import type { PuppetState } from '../types'
+import type { PuppetState } from '../types.ts'
 
 export const twitterDefaultState: PuppetState = {
   'twitter-last-updated': 0,

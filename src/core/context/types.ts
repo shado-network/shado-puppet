@@ -1,5 +1,5 @@
 import type { Puppet } from '../../core/puppet'
-import type { AppPlugin } from '../../plugin/types'
+import type { AppPlugin } from '../../plugin/types.ts'
 
 export type AppContext = {
   config: {

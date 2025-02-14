@@ -2,10 +2,10 @@ import { fmt, code } from 'telegraf/format'
 
 import TelegramClientPlugin from '../client-telegram/index.ts'
 
-import type { PuppetConfig } from '../../core/puppet/types'
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
-import type { LoggerConfig, LoggerMessage } from './types'
+import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
+import type { LoggerConfig, LoggerMessage } from './types.ts'
 
 class ShadoLoggerPlugin {
   config: LoggerConfig = {

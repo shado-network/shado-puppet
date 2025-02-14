@@ -1,8 +1,8 @@
 import { asyncForEach, asyncEvery } from '../../../core/libs/utils.async.ts'
-import type { AppContext } from '../../../core/context/types'
-import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
-import type { PuppetState } from '../types'
-import type { HtnTask } from '../tasks/types'
+import type { AppContext } from '../../../core/context/types.ts'
+import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types.ts'
+import type { PuppetState } from '../types.ts'
+import type { HtnTask } from '../tasks/types.ts'
 
 export const executePlan = async (
   puppetRuntime: PuppetRuntime,

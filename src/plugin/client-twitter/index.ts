@@ -6,9 +6,9 @@ import type { Tweet } from 'agent-twitter-client'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.async.ts'
-import type { PuppetConfig } from '../../core/puppet/types'
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
+import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
 
 // TODO: Find a better way.
 const __filename = fileURLToPath(import.meta.url)

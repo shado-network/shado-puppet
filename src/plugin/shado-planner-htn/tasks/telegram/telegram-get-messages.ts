@@ -1,4 +1,4 @@
-import type { HtnTask } from '../types'
+import type { HtnTask } from '../types.ts'
 
 export default {
   identifier: 'telegram-get-messages',

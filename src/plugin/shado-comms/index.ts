@@ -2,10 +2,10 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import type { FastifyInstance } from 'fastify'
 
-import type { PuppetConfig } from '../../core/puppet/types'
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
-import type { ShadoCommsResponse } from './types'
+import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
+import type { ShadoCommsResponse } from './types.ts'
 
 class ShadoCommsPlugin {
   config = {}

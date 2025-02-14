@@ -1,10 +1,10 @@
 import { asyncSleep } from '../../../core/libs/utils.async.ts'
 import { generatePlans } from './planner.generate.ts'
 import { executePlan } from './planner.execute.ts'
-import type { AppContext } from '../../../core/context/types'
-import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
-import type { PuppetState } from '../types'
-import type { HtnTask } from '../tasks/types'
+import type { AppContext } from '../../../core/context/types.ts'
+import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types.ts'
+import type { PuppetState } from '../types.ts'
+import type { HtnTask } from '../tasks/types.ts'
 
 const config = {
   AWAIT_PLANNING_FOR_X_SECONDS: 1,

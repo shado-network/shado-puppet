@@ -2,8 +2,8 @@ import { ChatOpenAI } from '@langchain/openai'
 import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
 
 class DeepSeekAdapterPlugin {
   // TODO: Get from puppet file.

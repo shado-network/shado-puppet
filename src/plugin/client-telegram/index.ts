@@ -2,9 +2,9 @@ import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 import type { FmtString } from 'telegraf/format'
 
-import type { PuppetConfig } from '../../core/puppet/types'
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
+import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
 
 class TelegramClientPlugin {
   config = {

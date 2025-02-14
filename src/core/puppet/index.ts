@@ -1,6 +1,6 @@
 import { _app } from '../../core/context/index.ts'
-import type { AppContext } from '../../core/context/types'
-import type { PuppetConfig, PuppetRuntime } from './types'
+import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetConfig, PuppetRuntime } from './types.ts'
 
 import { _memoryClient } from '../libs/utils.ts'
 import { asyncForEach } from '../libs/utils.async.ts'

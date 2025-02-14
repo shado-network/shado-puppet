@@ -1,9 +1,9 @@
 import { TwitterApi } from 'twitter-api-v2'
 import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
-import type { AppContext } from '../../core/context/types'
-import type { PuppetConfig } from '../../core/puppet/types'
-import { AppPlugin } from '../types'
+import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { AppPlugin } from '../types.ts'
 
 class TwitterApiClientPlugin {
   config = {}

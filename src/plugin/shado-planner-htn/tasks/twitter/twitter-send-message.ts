@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { HtnTask } from '../types'
+import type { HtnTask } from '../types.ts'
 
 export default {
   identifier: 'twitter-send-message',
@@ -11,14 +11,14 @@ export default {
     'twitter-has-logged-in': (props) =>
       props.state['twitter-has-logged-in'] === true,
     'twitter-last-sent': (props) =>
-      props.state['twitter-last-sent'] <= Date.now() - 15 * MIN_IN_MSEC,
+      props.state['twitter-last-sent'] <= Date.now() - 3 * MIN_IN_MSEC,
   },
 
   effects: {
     'twitter-last-sent': {
       // value: (props) => false,
       value: (props) =>
-        props.state['twitter-last-sent'] <= Date.now() - 15 * MIN_IN_MSEC,
+        props.state['twitter-last-sent'] <= Date.now() - 3 * MIN_IN_MSEC,
       trigger: async (props) => {
         props.state['twitter-last-sent'] = Date.now()
 

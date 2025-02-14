@@ -1,5 +1,5 @@
-import type { AppContext } from '../../../core/context/types'
-import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
+import type { AppContext } from '../../../core/context/types.ts'
+import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types.ts'
 
 export type HtnTask = {
   identifier: string

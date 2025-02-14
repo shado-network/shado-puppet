@@ -7,10 +7,10 @@ import { defaultStates } from './states/index.ts'
 import { plannerLoop } from './libs/planner.loop.ts'
 import { importTasks } from './libs/utils.tasks.ts'
 
-import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
-import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types'
-import type { HtnTask } from './tasks/types'
+import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types.ts'
+import type { AppContext } from '../../core/context/types.ts'
+import type { AppPlugin } from '../types.ts'
+import type { HtnTask } from './tasks/types.ts'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

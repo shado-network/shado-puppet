@@ -1,7 +1,7 @@
 import { asyncForEach } from '../../../core/libs/utils.async.ts'
-import type { AppContext } from '../../../core/context/types'
-import type { PuppetState } from '../types'
-import type { HtnTask } from '../tasks/types'
+import type { AppContext } from '../../../core/context/types.ts'
+import type { PuppetState } from '../types.ts'
+import type { HtnTask } from '../tasks/types.ts'
 
 export const generatePlans = async (
   tasksPool: HtnTask[],

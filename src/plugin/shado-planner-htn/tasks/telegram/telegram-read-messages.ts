@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { SEC_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { HtnTask } from '../types'
+import type { HtnTask } from '../types.ts'
 
 export default {
   identifier: 'telegram-read-messages',

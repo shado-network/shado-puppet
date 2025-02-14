@@ -1,5 +1,5 @@
 import { MIN_IN_MSEC, SEC_IN_MSEC } from '../src/core/libs/constants.ts'
-import type { PuppetConfig } from '../src/core/puppet/types'
+import type { PuppetConfig } from '../src/core/puppet/types.ts'
 
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.evil' })
@@ -80,7 +80,7 @@ const puppetConfig: PuppetConfig = {
     //     username: process.env['TWITTER_EVIL_USERNAME'],
     //     password: process.env['TWITTER_EVIL_PASSWORD'],
     //     email: process.env['TWITTER_EVIL_EMAIL'],
-    //   }
+    //   },
     // },
   ],
   //

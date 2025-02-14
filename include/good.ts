@@ -1,4 +1,4 @@
-import type { PuppetConfig } from '../src/core/puppet/types'
+import type { PuppetConfig } from '../src/core/puppet/types.ts'
 
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.good' })
@@ -62,7 +62,7 @@ const puppetConfig: PuppetConfig = {
     //     username: process.env['TWITTER_GOOD_USERNAME'],
     //     password: process.env['TWITTER_GOOD_PASSWORD'],
     //     email: process.env['TWITTER_GOOD_EMAIL'],
-    //   }
+    //   },
     // },
   ],
   //
