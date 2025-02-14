@@ -1,10 +1,18 @@
-import { tasks } from './tasks/index.ts'
-import { defaultState } from './libs/state.ts'
+import path from 'path'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+import { tasksPool } from './tasks/index.ts'
+import { defaultState } from './states/default.ts'
 import { plannerLoop } from './libs/planner.loop.ts'
+import { importTasks } from './libs/utils.tasks.ts'
 
 import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
 import type { AppPlugin } from '../types.ts'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 class ShadoPlannerHtnPlugin {
   puppetRuntime: PuppetRuntime
@@ -13,6 +21,9 @@ class ShadoPlannerHtnPlugin {
   //
 
   _app: AppContext
+  _tasks: any
+
+  config: { tasksPath: string }
 
   //
 
@@ -24,9 +35,11 @@ class ShadoPlannerHtnPlugin {
     this._app = _app
     this.puppetRuntime = puppetRuntime
     this.puppetConfig = puppetConfig
+
+    this.config = { tasksPath: path.join(__dirname, 'tasks') }
   }
 
-  init = () => {
+  init = async () => {
     try {
       this.puppetRuntime.memory.goals = {
         ...this.puppetRuntime.memory.goals,
@@ -46,6 +59,8 @@ class ShadoPlannerHtnPlugin {
         'telegram-has-client': Boolean(this.puppetRuntime.clients['telegram']),
         'twitter-has-client': Boolean(this.puppetRuntime.clients['twitter']),
       }
+
+      this._tasks = await this._registerTasks(this.config.tasksPath)
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
@@ -64,11 +79,35 @@ class ShadoPlannerHtnPlugin {
     plannerLoop(
       this.puppetRuntime,
       this.puppetConfig,
-      tasks,
+      //
       this.puppetRuntime.memory.goals,
       this.puppetRuntime.memory.state,
+      //
+      tasksPool(this.puppetConfig, this._app.plugins, this._tasks),
       this._app,
     )
+  }
+
+  _registerTasks = async (tasksPath: string) => {
+    const tasks = {}
+
+    const imports = await importTasks(tasksPath)
+
+    imports.forEach((importedTask) => {
+      if (!importedTask) {
+        return
+      }
+
+      const key = importedTask.identifier.split('-').at(0)
+
+      if (!tasks[key]) {
+        tasks[key] = {}
+      }
+
+      tasks[key][importedTask.identifier] = importedTask
+    })
+
+    return tasks
   }
 }
 

@@ -1,9 +1,10 @@
 import { asyncSleep } from '../../../core/libs/utils.async.ts'
+import { generatePlans } from './planner.generate.ts'
+import { executePlan } from './planner.execute.ts'
 import type { AppContext } from '../../../core/context/types'
 import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
 import type { PuppetState } from '../types'
-import { generatePlans } from './planner.generate.ts'
-import { executePlan } from './planner.execute.ts'
+import type { HtnTask } from '../tasks/types.ts'
 
 const config = {
   AWAIT_PLANNING_FOR_X_SECONDS: 1,
@@ -14,10 +15,10 @@ export const plannerLoop = async (
   puppetRuntime: PuppetRuntime,
   puppetConfig: PuppetConfig,
   //
-  tasks: any,
   goals: any,
   state: PuppetState,
   //
+  tasksPool: HtnTask[],
   _app: AppContext,
 ) => {
   // NOTE: Disable for debugging purposes.
@@ -46,7 +47,7 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
+    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
 
     return
   }
@@ -59,7 +60,7 @@ export const plannerLoop = async (
   })
 
   // NOTE: Generate plans for the current goals.
-  const plans = await generatePlans(tasks, goals, state, _app)
+  const plans = await generatePlans(tasksPool, goals, state, _app)
 
   // NOTE: Check if any plans have been generated.
   if (!plans || plans.length === 0) {
@@ -75,7 +76,7 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
+    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
 
     return
   }
@@ -98,7 +99,7 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
+    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
 
     return
   }
@@ -137,5 +138,5 @@ export const plannerLoop = async (
   }
 
   // NOTE: Enter the planning loop after timeout.
-  plannerLoop(puppetRuntime, puppetConfig, tasks, goals, state, _app)
+  plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
 }

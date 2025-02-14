@@ -61,7 +61,7 @@ export class Puppet {
 
     try {
       // NOTE: Start the planner loop.
-      this.planner.init()
+      await this.planner.init()
       this.planner.startPlanner()
     } catch (error) {
       _app.utils.logger.send({

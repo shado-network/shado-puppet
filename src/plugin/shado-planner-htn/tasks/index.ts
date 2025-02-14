@@ -1,16 +1,34 @@
-import telegramGetMessages from './telegram/telegram-get-messages.ts'
-import telegramReadMessages from './telegram/telegram-read-messages.ts'
+import type { HtnTask } from './types.ts'
+import type { PuppetConfig } from '../../../core/puppet/types.ts'
 
-import twitterLogIn from './twitter/twitter-log-in.ts'
-import twitterGetMessages from './twitter/twitter-get-messages.ts'
-import twitterSendMessage from './twitter/twitter-send-message.ts'
+export const tasksPool = (
+  puppetConfig: PuppetConfig,
+  //
+  _plugins: any,
+  _tasks: any,
+) => {
+  const pool: HtnTask[] = []
 
-export const tasks = [
-  // Telegram
-  telegramGetMessages,
-  telegramReadMessages,
-  // Twitter
-  twitterLogIn,
-  twitterGetMessages,
-  twitterSendMessage,
-]
+  const clientsArray = puppetConfig.clients.map((client) => {
+    return client.identifier
+  })
+
+  // NOTE: Check if there is overlap between all plugins and the puppets clients.
+  const intersection = Object.keys(_plugins).filter((value) =>
+    clientsArray.includes(value),
+  )
+
+  intersection.forEach((identifier: string) => {
+    try {
+      pool.push(
+        ...Object.values(
+          _tasks[_plugins[identifier].key] as { [key: string]: HtnTask },
+        ),
+      )
+    } catch (error) {
+      // console.log(error)
+    }
+  })
+
+  return pool
+}
