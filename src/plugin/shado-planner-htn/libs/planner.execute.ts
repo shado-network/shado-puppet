@@ -28,11 +28,11 @@ export const executePlan = async (
       source: 'PUPPET',
       puppetId: puppetRuntime.id,
       type: 'LOG',
-      message: `Executing task '${task.identifier}'`,
-      payload: {
-        task,
-        // currentState: state
-      },
+      message: `Executing task "${task.identifier}"`,
+      // payload: {
+      //   task,
+      //   // currentState: state
+      // },
     })
 
     // NOTE: Debug log!
@@ -48,7 +48,7 @@ export const executePlan = async (
         source: 'PUPPET',
         puppetId: puppetRuntime.id,
         type: 'WARNING',
-        message: `Task '${task.identifier}' skipped. Conditions have not been met. Something changed?`,
+        message: `Task "${task.identifier}" skipped`,
       })
 
       return false

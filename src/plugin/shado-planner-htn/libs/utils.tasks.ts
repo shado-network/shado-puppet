@@ -2,9 +2,10 @@ import fs from 'fs'
 import path from 'path'
 
 import { asyncForEach } from '../../../core/libs/utils.async.ts'
+import type { HtnTask } from '../tasks/types'
 
 export const importTasks = async (tasksPath: string) => {
-  const imports = []
+  const imports: HtnTask[] = []
 
   const files = fs.readdirSync(tasksPath, {
     recursive: true,

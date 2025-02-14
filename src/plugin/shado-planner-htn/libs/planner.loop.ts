@@ -4,7 +4,7 @@ import { executePlan } from './planner.execute.ts'
 import type { AppContext } from '../../../core/context/types'
 import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types'
 import type { PuppetState } from '../types'
-import type { HtnTask } from '../tasks/types.ts'
+import type { HtnTask } from '../tasks/types'
 
 const config = {
   AWAIT_PLANNING_FOR_X_SECONDS: 1,

@@ -3,13 +3,14 @@ import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 import { tasksPool } from './tasks/index.ts'
-import { defaultState } from './states/default.ts'
+import { defaultStates } from './states/index.ts'
 import { plannerLoop } from './libs/planner.loop.ts'
 import { importTasks } from './libs/utils.tasks.ts'
 
 import type { PuppetConfig, PuppetRuntime } from '../../core/puppet/types'
 import type { AppContext } from '../../core/context/types'
-import type { AppPlugin } from '../types.ts'
+import type { AppPlugin } from '../types'
+import type { HtnTask } from './tasks/types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -21,7 +22,11 @@ class ShadoPlannerHtnPlugin {
   //
 
   _app: AppContext
-  _tasks: any
+  _tasks: {
+    [key: string]: {
+      [key: string]: HtnTask
+    }
+  }
 
   config: { tasksPath: string }
 
@@ -53,11 +58,23 @@ class ShadoPlannerHtnPlugin {
       // })
 
       this.puppetRuntime.memory.state = {
-        ...defaultState,
+        'last-started': 0,
+        'last-updated': 0,
+        //
         ...this.puppetRuntime.memory.state,
-        // TODO: Move to plugin?!
+        //
+        // NOTE: Telegram default state
         'telegram-has-client': Boolean(this.puppetRuntime.clients['telegram']),
+        // 'telegram-has-credentials': undefined,
+        ...(this.puppetRuntime.clients['telegram']
+          ? defaultStates['telegram']
+          : {}),
+        // NOTE: Twitter default state
         'twitter-has-client': Boolean(this.puppetRuntime.clients['twitter']),
+        // 'twitter-has-credentials': undefined,
+        ...(this.puppetRuntime.clients['twitter']
+          ? defaultStates['twitter']
+          : {}),
       }
 
       this._tasks = await this._registerTasks(this.config.tasksPath)
@@ -83,13 +100,18 @@ class ShadoPlannerHtnPlugin {
       this.puppetRuntime.memory.goals,
       this.puppetRuntime.memory.state,
       //
+      // TODO: Make it so it stays dynamic?
       tasksPool(this.puppetConfig, this._app.plugins, this._tasks),
       this._app,
     )
   }
 
   _registerTasks = async (tasksPath: string) => {
-    const tasks = {}
+    const tasks: {
+      [key: string]: {
+        [key: string]: HtnTask
+      }
+    } = {}
 
     const imports = await importTasks(tasksPath)
 
