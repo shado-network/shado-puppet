@@ -15,6 +15,6 @@ export type AppContext = {
   }
   utils: {
     // TODO: Update to the proper type from the plugin.
-    logger: null | any
+    logger: undefined | any
   }
 }

@@ -9,7 +9,7 @@ class OpenAiAdapterPlugin {
   // TODO: Get from puppet file.
   fields: ChatOpenAIFields = {
     model: 'gpt-4o-mini',
-    temperature: 1,
+    temperature: 1.0,
     maxTokens: 256,
   }
 
@@ -62,6 +62,6 @@ class OpenAiAdapterPlugin {
 export default {
   identifier: 'adapter-openai',
   description: 'Wrapper for OpenAI interaction through LangChain.',
-  key: 'llm',
+  key: 'model',
   plugin: OpenAiAdapterPlugin,
 } satisfies AppPlugin

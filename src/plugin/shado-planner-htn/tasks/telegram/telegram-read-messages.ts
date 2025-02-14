@@ -56,12 +56,12 @@ export default {
           }
 
           // NOTE: Mark message as read.
-          props.puppetRuntime.clients['telegram'].markAsRead(message.id)
+          props._puppet.runtime.clients['telegram'].markAsRead(message.id)
 
           props._app.utils.logger.send({
             type: 'LOG',
             source: 'AGENT',
-            puppetId: props.puppetRuntime.id,
+            puppetId: props._puppet.config.id,
             message: 'Got a Telegram message',
             payload: {
               message: message.message,
@@ -73,7 +73,7 @@ export default {
             props._app.utils.logger.send({
               type: 'LOG',
               source: 'AGENT',
-              puppetId: props.puppetRuntime.id,
+              puppetId: props._puppet.config.id,
               message: 'Chose to ignore Telegram message:',
               payload: {
                 message: message.message,
@@ -89,11 +89,11 @@ export default {
 
           // NOTE: Check if this is a new thread.
           if (
-            !props.puppetRuntime.clients['telegram']
+            !props._puppet.runtime.clients['telegram']
               .getMessageThreads()
               .includes(`telegram-${message.from_id}`)
           ) {
-            props.puppetRuntime.clients['telegram'].addMessageThread(
+            props._puppet.runtime.clients['telegram'].addMessageThread(
               `telegram-${message.from_id}`,
             )
 
@@ -102,7 +102,7 @@ export default {
 
           if (firstMessageInThread) {
             messages = [
-              new SystemMessage(props.puppetConfig.bio.join('\n')),
+              new SystemMessage(props._puppet.config.bio.join('\n')),
               new HumanMessage(message.message),
             ]
           } else {
@@ -111,7 +111,7 @@ export default {
 
           // NOTE: Generate a response.
           const response = await (
-            props.puppetRuntime.model as any
+            props._puppet.runtime.model as any
           ).getMessagesResponse(messages, {
             thread: `telegram-${message.from_id}`,
           })
@@ -122,7 +122,7 @@ export default {
           // )
 
           // NOTE: Send the reply.
-          await props.puppetRuntime.clients['telegram'].replyToMessage(
+          await props._puppet.runtime.clients['telegram'].replyToMessage(
             response as string,
             message.ctx,
           )
@@ -165,12 +165,12 @@ const _shouldReplyToMessage = (props, ctx) => {
   // NOTE: Check if they are mentioned.
   const isMentioned =
     ctx.message.text.includes(
-      `@${process.env[`TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`]}`,
+      `@${process.env[`TELEGRAM_${props._puppet.config.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
     ctx.message.text.includes(
-      `${process.env[`TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`]}`,
+      `${process.env[`TELEGRAM_${props._puppet.config.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
-    ctx.message.text.includes(`${props.puppetConfig.name}`)
+    ctx.message.text.includes(`${props._puppet.config.name}`)
 
   // NOTE: Check if there is a mention of swarm members.
   // const isFromSwarmPuppet = [
@@ -181,7 +181,7 @@ const _shouldReplyToMessage = (props, ctx) => {
   //     return !(
   //       handle ===
   //       process.env[
-  //         `TELEGRAM_${props.puppetRuntime.id.toUpperCase()}_BOT_HANDLE`
+  //         `TELEGRAM_${props._puppet.config.id.toUpperCase()}_BOT_HANDLE`
   //       ]
   //     )
   //   })

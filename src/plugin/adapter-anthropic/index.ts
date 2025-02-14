@@ -11,7 +11,7 @@ class AnthropicAdapterPlugin {
   config: AnthropicInput & BaseChatModelParams = {
     apiKey: process.env.ANTHROPIC_API_KEY,
     model: 'claude-3-5-sonnet-20241022',
-    temperature: 1,
+    temperature: 1.0,
     maxTokens: 256,
   }
 
@@ -59,6 +59,6 @@ class AnthropicAdapterPlugin {
 export default {
   identifier: 'adapter-anthropic',
   description: 'Wrapper for Anthropic Claude interaction through LangChain.',
-  key: 'llm',
+  key: 'model',
   plugin: AnthropicAdapterPlugin,
 } satisfies AppPlugin

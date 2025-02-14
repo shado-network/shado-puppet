@@ -1,12 +1,11 @@
 import { asyncForEach, asyncEvery } from '../../../core/libs/utils.async.ts'
 import type { AppContext } from '../../../core/context/types.ts'
-import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../../core/puppet/types.ts'
 import type { PuppetState } from '../types.ts'
 import type { HtnTask } from '../tasks/types.ts'
 
 export const executePlan = async (
-  puppetRuntime: PuppetRuntime,
-  puppetConfig: PuppetConfig,
+  _puppet: PuppetInstance,
   //
   plan: any[],
   state: PuppetState,
@@ -15,7 +14,7 @@ export const executePlan = async (
 ) => {
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppetRuntime.id,
+    puppetId: _puppet.config.id,
     type: 'INFO',
     message: 'Executing plan',
     payload: { currentPlan: plan },
@@ -26,7 +25,7 @@ export const executePlan = async (
   const result = await asyncEvery(plan, async (task: HtnTask) => {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'LOG',
       message: `Executing task "${task.identifier}"`,
       // payload: {
@@ -46,7 +45,7 @@ export const executePlan = async (
     ) {
       _app.utils.logger.send({
         source: 'PUPPET',
-        puppetId: puppetRuntime.id,
+        puppetId: _puppet.config.id,
         type: 'WARNING',
         message: `Task "${task.identifier}" skipped`,
       })
@@ -61,8 +60,7 @@ export const executePlan = async (
       Object.keys(task.actions),
       async (actionIdentifier: string) => {
         const result = await task.actions[actionIdentifier]({
-          puppetRuntime,
-          puppetConfig,
+          _puppet,
           state,
           _app,
         })
@@ -88,8 +86,7 @@ export const executePlan = async (
       Object.keys(task.effects),
       async (effectIdentifier: string) => {
         const result = await task.effects[effectIdentifier].trigger({
-          puppetRuntime,
-          puppetConfig,
+          _puppet,
           state,
           _app,
         })

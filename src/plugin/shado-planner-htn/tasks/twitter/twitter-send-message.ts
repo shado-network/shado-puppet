@@ -46,11 +46,11 @@ export default {
 
         // NOTE: Check if this is a new thread.
         if (
-          !props.puppetRuntime.clients['twitter']
+          !props._puppet.runtime.clients['twitter']
             .getMessageThreads()
             .includes(`twitter-${message.from_id}`)
         ) {
-          props.puppetRuntime.clients['twitter'].addMessageThread(
+          props._puppet.runtime.clients['twitter'].addMessageThread(
             `twitter-${message.from_id}`,
           )
 
@@ -59,7 +59,7 @@ export default {
 
         if (firstMessageInThread) {
           messages = [
-            new SystemMessage(props.puppetConfig.bio.join('\n')),
+            new SystemMessage(props._puppet.config.bio.join('\n')),
             new HumanMessage(message.message),
           ]
         } else {
@@ -71,19 +71,19 @@ export default {
 
         // NOTE: Generate a response.
         const response = await (
-          props.puppetRuntime.model as any
+          props._puppet.runtime.model as any
         ).getMessagesResponse(messages, {
           thread: `twitter-${message.from_id}`,
         })
 
-        // console.log('???', props.puppetRuntime.clients['twitter'].sendMessage)
+        // console.log('???', props._puppet.runtime.clients['twitter'].sendMessage)
 
         // NOTE: Send the message.
-        await props.puppetRuntime.clients['twitter'].sendMessage(
+        await props._puppet.runtime.clients['twitter'].sendMessage(
           response as string,
         )
 
-        // props.puppetRuntime.clients['twitter'].markAsRead(message.id)
+        // props._puppet.runtime.clients['twitter'].markAsRead(message.id)
 
         return {
           success: true,

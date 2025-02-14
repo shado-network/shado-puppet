@@ -2,7 +2,7 @@ import { fmt, code } from 'telegraf/format'
 
 import TelegramClientPlugin from '../client-telegram/index.ts'
 
-import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { AppPlugin } from '../types.ts'
 import type { LoggerConfig, LoggerMessage } from './types.ts'
@@ -94,22 +94,32 @@ class ShadoLoggerPlugin {
         botToken: process.env['SANDBOX_TELEGRAM_BOT_TOKEN'],
       }
 
-      const sandboxPuppetConfig = {
-        id: 'sandbox',
-        name: 'Shadō Puppet Sandbox',
-        //
-        planner: null,
-        model: null,
-        clients: [
-          {
-            identifier: 'client-telegram',
-            config: sandboxClientConfig,
-            secrets: sandboxClientSecrets,
-          },
-        ],
-        //
-        bio: null,
-      } satisfies PuppetConfig
+      // TODO: Make this cleaner.
+      const sandboxPuppetInstance = {
+        runtime: {
+          id: 'sandbox',
+          //
+          model: null,
+          clients: null,
+          memory: null,
+        },
+        config: {
+          id: 'sandbox',
+          name: 'Shadō Puppet Sandbox',
+          //
+          planner: null,
+          model: null,
+          clients: [
+            {
+              identifier: 'client-telegram',
+              config: sandboxClientConfig,
+              secrets: sandboxClientSecrets,
+            },
+          ],
+          //
+          bio: null,
+        },
+      } satisfies PuppetInstance
 
       const sandboxApp = {
         config: null,
@@ -124,7 +134,7 @@ class ShadoLoggerPlugin {
       this.config.sandboxClients['telegram'] = new TelegramClientPlugin.plugin(
         sandboxClientConfig,
         sandboxClientSecrets,
-        sandboxPuppetConfig,
+        sandboxPuppetInstance,
         sandboxApp,
       )
     } catch (error) {

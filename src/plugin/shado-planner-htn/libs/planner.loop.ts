@@ -2,7 +2,7 @@ import { asyncSleep } from '../../../core/libs/utils.async.ts'
 import { generatePlans } from './planner.generate.ts'
 import { executePlan } from './planner.execute.ts'
 import type { AppContext } from '../../../core/context/types.ts'
-import type { PuppetConfig, PuppetRuntime } from '../../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../../core/puppet/types.ts'
 import type { PuppetState } from '../types.ts'
 import type { HtnTask } from '../tasks/types.ts'
 
@@ -12,8 +12,7 @@ const config = {
 }
 
 export const plannerLoop = async (
-  puppetRuntime: PuppetRuntime,
-  puppetConfig: PuppetConfig,
+  _puppet: PuppetInstance,
   //
   goals: any,
   state: PuppetState,
@@ -29,7 +28,7 @@ export const plannerLoop = async (
 
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppetRuntime.id,
+    puppetId: _puppet.config.id,
     type: 'LOG',
     message: date.toLocaleString(),
   })
@@ -38,7 +37,7 @@ export const plannerLoop = async (
   if (!goals || Object.keys(goals).length === 0) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'LOG',
       message: 'No goals have been set',
       payload: {
@@ -47,14 +46,14 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
+    plannerLoop(_puppet, goals, state, tasksPool, _app)
 
     return
   }
 
   _app.utils.logger.send({
     source: 'PUPPET',
-    puppetId: puppetRuntime.id,
+    puppetId: _puppet.config.id,
     type: 'LOG',
     message: 'Generating plans',
   })
@@ -66,7 +65,7 @@ export const plannerLoop = async (
   if (!plans || plans.length === 0) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'LOG',
       message: 'No plan found for current goals',
       payload: {
@@ -76,7 +75,7 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
+    plannerLoop(_puppet, goals, state, tasksPool, _app)
 
     return
   }
@@ -89,7 +88,7 @@ export const plannerLoop = async (
   if (!plan || plan.length === 0) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'LOG',
       message: 'No plan found for current goals',
       payload: {
@@ -99,14 +98,13 @@ export const plannerLoop = async (
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
+    plannerLoop(_puppet, goals, state, tasksPool, _app)
 
     return
   }
 
   const isPlanSuccessful = await executePlan(
-    puppetRuntime,
-    puppetConfig,
+    _puppet,
     //
     plan.reverse(),
     state,
@@ -118,7 +116,7 @@ export const plannerLoop = async (
   if (isPlanSuccessful) {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'INFO',
       message: 'Plan executed successfully',
       payload: { currentState: state },
@@ -128,7 +126,7 @@ export const plannerLoop = async (
   } else {
     _app.utils.logger.send({
       source: 'PUPPET',
-      puppetId: puppetRuntime.id,
+      puppetId: _puppet.config.id,
       type: 'WARNING',
       message: 'Plan skipped',
       payload: { currentState: state },
@@ -138,5 +136,5 @@ export const plannerLoop = async (
   }
 
   // NOTE: Enter the planning loop after timeout.
-  plannerLoop(puppetRuntime, puppetConfig, goals, state, tasksPool, _app)
+  plannerLoop(_puppet, goals, state, tasksPool, _app)
 }

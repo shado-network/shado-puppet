@@ -29,7 +29,7 @@ export default {
   actions: {
     'telegram-get-messages': async (props) => {
       try {
-        const messages = props.puppetRuntime.clients['twitter'].getMessages([])
+        const messages = props._puppet.runtime.clients['twitter'].getMessages()
         props.state['twitter-messages'] = messages
 
         return {

@@ -2,8 +2,8 @@ import { Telegraf } from 'telegraf'
 import { message } from 'telegraf/filters'
 import type { FmtString } from 'telegraf/format'
 
-import type { PuppetConfig } from '../../core/puppet/types.ts'
 import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppPlugin } from '../types.ts'
 
 class TelegramClientPlugin {
@@ -22,19 +22,19 @@ class TelegramClientPlugin {
 
   //
 
-  puppetConfig: PuppetConfig
   _app: AppContext
+  _puppet: PuppetInstance
 
   //
 
   constructor(
     clientConfig: any,
     clientSecrets: any,
-    puppetConfig: PuppetConfig,
+    _puppet: PuppetInstance,
     _app: AppContext,
   ) {
     this._app = _app
-    this.puppetConfig = puppetConfig
+    this._puppet = _puppet
 
     this.clientConfig = {
       ...this.clientConfig,
@@ -52,14 +52,14 @@ class TelegramClientPlugin {
       // this._app.utils.logger.send({
       //   type: 'SUCCESS',
       //   source: 'PUPPET',
-      //   puppetId: this.puppetConfig.id,
+      //   puppetId: this._puppet.config.id,
       //   message: 'Connected to Telegram bot',
       // })
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Could not connect to Telegram bot',
       })
     }

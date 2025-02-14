@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { PuppetConfig } from '../../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../../core/puppet/types.ts'
 
 export const cookies = {
   retrieve: (cookiesFilepath: string) => {
@@ -13,10 +13,13 @@ export const cookies = {
   store: (cookies: any[], cookiesFilepath: string) => {
     fs.writeFileSync(cookiesFilepath, JSON.stringify(cookies), 'utf-8')
   },
-  getFilepath: (cacheDirectoryPaths: string[], puppetConfig: PuppetConfig) => {
+  getFilepath: (
+    cacheDirectoryPaths: string[],
+    puppetId: PuppetInstance['config']['id'],
+  ) => {
     const cookiesFilepath = path.join(
       ...cacheDirectoryPaths,
-      `twitter_cookies_${puppetConfig.id}.json`,
+      `twitter_cookies_${puppetId}.json`,
     )
 
     return cookiesFilepath

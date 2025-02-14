@@ -1,3 +1,5 @@
+import { PuppetInstance } from '../../core/puppet/types.ts'
+
 export type LoggerConfig = {
   clients: {
     sandbox: boolean
@@ -6,7 +8,7 @@ export type LoggerConfig = {
   }
   sandboxClients: {
     // TODO: Update to the proper type from the plugin.
-    telegram: null | any
+    telegram: undefined | any
     [key: string]: any
   }
   //
@@ -19,7 +21,8 @@ export type LoggerMessage = {
   message: string
   payload?: null | unknown
   //
+  // TODO: Improve upon type. Unify or split fully.
   playId?: string
-  puppetId?: string
+  puppetId?: PuppetInstance['config']['id']
   userId?: string
 }

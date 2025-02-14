@@ -1,15 +1,15 @@
+import type { PuppetInstance } from '../../../core/puppet/types.ts'
 import type { HtnTask } from './types.ts'
-import type { PuppetConfig } from '../../../core/puppet/types.ts'
 
 export const tasksPool = (
-  puppetConfig: PuppetConfig,
+  _puppet: PuppetInstance,
   //
   _plugins: any,
   _tasks: any,
 ) => {
   const pool: HtnTask[] = []
 
-  const clientsArray = puppetConfig.clients.map((client) => {
+  const clientsArray = _puppet.config.clients.map((client) => {
     return client.identifier
   })
 

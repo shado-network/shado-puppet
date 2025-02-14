@@ -2,8 +2,8 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import type { FastifyInstance } from 'fastify'
 
-import type { PuppetConfig } from '../../core/puppet/types.ts'
 import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppPlugin } from '../types.ts'
 import type { ShadoCommsResponse } from './types.ts'
 
@@ -18,19 +18,19 @@ class ShadoCommsPlugin {
 
   //
 
-  puppetConfig: PuppetConfig
   _app: AppContext
+  _puppet: PuppetInstance
 
   //
 
   constructor(
     clientConfig: any,
     clientSecrets: any,
-    puppetConfig: PuppetConfig,
+    _puppet: PuppetInstance,
     _app: AppContext,
   ) {
     this._app = _app
-    this.puppetConfig = puppetConfig
+    this._puppet = _puppet
 
     this.serverConfig = {
       ...this.serverConfig,
@@ -53,7 +53,7 @@ class ShadoCommsPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Could not create Shadō Comms server',
       })
     }
@@ -70,14 +70,14 @@ class ShadoCommsPlugin {
       this._app.utils.logger.send({
         type: 'SUCCESS',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: `Started Shadō Comms server at port ${this.serverConfig.port}`,
       })
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Could not start Shadō Comms server',
       })
 
@@ -127,10 +127,10 @@ class ShadoCommsPlugin {
           status: 'success',
           timestamp: Date.now(),
           data: {
-            message: `Puppet data for [ ${this.puppetConfig.id} / ${this.puppetConfig.name} ]`,
+            message: `Puppet data for [ ${this._puppet.config.id} / ${this._puppet.config.name} ]`,
             puppet: {
-              id: this.puppetConfig.id,
-              name: this.puppetConfig.name,
+              id: this._puppet.config.id,
+              name: this._puppet.config.name,
               image: null,
               port: this.serverConfig.port,
             },

@@ -6,8 +6,8 @@ import type { Tweet } from 'agent-twitter-client'
 
 import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.async.ts'
-import type { PuppetConfig } from '../../core/puppet/types.ts'
 import type { AppContext } from '../../core/context/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppPlugin } from '../types.ts'
 
 // TODO: Find a better way.
@@ -32,19 +32,19 @@ class TwitterClientPlugin {
 
   //
 
-  puppetConfig: PuppetConfig
   _app: AppContext
+  _puppet: PuppetInstance
 
   //
 
   constructor(
     clientConfig: any,
     clientSecrets: any,
-    puppetConfig: PuppetConfig,
+    _puppet: PuppetInstance,
     _app: AppContext,
   ) {
     this._app = _app
-    this.puppetConfig = puppetConfig
+    this._puppet = _puppet
 
     this.clientConfig = {
       ...this.clientConfig,
@@ -62,7 +62,7 @@ class TwitterClientPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Could not connect to Twitter bot',
       })
     }
@@ -88,7 +88,7 @@ class TwitterClientPlugin {
     cookies.createDirectory(cacheDirectoryPaths)
     const cookiesFilepath = cookies.getFilepath(
       cacheDirectoryPaths,
-      this.puppetConfig,
+      this._puppet.config.id,
     )
 
     //
@@ -102,7 +102,7 @@ class TwitterClientPlugin {
         this._app.utils.logger.send({
           type: 'INFO',
           source: 'PUPPET',
-          puppetId: this.puppetConfig.id,
+          puppetId: this._puppet.config.id,
           message: "Found it's previous Twitter cookies",
         })
       }
@@ -113,7 +113,7 @@ class TwitterClientPlugin {
         this._app.utils.logger.send({
           type: 'LOG',
           source: 'PUPPET',
-          puppetId: this.puppetConfig.id,
+          puppetId: this._puppet.config.id,
           message: `Twitter login attempt #${loginAttempts + 1}`,
         })
 
@@ -127,7 +127,7 @@ class TwitterClientPlugin {
           this._app.utils.logger.send({
             type: 'SUCCESS',
             source: 'PUPPET',
-            puppetId: this.puppetConfig.id,
+            puppetId: this._puppet.config.id,
             message: `Logged into Twitter`,
           })
 
@@ -138,14 +138,14 @@ class TwitterClientPlugin {
             this._app.utils.logger.send({
               type: 'SUCCESS',
               source: 'PUPPET',
-              puppetId: this.puppetConfig.id,
+              puppetId: this._puppet.config.id,
               message: `Stored it's new Twitter cookies`,
             })
           } catch (error) {
             this._app.utils.logger.send({
               type: 'ERROR',
               source: 'PUPPET',
-              puppetId: this.puppetConfig.id,
+              puppetId: this._puppet.config.id,
               message: `Could not store it's new Twitter cookies`,
             })
           }
@@ -159,7 +159,7 @@ class TwitterClientPlugin {
           this._app.utils.logger.send({
             type: 'ERROR',
             source: 'PUPPET',
-            puppetId: this.puppetConfig.id,
+            puppetId: this._puppet.config.id,
             message: `Failed to log in to Twitter after ${loginAttempts} attempts`,
           })
 
@@ -178,7 +178,7 @@ class TwitterClientPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: `Error logging in to Twitter`,
         payload: { error },
       })
@@ -192,7 +192,7 @@ class TwitterClientPlugin {
       this._app.utils.logger.send({
         type: 'SANDBOX',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'client-twitter | sendMessage()',
         payload: {
           message: message,
@@ -209,12 +209,12 @@ class TwitterClientPlugin {
   }
 
   /*
-  getMessages = async (messages) => {
+  getMessages = async () => {
     if (await !this.client.isLoggedIn()) {
       return
     }
     const userId = 'user'
-    const message = `Interesting ${this.puppetConfig.name}, tell me more?`
+    const message = `Interesting ${this._puppet.name}, tell me more?`
 
     const tweets = []
 
@@ -258,7 +258,7 @@ class TwitterClientPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Error',
         payload: { error },
       })
@@ -266,7 +266,7 @@ class TwitterClientPlugin {
     this._app.utils.logger.send({
       type: 'LOG',
       source: 'AGENT',
-      puppetId: this.puppetConfig.id,
+      puppetId: this._puppet.config.id,
       message: 'Read some Tweets:',
       payload: {
         tweets: tweets,
@@ -291,7 +291,7 @@ class TwitterClientPlugin {
     // this._app.utils.logger.send({
     //   type: 'LOG',
     //   source: 'PUPPET',
-    //   puppetId: puppetConfig.id,
+    //   puppetId: puppet.id,
     //   message: 'Read a message:',
     //   payload: {
     //     message: message,

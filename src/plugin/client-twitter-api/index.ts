@@ -2,7 +2,7 @@ import { TwitterApi } from 'twitter-api-v2'
 import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
 import type { AppContext } from '../../core/context/types.ts'
-import type { PuppetConfig } from '../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppPlugin } from '../types.ts'
 
 class TwitterApiClientPlugin {
@@ -19,19 +19,19 @@ class TwitterApiClientPlugin {
 
   //
 
-  puppetConfig: PuppetConfig
   _app: AppContext
+  _puppet: PuppetInstance
 
   //
 
   constructor(
     clientConfig: any,
     clientSecrets: any,
-    puppetConfig: PuppetConfig,
+    _puppet: PuppetInstance,
     _app: AppContext,
   ) {
     this._app = _app
-    this.puppetConfig = puppetConfig
+    this._puppet = _puppet
 
     this.clientConfig = {
       ...this.clientConfig,
@@ -46,7 +46,7 @@ class TwitterApiClientPlugin {
     this._app.utils.logger.send({
       type: 'SUCCESS',
       source: 'PUPPET',
-      puppetId: this.puppetConfig.id,
+      puppetId: this._puppet.config.id,
       message: `Loaded client plugin "client-twitter-api"`,
     })
   }
@@ -72,7 +72,7 @@ class TwitterApiClientPlugin {
       // this._app.utils.logger.send({
       //   type: 'SUCCESS',
       //   source: 'PUPPET',
-      //   puppetId: this.puppetConfig.id,
+      //   puppetId: this._puppet.config.id,
       //   message: `Connected to Twitter bot`,
       // })
 
@@ -81,7 +81,7 @@ class TwitterApiClientPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: `Error connecting to Twitter bot`,
         payload: { error },
       })
@@ -103,7 +103,7 @@ class TwitterApiClientPlugin {
       this._app.utils.logger.send({
         type: 'SANDBOX',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'client-twitter-api | sendMessage()',
         payload: {
           message: message,
@@ -115,7 +115,7 @@ class TwitterApiClientPlugin {
 
     const response = await this.client.v2.tweet(message)
 
-    console.log('client-twitter | sendMessage()', { response })
+    console.log('!!!', 'client-twitter | sendMessage()', { response })
   }
 
   // getMessages = () => {
@@ -127,9 +127,9 @@ class TwitterApiClientPlugin {
   // }
 
   /*
-  getMessages = async (messages) => {
+  getMessages = async () => {
     const userId = 'user'
-    const message = `Interesting ${this.puppetConfig.name}, tell me more?`
+    const message = `Interesting ${this._puppet.name}, tell me more?`
 
     const tweets = []
 
@@ -139,7 +139,7 @@ class TwitterApiClientPlugin {
       this._app.utils.logger.send({
         type: 'ERROR',
         source: 'PUPPET',
-        puppetId: this.puppetConfig.id,
+        puppetId: this._puppet.config.id,
         message: 'Error',
         payload: { error },
       })
@@ -147,7 +147,7 @@ class TwitterApiClientPlugin {
     this._app.utils.logger.send({
       type: 'LOG',
       source: 'AGENT',
-      puppetId: this.puppetConfig.id,
+      puppetId: this._puppet.config.id,
       message: 'Read some Tweets:',
       payload: {
         tweets: tweets,
@@ -174,7 +174,7 @@ class TwitterApiClientPlugin {
     // this._app.utils.logger.send({
     //   type: 'LOG',
     //   source: 'PUPPET',
-    //   puppetId: puppetConfig.id,
+    //   puppetId: puppet.id,
     //   message: 'Read a message:',
     //   payload: {
     //     message: message,

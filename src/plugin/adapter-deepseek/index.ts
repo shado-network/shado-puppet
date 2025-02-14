@@ -9,7 +9,7 @@ class DeepSeekAdapterPlugin {
   // TODO: Get from puppet file.
   fields: ChatOpenAIFields = {
     model: 'deepseek-chat',
-    temperature: 1,
+    temperature: 1.0,
     maxTokens: 256,
   }
 
@@ -63,6 +63,6 @@ class DeepSeekAdapterPlugin {
 export default {
   identifier: 'adapter-deepseek',
   description: 'Wrapper for DeepSeek interaction through LangChain.',
-  key: 'llm',
+  key: 'model',
   plugin: DeepSeekAdapterPlugin,
 } satisfies AppPlugin

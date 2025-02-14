@@ -19,7 +19,7 @@ const puppetConfig: PuppetConfig = {
     provider: 'adapter-deepseek',
     config: {
       model: 'deepseek-chat',
-      temperature: 1,
+      temperature: 0.6,
       maxTokens: 256,
     },
     // provider: 'adapter-openai',
