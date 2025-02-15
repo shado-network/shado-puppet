@@ -7,24 +7,27 @@ export default {
   identifier: 'twitter-send-message',
 
   conditions: {
-    'twitter-has-client': (props) => props.state['twitter-has-client'] === true,
+    'twitter-has-client': (props) =>
+      props._puppet.runtime.memory.state?.['twitter-has-client'] === true,
     'twitter-has-logged-in': (props) =>
-      props.state['twitter-has-logged-in'] === true,
+      props._puppet.runtime.memory.state?.['twitter-has-logged-in'] === true,
     'twitter-last-sent': (props) =>
-      props.state['twitter-last-sent'] <= Date.now() - 3 * MIN_IN_MSEC,
+      props._puppet.runtime.memory.state?.['twitter-last-sent'] <=
+      Date.now() - 3 * MIN_IN_MSEC,
   },
 
   effects: {
     'twitter-last-sent': {
       // value: (props) => false,
       value: (props) =>
-        props.state['twitter-last-sent'] <= Date.now() - 3 * MIN_IN_MSEC,
+        props._puppet.runtime.memory.state?.['twitter-last-sent'] <=
+        Date.now() - 3 * MIN_IN_MSEC,
       trigger: async (props) => {
-        props.state['twitter-last-sent'] = Date.now()
+        props._puppet.runtime.memory.state['twitter-last-sent'] = Date.now()
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },

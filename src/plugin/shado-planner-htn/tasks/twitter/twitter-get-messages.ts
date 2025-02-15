@@ -4,23 +4,24 @@ export default {
   identifier: 'twitter-get-messages',
 
   conditions: {
-    'twitter-has-client': (props) => props.state['twitter-has-client'] === true,
+    'twitter-has-client': (props) =>
+      props._puppet.runtime.memory.state?.['twitter-has-client'] === true,
     'twitter-has-logged-in': (props) =>
-      props.state['twitter-has-logged-in'] === true,
+      props._puppet.runtime.memory.state?.['twitter-has-logged-in'] === true,
     'twitter-has-messages': (props) =>
-      props.state['twitter-has-messages'] === false,
+      props._puppet.runtime.memory.state?.['twitter-has-messages'] === false,
   },
 
   effects: {
     'twitter-has-messages': {
       value: (props) => true,
       trigger: async (props) => {
-        props.state['twitter-has-messages'] = true
-        // props.state['twitter-has-messages'] = props.state['twitter-messages'].length > 0
+        props._puppet.runtime.memory.state['twitter-has-messages'] = true
+        // props._puppet.runtime.memory.state['twitter-has-messages'] = props._puppet.runtime.memory.state?.['twitter-messages'].length > 0
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
@@ -30,7 +31,7 @@ export default {
     'telegram-get-messages': async (props) => {
       try {
         const messages = props._puppet.runtime.clients['twitter'].getMessages()
-        props.state['twitter-messages'] = messages
+        props._puppet.runtime.memory.state['twitter-messages'] = messages
 
         return {
           success: true,

@@ -1,12 +1,11 @@
 import { asyncForEach } from '../../../core/libs/utils.async.ts'
 import type { AppContext } from '../../../core/context/types.ts'
-import type { PuppetState } from '../types.ts'
+import type { PuppetInstance } from '../../../core/puppet/types.ts'
 import type { HtnTask } from '../tasks/types.ts'
 
 export const generatePlans = async (
   tasksPool: HtnTask[],
-  goals: any,
-  state: PuppetState,
+  _puppet: PuppetInstance,
   _app: AppContext,
 ) => {
   const plans: HtnTask[][] = []
@@ -15,8 +14,11 @@ export const generatePlans = async (
   const goalsUnreached = []
 
   // NOTE: Loop through current goals and categorise into reached and unreached.
-  Object.keys(goals).forEach((goalIdentifier) => {
-    const goalResult = goals[goalIdentifier]({ state })
+  Object.keys(_puppet.runtime.memory.goals || {}).forEach((goalIdentifier) => {
+    const goalResult = _puppet.runtime.memory.goals[goalIdentifier]({
+      _puppet,
+      _app,
+    })
 
     if (goalResult) {
       goalsReached.push(goalIdentifier)
@@ -57,33 +59,21 @@ export const generatePlans = async (
       // NOTE: Just pick first related task for now.
       [relatedTasks.at(0)],
       async (relatedTask: HtnTask) => {
-        const remainingPlan = await _recursivePlanner(
+        const tempPlan: HtnTask[] = await _recursivePlanner(
           true,
           relatedTask,
-          tasksPool,
           [],
-          state,
+          tasksPool,
+          _puppet,
           _app,
         )
 
         // NOTE: Debug log!
-        // console.log('!!!', 'tempPlan', tempPlan)
+        // console.log('!!!', 'currentPlan', currentPlan)
 
         // NOTE: Check if full plan is executable.
-        if (
-          remainingPlan &&
-          remainingPlan !== null &&
-          remainingPlan.length > 0
-        ) {
-          // TODO: If only 1 thing in the chain, it's just the related one, just run that?
-          // TODO: If not, add it to the recursive plan?
-
-          const fullPlan: HtnTask[] = [relatedTask, ...remainingPlan]
-
-          // NOTE: Debug log!
-          // console.log('!!!', 'fullPlan', fullPlan)
-
-          tempPlans.push(fullPlan)
+        if (tempPlan && tempPlan !== null && tempPlan.length > 0) {
+          tempPlans.push(tempPlan)
         }
       },
     )
@@ -96,10 +86,10 @@ export const generatePlans = async (
 
 const _recursivePlanner = async (
   success: boolean,
-  tempTask: HtnTask,
+  currentTask: HtnTask,
+  currentPlan: HtnTask[],
   tasksPool: HtnTask[],
-  tempPlan: any[],
-  state: PuppetState,
+  _puppet: PuppetInstance,
   _app: AppContext,
 ) => {
   // NOTE: Early return of the loop.
@@ -109,7 +99,7 @@ const _recursivePlanner = async (
   }
 
   // NOTE: No more valid tasks.
-  if (!tempTask) {
+  if (!currentTask) {
     success = false
     return null
   }
@@ -118,9 +108,9 @@ const _recursivePlanner = async (
   const conditionsUnmet = []
 
   // NOTE: Check conditions of task and categorise them.
-  Object.keys(tempTask.conditions).forEach((conditionIdentifier) => {
-    const conditionResult = tempTask.conditions[conditionIdentifier]({
-      state: { ...state },
+  Object.keys(currentTask.conditions).forEach((conditionIdentifier) => {
+    const conditionResult = currentTask.conditions[conditionIdentifier]({
+      _puppet: { ..._puppet },
       _app,
     })
 
@@ -134,7 +124,7 @@ const _recursivePlanner = async (
   // NOTE: Debug log!
   // console.log(
   //   '!!!',
-  //   tempTask.identifier,
+  //   currentTask.identifier,
   //   { conditionsMet },
   //   { conditionsUnmet },
   // )
@@ -142,7 +132,7 @@ const _recursivePlanner = async (
   // NOTE: All task conditions have been met.
   if (conditionsUnmet.length === 0) {
     success = true
-    return [tempTask]
+    return [currentTask]
   }
 
   // NOTE: Debug log!
@@ -153,7 +143,7 @@ const _recursivePlanner = async (
     // NOTE: Search for related tasks for the task condition.
     const relatedTasks = tasksPool.filter((relatedTask) => {
       const effectValue = relatedTask.effects[conditionIdentifier]?.value({
-        state: { ...state },
+        _puppet: { ..._puppet },
         _app,
       })
 
@@ -171,16 +161,16 @@ const _recursivePlanner = async (
 
     // NOTE: Add task to plan.
     // NOTE: Just pick first one for now.
-    tempPlan.push(relatedTasks.at(0))
+    currentPlan.push(relatedTasks.at(0))
 
     // NOTE: Re-enter loop to look for more potential tasks to chain.
     return await _recursivePlanner(
       success,
       // NOTE: Just pick first related task for now.
       relatedTasks.at(0),
+      currentPlan,
       tasksPool,
-      tempPlan,
-      state,
+      _puppet,
       _app,
     )
   })
@@ -193,5 +183,5 @@ const _recursivePlanner = async (
 
   // NOTE: Compiled a full task chain.
   success = true
-  return tempPlan
+  return [currentTask, ...currentPlan].reverse()
 }

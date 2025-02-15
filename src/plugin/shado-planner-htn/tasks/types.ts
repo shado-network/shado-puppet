@@ -1,6 +1,5 @@
 import type { AppContext } from '../../../core/context/types.ts'
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { PuppetState } from '../types.ts'
 
 export type HtnTask = {
   identifier: string
@@ -24,20 +23,19 @@ export type HtnTask = {
 }
 
 export type GoalProps = {
-  state: PuppetState
+  _puppet: PuppetInstance
   _app: AppContext
-  [key: string]: any
+  // [key: string]: any
 }
 
 export type ValueProps = {
-  state: PuppetState
+  _puppet: PuppetInstance
   _app: AppContext
-  [key: string]: any
+  // [key: string]: any
 }
 
 export type TriggerProps = {
   _puppet: PuppetInstance
-  state: PuppetState
   _app: AppContext
-  [key: string]: any
+  // [key: string]: any
 }

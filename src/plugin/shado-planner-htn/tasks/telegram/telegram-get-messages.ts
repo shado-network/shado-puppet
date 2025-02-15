@@ -4,21 +4,21 @@ export default {
   identifier: 'telegram-get-messages',
   conditions: {
     'telegram-has-client': (props) =>
-      props.state['telegram-has-client'] === true,
+      props._puppet.runtime.memory.state?.['telegram-has-client'] === true,
     'telegram-has-messages': (props) =>
-      props.state['telegram-has-messages'] === false,
+      props._puppet.runtime.memory.state?.['telegram-has-messages'] === false,
   },
 
   effects: {
     'telegram-has-messages': {
       value: (props) => true,
       trigger: async (props) => {
-        props.state['telegram-has-messages'] =
-          props.state['telegram-messages']?.length > 0
+        props._puppet.runtime.memory.state['telegram-has-messages'] =
+          props._puppet.runtime.memory.state?.['telegram-messages']?.length > 0
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
@@ -28,7 +28,7 @@ export default {
     'telegram-get-messages': async (props) => {
       try {
         const messages = props._puppet.runtime.clients['telegram'].getMessages()
-        props.state['telegram-messages'] = messages
+        props._puppet.runtime.memory.state['telegram-messages'] = messages
         return {
           success: true,
           payload: messages,

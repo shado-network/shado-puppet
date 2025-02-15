@@ -15,8 +15,8 @@ class ShadoLoggerPlugin {
       rest: false,
     },
     sandboxClients: {
-      telegram: null,
-      discord: null,
+      telegram: undefined,
+      discord: undefined,
     },
     //
     showIcons: false,
@@ -104,16 +104,16 @@ class ShadoLoggerPlugin {
         runtime: {
           id: 'sandbox',
           //
-          model: null,
-          clients: null,
-          memory: null,
+          model: undefined,
+          clients: undefined,
+          memory: undefined,
         },
         config: {
           id: 'sandbox',
           name: 'Shadō Puppet Sandbox',
           //
-          planner: null,
-          model: null,
+          planner: undefined,
+          model: undefined,
           clients: [
             {
               identifier: 'client-telegram',
@@ -122,14 +122,14 @@ class ShadoLoggerPlugin {
             },
           ],
           //
-          bio: null,
+          bio: undefined,
         },
       } satisfies PuppetInstance
 
       const sandboxApp = {
-        config: null,
-        core: null,
-        plugins: null,
+        config: undefined,
+        core: undefined,
+        plugins: undefined,
         utils: {
           logger: this,
         },

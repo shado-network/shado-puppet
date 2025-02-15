@@ -8,35 +8,37 @@ export default {
 
   conditions: {
     'telegram-has-client': (props) =>
-      props.state['telegram-has-client'] === true,
+      props._puppet.runtime.memory.state?.['telegram-has-client'] === true,
     'telegram-has-messages': (props) =>
-      props.state['telegram-has-messages'] === true,
+      props._puppet.runtime.memory.state?.['telegram-has-messages'] === true,
     'telegram-last-replied': (props) =>
-      props.state['telegram-last-replied'] <= Date.now() - 1 * SEC_IN_MSEC,
+      props._puppet.runtime.memory.state?.['telegram-last-replied'] <=
+      Date.now() - 1 * SEC_IN_MSEC,
   },
 
   effects: {
     'telegram-has-messages': {
       value: (props) => false,
       trigger: async (props) => {
-        props.state['telegram-messages'] = []
-        props.state['telegram-has-messages'] = false
+        props._puppet.runtime.memory.state['telegram-messages'] = []
+        props._puppet.runtime.memory.state['telegram-has-messages'] = false
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
     'telegram-last-replied': {
       value: (props) =>
-        props.state['telegram-last-replied'] <= Date.now() - 1 * SEC_IN_MSEC,
+        props._puppet.runtime.memory.state?.['telegram-last-replied'] <=
+        Date.now() - 1 * SEC_IN_MSEC,
       trigger: async (props) => {
-        props.state['telegram-last-replied'] = Date.now()
+        props._puppet.runtime.memory.state['telegram-last-replied'] = Date.now()
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
@@ -50,28 +52,15 @@ export default {
         let firstMessageInThread = false
 
         // NOTE: Loop through messages.
-        props.state['telegram-messages'].forEach(async (message) => {
-          if (message.isRead) {
-            return
-          }
+        props._puppet.runtime.memory.state?.['telegram-messages'].forEach(
+          async (message) => {
+            if (message.isRead) {
+              return
+            }
 
-          // NOTE: Mark message as read.
-          props._puppet.runtime.clients['telegram'].markAsRead(message.id)
+            // NOTE: Mark message as read.
+            props._puppet.runtime.clients['telegram'].markAsRead(message.id)
 
-          props._app.utils.logger.send({
-            type: 'LOG',
-            origin: {
-              type: 'AGENT',
-              id: props._puppet.config.id,
-            },
-            data: {
-              message: 'Got a Telegram message',
-              payload: { message: message.message },
-            },
-          })
-
-          // NOTE: Should reply to message?
-          if (!_shouldReplyToMessage(props, message.ctx)) {
             props._app.utils.logger.send({
               type: 'LOG',
               origin: {
@@ -79,76 +68,91 @@ export default {
                 id: props._puppet.config.id,
               },
               data: {
-                message: 'Chose to ignore Telegram message:',
+                message: 'Got a Telegram message',
                 payload: { message: message.message },
               },
             })
 
-            replied.push(false)
+            // NOTE: Should reply to message?
+            if (!_shouldReplyToMessage(props, message.ctx)) {
+              props._app.utils.logger.send({
+                type: 'LOG',
+                origin: {
+                  type: 'AGENT',
+                  id: props._puppet.config.id,
+                },
+                data: {
+                  message: 'Chose to ignore Telegram message:',
+                  payload: { message: message.message },
+                },
+              })
 
-            return
-          }
+              replied.push(false)
 
-          // NOTE: Write response.
+              return
+            }
 
-          // NOTE: Check if this is a new thread.
-          if (
-            !props._puppet.runtime.clients['telegram']
-              .getMessageThreads()
-              .includes(`telegram-${message.from_id}`)
-          ) {
-            props._puppet.runtime.clients['telegram'].addMessageThread(
-              `telegram-${message.from_id}`,
+            // NOTE: Write response.
+
+            // NOTE: Check if this is a new thread.
+            if (
+              !props._puppet.runtime.clients['telegram']
+                .getMessageThreads()
+                .includes(`telegram-${message.from_id}`)
+            ) {
+              props._puppet.runtime.clients['telegram'].addMessageThread(
+                `telegram-${message.from_id}`,
+              )
+
+              firstMessageInThread = true
+            }
+
+            if (firstMessageInThread) {
+              messages = [
+                new SystemMessage(props._puppet.config.bio.join('\n')),
+                new HumanMessage(message.message),
+              ]
+            } else {
+              messages = [new HumanMessage(message.message)]
+            }
+
+            // NOTE: Generate a response.
+            const response = await (
+              props._puppet.runtime.model as any
+            ).getMessagesResponse(messages, {
+              thread: `telegram-${message.from_id}`,
+            })
+
+            // console.log(
+            //   { response, message },
+            //   { thread: `telegram-${message.from_id}` },
+            // )
+
+            // NOTE: Send the reply.
+            await props._puppet.runtime.clients['telegram'].replyToMessage(
+              response as string,
+              message.ctx,
             )
 
-            firstMessageInThread = true
-          }
+            replied.push(true)
 
-          if (firstMessageInThread) {
-            messages = [
-              new SystemMessage(props._puppet.config.bio.join('\n')),
-              new HumanMessage(message.message),
-            ]
-          } else {
-            messages = [new HumanMessage(message.message)]
-          }
-
-          // NOTE: Generate a response.
-          const response = await (
-            props._puppet.runtime.model as any
-          ).getMessagesResponse(messages, {
-            thread: `telegram-${message.from_id}`,
-          })
-
-          // console.log(
-          //   { response, message },
-          //   { thread: `telegram-${message.from_id}` },
-          // )
-
-          // NOTE: Send the reply.
-          await props._puppet.runtime.clients['telegram'].replyToMessage(
-            response as string,
-            message.ctx,
-          )
-
-          replied.push(true)
-
-          // TODO: Move to runtime?
-          // NOTE: Fake a delay for a more "human" response?
-          // const sleepForInSeconds = response.length * this.config.SECONDS_PER_CHAR
-          // await asyncSleep(sleepForInSeconds)
-        })
+            // TODO: Move to runtime?
+            // NOTE: Fake a delay for a more "human" response?
+            // const sleepForInSeconds = response.length * this.config.SECONDS_PER_CHAR
+            // await asyncSleep(sleepForInSeconds)
+          },
+        )
 
         // NOTE: Check if all messages got a reply.
         // if (replied.every((reply) => reply === true) && replied.length > 0) {
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
         // } else {
         //   return {
         //     success: false,
-        //     payload: null,
+        //     payload: undefined,
         //   }
         // }
       } catch (error) {

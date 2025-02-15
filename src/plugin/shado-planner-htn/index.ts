@@ -94,14 +94,9 @@ class ShadoPlannerHtnPlugin {
     this._puppet.runtime.memory.state['last-started'] = date.valueOf()
 
     plannerLoop(
-      this._puppet,
-      //
-      // TODO: Simplify, unify, or deprecate.
-      this._puppet.runtime.memory.goals,
-      this._puppet.runtime.memory.state,
-      //
       // TODO: Make it so it stays dynamic?
       tasksPool(this._puppet, this._app.plugins, this._tasks),
+      this._puppet,
       this._app,
     )
   }

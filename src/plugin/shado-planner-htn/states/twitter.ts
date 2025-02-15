@@ -1,6 +1,4 @@
-import type { PuppetState } from '../types.ts'
-
-export const twitterDefaultState: PuppetState = {
+export const twitterDefaultState = {
   'twitter-last-updated': 0,
   //
   'twitter-has-logged-in': false,

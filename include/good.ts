@@ -19,7 +19,8 @@ const puppetConfig: PuppetConfig = {
         'telegram-last-replied': (props: any) => {
           // 'telegram-last-replied': (props: GoalProps) => {
           return (
-            props.state['telegram-last-replied'] >= Date.now() - 1 * SEC_IN_MSEC
+            props._puppet.runtime.memory.state?.['telegram-last-replied'] >=
+            Date.now() - 1 * SEC_IN_MSEC
           )
         },
         // Twitter
@@ -27,7 +28,8 @@ const puppetConfig: PuppetConfig = {
         'twitter-last-sent': (props: any) => {
           // 'twitter-last-sent': (props: GoalProps) => {
           return (
-            props.state['twitter-last-sent'] >= Date.now() - 3 * MIN_IN_MSEC
+            props._puppet.runtime.memory.state?.['twitter-last-sent'] >=
+            Date.now() - 3 * MIN_IN_MSEC
           )
         },
       },

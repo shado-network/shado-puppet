@@ -6,15 +6,17 @@ export type PuppetInstance = {
 export type PuppetRuntime = {
   id: string
   //
-  planner?: null | unknown
-  model: null | unknown
+  planner?: undefined | unknown
+  model: undefined | unknown
   clients: {
     [key: string]: any
   }
   //
   memory: {
-    state: any
-    goals: {
+    state?: {
+      [key: string]: any
+    }
+    goals?: {
       [key: string]: (props: any) => boolean
     }
     [key: string]: any

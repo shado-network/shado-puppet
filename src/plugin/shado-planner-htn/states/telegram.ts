@@ -1,6 +1,4 @@
-import type { PuppetState } from '../types.ts'
-
-export const telegramDefaultState: PuppetState = {
+export const telegramDefaultState = {
   'telegram-last-updated': 0,
   //
   'telegram-has-messages': false,

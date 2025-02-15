@@ -143,7 +143,7 @@ class ShadoCommsPlugin {
             puppet: {
               id: this._puppet.config.id,
               name: this._puppet.config.name,
-              image: null,
+              image: undefined,
               port: this.serverConfig.port,
             },
           },

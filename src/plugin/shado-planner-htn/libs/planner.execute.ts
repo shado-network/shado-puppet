@@ -1,15 +1,11 @@
 import { asyncForEach, asyncEvery } from '../../../core/libs/utils.async.ts'
 import type { AppContext } from '../../../core/context/types.ts'
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { PuppetState } from '../types.ts'
 import type { HtnTask } from '../tasks/types.ts'
 
 export const executePlan = async (
-  _puppet: PuppetInstance,
-  //
   plan: any[],
-  state: PuppetState,
-  //
+  _puppet: PuppetInstance,
   _app: AppContext,
 ) => {
   _app.utils.logger.send({
@@ -48,7 +44,10 @@ export const executePlan = async (
     // NOTE: Check if current conditions have been reached.
     if (
       !Object.keys(task.conditions).every((conditionIdentifier) => {
-        return task.conditions[conditionIdentifier]({ state, _app })
+        return task.conditions[conditionIdentifier]({
+          _puppet,
+          _app,
+        })
       })
     ) {
       _app.utils.logger.send({
@@ -73,7 +72,6 @@ export const executePlan = async (
       async (actionIdentifier: string) => {
         const result = await task.actions[actionIdentifier]({
           _puppet,
-          state,
           _app,
         })
 
@@ -99,7 +97,6 @@ export const executePlan = async (
       async (effectIdentifier: string) => {
         const result = await task.effects[effectIdentifier].trigger({
           _puppet,
-          state,
           _app,
         })
       },

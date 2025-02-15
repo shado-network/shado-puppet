@@ -35,7 +35,7 @@ export function parseArgs(): {
       },
     })
 
-    return { puppets: null }
+    return { puppets: undefined }
   }
 }
 

@@ -5,11 +5,12 @@ export default {
   identifier: 'twitter-log-in',
 
   conditions: {
-    'twitter-has-client': (props) => props.state['twitter-has-client'] === true,
+    'twitter-has-client': (props) =>
+      props._puppet.runtime.memory.state?.['twitter-has-client'] === true,
     'twitter-has-logged-in': (props) =>
-      props.state['twitter-has-logged-in'] === false,
+      props._puppet.runtime.memory.state?.['twitter-has-logged-in'] === false,
     'twitter-last-log-in': (props) =>
-      props.state['twitter-last-log-in-attempt'] <=
+      props._puppet.runtime.memory.state?.['twitter-last-log-in-attempt'] <=
       Date.now() - 1 * MIN_IN_MSEC,
   },
 
@@ -17,23 +18,25 @@ export default {
     'twitter-has-logged-in': {
       value: (props) => true,
       trigger: async (props) => {
-        props.state['twitter-has-logged-in'] = true
+        props._puppet.runtime.memory.state['twitter-has-logged-in'] = true
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
     'twitter-last-log-in-attempt': {
       value: (props) =>
-        props.state['twitter-log-in-try'] <= Date.now() - 1 * MIN_IN_MSEC,
+        props._puppet.runtime.memory.state?.['twitter-log-in-try'] <=
+        Date.now() - 1 * MIN_IN_MSEC,
       trigger: async (props) => {
-        props.state['twitter-last-log-in-attempt'] = Date.now()
+        props._puppet.runtime.memory.state['twitter-last-log-in-attempt'] =
+          Date.now()
 
         return {
           success: true,
-          payload: null,
+          payload: undefined,
         }
       },
     },
@@ -41,7 +44,8 @@ export default {
 
   actions: {
     'twitter-log-in': async (props) => {
-      props.state['twitter-last-log-in-attempt'] = Date.now()
+      props._puppet.runtime.memory.state['twitter-last-log-in-attempt'] =
+        Date.now()
 
       try {
         const result = await props._puppet.runtime.clients['twitter'].login()
@@ -49,12 +53,12 @@ export default {
         if (result === true) {
           return {
             success: true,
-            payload: null,
+            payload: undefined,
           }
         } else {
           return {
             success: false,
-            payload: null,
+            payload: undefined,
           }
         }
       } catch (error) {

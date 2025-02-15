@@ -17,6 +17,6 @@ export const _app: AppContext = {
   },
   plugins: {},
   utils: {
-    logger: null,
+    logger: undefined,
   },
 }
