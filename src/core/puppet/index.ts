@@ -1,6 +1,7 @@
 import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from './types.ts'
+import type { AbstractPlanner } from '../abstract/types.ts'
 
 import { _memoryClient } from '../libs/utils.ts'
 import { asyncForEach } from '../libs/utils.async.ts'
@@ -8,10 +9,9 @@ import { asyncForEach } from '../libs/utils.async.ts'
 export class Puppet {
   instance: PuppetInstance
 
-  // TODO: Update to the proper type from the plugin.
-  planner: undefined | any
-
   _app: AppContext
+  // TODO: Update to the proper type from the plugin?
+  _planner: undefined | AbstractPlanner
 
   constructor(puppetId: PuppetInstance['config']['id'], _app: AppContext) {
     this._app = _app
@@ -30,7 +30,7 @@ export class Puppet {
       this.instance.config = await this._getPuppetConfig(puppetId)
 
       // NOTE: Register plugins.
-      this.planner = await this._setPlannerPlugin(
+      this._planner = await this._setPlannerPlugin(
         this.instance.config.planner.provider,
       )
       this.instance.runtime.model = await this._setModelPlugin(
@@ -42,24 +42,32 @@ export class Puppet {
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `Error in puppet initialization`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Error in puppet initialization`,
+          payload: { error },
+        },
       })
     }
 
     try {
       // NOTE: Start the planner loop.
-      await this.planner.init()
-      this.planner.startPlanner()
+      await this._planner.init()
+      this._planner.startPlanner()
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `Error in puppet runner loop`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Error in puppet runner loop`,
+          payload: { error },
+        },
       })
     }
   }
@@ -88,19 +96,27 @@ export class Puppet {
 
       _app.utils.logger.send({
         type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: config.id,
-        message: `Loaded puppet config "${config.id}"`,
+        origin: {
+          type: 'PUPPET',
+          id: config.id,
+        },
+        data: {
+          message: `Loaded puppet config "${config.id}"`,
+        },
       })
 
       return config
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `No puppet config loaded!"`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `No puppet config loaded!"`,
+          payload: { error },
+        },
       })
 
       return undefined
@@ -116,19 +132,27 @@ export class Puppet {
 
       _app.utils.logger.send({
         type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `Loaded planner plugin "${plannerProvider}"`,
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Loaded planner plugin "${plannerProvider}"`,
+        },
       })
 
       return planner
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `No planner plugin loaded!"`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `No planner plugin loaded!"`,
+          payload: { error },
+        },
       })
 
       return undefined
@@ -141,19 +165,27 @@ export class Puppet {
 
       _app.utils.logger.send({
         type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `Loaded model plugin "${modelProvider}"`,
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Loaded model plugin "${modelProvider}"`,
+        },
       })
 
       return model
     } catch (error) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this.instance.config.id,
-        message: `No model plugin loaded!"`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `No model plugin loaded!"`,
+          payload: { error },
+        },
       })
 
       return undefined
@@ -176,17 +208,25 @@ export class Puppet {
 
         _app.utils.logger.send({
           type: 'SUCCESS',
-          source: 'PUPPET',
-          puppetId: this.instance.config.id,
-          message: `Loaded client plugin "${clientPlugin.identifier}"`,
+          origin: {
+            type: 'PUPPET',
+            id: this.instance.config.id,
+          },
+          data: {
+            message: `Loaded client plugin "${clientPlugin.identifier}"`,
+          },
         })
       } catch (error) {
         _app.utils.logger.send({
           type: 'ERROR',
-          source: 'PUPPET',
-          puppetId: this.instance.config.id,
-          message: `Could not load client plugin "${clientPlugin.identifier}"!`,
-          payload: { error },
+          origin: {
+            type: 'PUPPET',
+            id: this.instance.config.id,
+          },
+          data: {
+            message: `Could not load client plugin "${clientPlugin.identifier}"!`,
+            payload: { error },
+          },
         })
       }
     })

@@ -13,25 +13,33 @@ export const executePlan = async (
   _app: AppContext,
 ) => {
   _app.utils.logger.send({
-    source: 'PUPPET',
-    puppetId: _puppet.config.id,
     type: 'INFO',
-    message: 'Executing plan',
-    payload: { currentPlan: plan },
+    origin: {
+      type: 'PUPPET',
+      id: _puppet.config.id,
+    },
+    data: {
+      message: 'Executing plan',
+      payload: { currentPlan: plan },
+    },
   })
 
   // TODO: Why the every? Just break out of plan if one step fails!
   // NOTE: Loop through the plan's tasks.
   const result = await asyncEvery(plan, async (task: HtnTask) => {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'LOG',
-      message: `Executing task "${task.identifier}"`,
-      // payload: {
-      //   task,
-      //   // currentState: state
-      // },
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: `Executing task "${task.identifier}"`,
+        // payload: {
+        //   task,
+        //   // state
+        // },
+      },
     })
 
     // NOTE: Debug log!
@@ -44,10 +52,14 @@ export const executePlan = async (
       })
     ) {
       _app.utils.logger.send({
-        source: 'PUPPET',
-        puppetId: _puppet.config.id,
         type: 'WARNING',
-        message: `Task "${task.identifier}" skipped`,
+        origin: {
+          type: 'PUPPET',
+          id: _puppet.config.id,
+        },
+        data: {
+          message: `Task "${task.identifier}" skipped`,
+        },
       })
 
       return false

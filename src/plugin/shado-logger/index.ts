@@ -4,11 +4,11 @@ import TelegramClientPlugin from '../client-telegram/index.ts'
 
 import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AppContext } from '../../core/context/types.ts'
-import type { AppPlugin } from '../types.ts'
-import type { LoggerConfig, LoggerMessage } from './types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { ShadoLoggerConfig, ShadoLoggerMessage } from './types.ts'
 
 class ShadoLoggerPlugin {
-  config: LoggerConfig = {
+  config: ShadoLoggerConfig = {
     clients: {
       sandbox: false,
       console: false,
@@ -81,11 +81,16 @@ class ShadoLoggerPlugin {
 
     this.send({
       type: 'SUCCESS',
-      source: 'SERVER',
-      message: 'Started Shadō Logger',
+      origin: {
+        type: 'SERVER',
+      },
+      data: {
+        message: 'Started Shadō Logger',
+      },
     })
   }
 
+  // TODO: Move?
   _setSandboxClients = () => {
     try {
       const sandboxClientConfig = {}
@@ -140,9 +145,13 @@ class ShadoLoggerPlugin {
     } catch (error) {
       this.send({
         type: 'ERROR',
-        source: 'SERVER',
-        message: 'Could not start sandbox clients.',
-        payload: { error },
+        origin: {
+          type: 'SERVER',
+        },
+        data: {
+          message: 'Could not start sandbox clients.',
+          payload: { error },
+        },
       })
     }
   }
@@ -157,18 +166,18 @@ class ShadoLoggerPlugin {
     }
   }
 
-  _composeSandboxMessage = (loggerMessage: LoggerMessage) => {
+  _composeSandboxMessage = (loggerMessage: ShadoLoggerMessage) => {
     // NOTE: Styling.
     // TODO: Make same stylistic choices as the console logger.
 
     // NOTE: Logging.
     // TODO: Check if there is a payload.
     const sandboxMessage = fmt`
-[ PUPPET / ${loggerMessage.puppetId?.toUpperCase()} ]
-${loggerMessage.message}
+[ PUPPET / ${loggerMessage.origin.id?.toUpperCase()} ]
+${loggerMessage.data.message}
 
 PAYLOAD: 
-${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
+${code`${JSON.stringify(loggerMessage.data.payload || null, null, 2)}`}
 `
     this.config.sandboxClients['telegram'].sendMessage(
       sandboxMessage,
@@ -193,7 +202,7 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
     return this.colors.node.fg.clear
   }
 
-  _composeConsoleMessage = (loggerMessage: LoggerMessage) => {
+  _composeConsoleMessage = (loggerMessage: ShadoLoggerMessage) => {
     // NOTE: Styling.
     let typeStyling: string
     let icon: string
@@ -232,7 +241,7 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
         break
     }
 
-    switch (loggerMessage.source) {
+    switch (loggerMessage.origin.type) {
       case 'SERVER':
         headerStyling = this._setConsoleColor('green', '')
         header = '[ SERVER ]'
@@ -240,20 +249,20 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
       //
       case 'PLAY':
         headerStyling = this._setConsoleColor('blue', '')
-        header = `[ PLAY / ${loggerMessage.playId.toUpperCase()} ]`
+        header = `[ PLAY / ${loggerMessage.origin.id.toUpperCase()} ]`
         break
       case 'PUPPET':
         headerStyling = this._setConsoleColor('magenta', '')
-        header = `[ PUPPET / ${loggerMessage.puppetId.toUpperCase()} ]`
+        header = `[ PUPPET / ${loggerMessage.origin.id.toUpperCase()} ]`
         break
       //
       case 'AGENT':
         headerStyling = this._setConsoleColor('yellow', '')
-        header = `< ${loggerMessage.puppetId.toUpperCase()} >`
+        header = `< ${loggerMessage.origin.id.toUpperCase()} >`
         break
       case 'USER':
         headerStyling = this._setConsoleColor('cyan', '')
-        header = `< ${loggerMessage.userId.toUpperCase()} >`
+        header = `< ${loggerMessage.origin.id.toUpperCase()} >`
         break
       //
       default:
@@ -270,11 +279,11 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
         this._resetConsoleColor(),
     )
 
-    console.log(loggerMessage.message)
+    console.log(loggerMessage.data.message)
 
-    if (loggerMessage.payload && loggerMessage.payload !== null) {
+    if (loggerMessage.data.payload && loggerMessage.data.payload !== null) {
       console.log('')
-      console.log('PAYLOAD =', loggerMessage.payload)
+      console.log('PAYLOAD =', loggerMessage.data.payload)
     }
 
     console.log('')
@@ -282,7 +291,7 @@ ${code`${JSON.stringify(loggerMessage.payload || null, null, 2)}`}
 
   //
 
-  send = (loggerMessage: LoggerMessage) => {
+  send = (loggerMessage: ShadoLoggerMessage) => {
     if (this.config.clients.sandbox && loggerMessage.type === 'SANDBOX') {
       this._composeSandboxMessage(loggerMessage)
     }
@@ -298,4 +307,4 @@ export default {
   description: 'First party logging utility.',
   key: 'logger',
   plugin: ShadoLoggerPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

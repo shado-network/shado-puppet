@@ -60,11 +60,13 @@ export default {
 
           props._app.utils.logger.send({
             type: 'LOG',
-            source: 'AGENT',
-            puppetId: props._puppet.config.id,
-            message: 'Got a Telegram message',
-            payload: {
-              message: message.message,
+            origin: {
+              type: 'AGENT',
+              id: props._puppet.config.id,
+            },
+            data: {
+              message: 'Got a Telegram message',
+              payload: { message: message.message },
             },
           })
 
@@ -72,11 +74,13 @@ export default {
           if (!_shouldReplyToMessage(props, message.ctx)) {
             props._app.utils.logger.send({
               type: 'LOG',
-              source: 'AGENT',
-              puppetId: props._puppet.config.id,
-              message: 'Chose to ignore Telegram message:',
-              payload: {
-                message: message.message,
+              origin: {
+                type: 'AGENT',
+                id: props._puppet.config.id,
+              },
+              data: {
+                message: 'Chose to ignore Telegram message:',
+                payload: { message: message.message },
               },
             })
 

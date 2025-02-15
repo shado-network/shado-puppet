@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AppPlugin } from '../types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
 import type { ShadoCommsResponse } from './types.ts'
 
 class ShadoCommsPlugin {
@@ -52,9 +52,13 @@ class ShadoCommsPlugin {
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: 'Could not create Shadō Comms server',
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: 'Could not create Shadō Comms server',
+        },
       })
     }
 
@@ -69,16 +73,24 @@ class ShadoCommsPlugin {
 
       this._app.utils.logger.send({
         type: 'SUCCESS',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: `Started Shadō Comms server at port ${this.serverConfig.port}`,
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: `Started Shadō Comms server at port ${this.serverConfig.port}`,
+        },
       })
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: 'Could not start Shadō Comms server',
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: 'Could not start Shadō Comms server',
+        },
       })
 
       // this.server.log.error(error)
@@ -148,4 +160,4 @@ export default {
   description: 'First party intra-communication utility.',
   key: 'comms',
   plugin: ShadoCommsPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

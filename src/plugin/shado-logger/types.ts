@@ -1,6 +1,7 @@
+import { AbstractLoggerMessage } from '../../core/abstract/types.ts'
 import { PuppetInstance } from '../../core/puppet/types.ts'
 
-export type LoggerConfig = {
+export type ShadoLoggerConfig = {
   clients: {
     sandbox: boolean
     console: boolean
@@ -15,14 +16,9 @@ export type LoggerConfig = {
   [key: string]: any
 }
 
-export type LoggerMessage = {
-  type: 'SUCCESS' | 'WARNING' | 'ERROR' | 'INFO' | 'LOG' | 'SANDBOX'
-  source: 'SERVER' | 'PLAY' | 'PUPPET' | 'AGENT' | 'USER'
-  message: string
-  payload?: null | unknown
-  //
-  // TODO: Improve upon type. Unify or split fully.
-  playId?: string
-  puppetId?: PuppetInstance['config']['id']
-  userId?: string
+export type ShadoLoggerMessage = AbstractLoggerMessage & {
+  origin: {
+    id?: string | PuppetInstance['config']['id']
+    name?: string | PuppetInstance['config']['name']
+  }
 }

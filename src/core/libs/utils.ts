@@ -26,9 +26,13 @@ export function parseArgs(): {
   } catch (error) {
     _app.utils.logger.send({
       type: 'ERROR',
-      source: 'SERVER',
-      message: `Error parsing CLI arguments`,
-      payload: { error },
+      origin: {
+        type: 'SERVER',
+      },
+      data: {
+        message: `Error parsing CLI arguments`,
+        payload: { error },
+      },
     })
 
     return { puppets: null }

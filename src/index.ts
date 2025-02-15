@@ -39,7 +39,7 @@ _app.plugins = await registerPlugins(_app.config.pluginsPath)
 
 //
 
-// TODO: Update to the proper type from the plugin.
+// TODO: Update to the proper type from the plugin?
 _app.utils.logger = new _app.plugins['shado-logger'].plugin([
   'sandbox',
   'console',
@@ -60,8 +60,12 @@ const initPuppets = (puppetIds: string[]) => {
   if (!puppetIds || puppetIds.length === 0) {
     _app.utils.logger.send({
       type: 'WARNING',
-      source: 'SERVER',
-      message: 'No puppetIds have been set!',
+      origin: {
+        type: 'SERVER',
+      },
+      data: {
+        message: 'No puppetIds have been set!',
+      },
     })
 
     return
@@ -75,8 +79,12 @@ const initPuppets = (puppetIds: string[]) => {
     if (!puppet) {
       _app.utils.logger.send({
         type: 'ERROR',
-        source: 'SERVER',
-        message: `Error loading puppet "${puppetId}"`,
+        origin: {
+          type: 'SERVER',
+        },
+        data: {
+          message: `Error loading puppet "${puppetId}"`,
+        },
       })
 
       return
@@ -91,5 +99,13 @@ const initPuppets = (puppetIds: string[]) => {
 _app.core.puppets = initPuppets(puppetIds)
 
 setInterval(() => {
-  // _app.utils.logger.send({ type: 'INFO', source: 'SERVER', message: 'PING!' })
+  // _app.utils.logger.send({
+  //   type: 'INFO',
+  //   origin: {
+  //     type: 'SERVER',
+  //   },
+  //   data: {
+  //     message: 'PING!',
+  //   },
+  // })
 }, 1 * SEC_IN_MSEC)

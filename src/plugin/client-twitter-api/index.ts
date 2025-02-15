@@ -3,7 +3,7 @@ import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AppPlugin } from '../types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
 
 class TwitterApiClientPlugin {
   config = {}
@@ -45,9 +45,13 @@ class TwitterApiClientPlugin {
 
     this._app.utils.logger.send({
       type: 'SUCCESS',
-      source: 'PUPPET',
-      puppetId: this._puppet.config.id,
-      message: `Loaded client plugin "client-twitter-api"`,
+      origin: {
+        type: 'PUPPET',
+        id: this._puppet.config.id,
+      },
+      data: {
+        message: `Loaded client plugin "client-twitter-api"`,
+      },
     })
   }
 
@@ -71,19 +75,27 @@ class TwitterApiClientPlugin {
 
       // this._app.utils.logger.send({
       //   type: 'SUCCESS',
-      //   source: 'PUPPET',
-      //   puppetId: this._puppet.config.id,
-      //   message: `Connected to Twitter bot`,
+      //   origin: {
+      //     type: 'PUPPET',
+      //     id: this._puppet.config.id,
+      //   },
+      //   data: {
+      //     message: `Connected to Twitter bot`,
+      //   },
       // })
 
       return true
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: `Error connecting to Twitter bot`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: `Error connecting to Twitter bot`,
+          payload: { error },
+        },
       })
 
       return false
@@ -102,11 +114,13 @@ class TwitterApiClientPlugin {
     if (this._app.config.sandboxMode) {
       this._app.utils.logger.send({
         type: 'SANDBOX',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: 'client-twitter-api | sendMessage()',
-        payload: {
-          message: message,
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: 'client-twitter-api | sendMessage()',
+          payload: { message },
         },
       })
 
@@ -115,79 +129,8 @@ class TwitterApiClientPlugin {
 
     const response = await this.client.v2.tweet(message)
 
-    console.log('!!!', 'client-twitter | sendMessage()', { response })
+    // console.log('!!!', 'client-twitter | sendMessage()', { response })
   }
-
-  // getMessages = () => {
-  //   return this.messages.filter((message) => !message.isRead)
-  // }
-
-  // clearReadMessages = () => {
-  //   this.messages = this.messages.filter((message) => !message.isRead)
-  // }
-
-  /*
-  getMessages = async () => {
-    const userId = 'user'
-    const message = `Interesting ${this._puppet.name}, tell me more?`
-
-    const tweets = []
-
-    try {
-      // TODO: !!!
-    } catch (error) {
-      this._app.utils.logger.send({
-        type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: 'Error',
-        payload: { error },
-      })
-    }
-    this._app.utils.logger.send({
-      type: 'LOG',
-      source: 'AGENT',
-      puppetId: this._puppet.config.id,
-      message: 'Read some Tweets:',
-      payload: {
-        tweets: tweets,
-      },
-    })
-
-    // const response = await this.client.sendTweet('Hello world!', tweets.at(0).id)
-
-    // messages.push({
-    //   role: userId,
-    //   content: message,
-    // })
-
-    // this._app.utils.logger.send({
-    //   type: 'LOG',
-    //   source: 'USER',
-    //   userId: userId,
-    //   message: 'Wrote a message:',
-    //   payload: {
-    //     message: message,
-    //   },
-    // })
-
-    // this._app.utils.logger.send({
-    //   type: 'LOG',
-    //   source: 'PUPPET',
-    //   puppetId: puppet.id,
-    //   message: 'Read a message:',
-    //   payload: {
-    //     message: message,
-    //   },
-    // })
-
-    return {
-      user: userId,
-      message: message,
-      shouldReply: true,
-    }
-  }
-  */
 }
 
 export default {
@@ -195,4 +138,4 @@ export default {
   description: 'Wrapper for OpenAI interaction through LangChain.',
   key: 'twitter',
   plugin: TwitterApiClientPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

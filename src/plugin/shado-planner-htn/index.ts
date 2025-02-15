@@ -9,7 +9,7 @@ import { importTasks } from './libs/utils.tasks.ts'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AppPlugin } from '../types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
 import type { HtnTask } from './tasks/types.ts'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -77,10 +77,14 @@ class ShadoPlannerHtnPlugin {
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: `Error in planner initialization`,
-        payload: { error },
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: `Error in planner initialization`,
+          payload: { error },
+        },
       })
     }
   }
@@ -134,4 +138,4 @@ export default {
   description: 'First party runtime planner utility.',
   key: 'planner',
   plugin: ShadoPlannerHtnPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

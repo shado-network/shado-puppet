@@ -4,7 +4,7 @@ import type { BaseChatModelParams } from '@langchain/core/language_models/chat_m
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types.ts'
-import type { AppPlugin } from '../types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
 
 class AnthropicAdapterPlugin {
   // TODO: Get from puppet file.
@@ -44,10 +44,12 @@ class AnthropicAdapterPlugin {
     if (!response || !response.messages || response.messages.length === 0) {
       this._app.utils.logger.send({
         type: 'WARNING',
-        source: 'SERVER',
-        message: 'Error parsing response',
-        payload: {
-          content: response.content,
+        origin: {
+          type: 'SERVER',
+        },
+        data: {
+          message: 'Error parsing response',
+          payload: { content: response.content },
         },
       })
     }
@@ -61,4 +63,4 @@ export default {
   description: 'Wrapper for Anthropic Claude interaction through LangChain.',
   key: 'model',
   plugin: AnthropicAdapterPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

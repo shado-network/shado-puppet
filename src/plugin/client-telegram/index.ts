@@ -4,7 +4,7 @@ import type { FmtString } from 'telegraf/format'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AppPlugin } from '../types.ts'
+import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
 
 class TelegramClientPlugin {
   config = {
@@ -48,19 +48,16 @@ class TelegramClientPlugin {
 
     try {
       this.client = new Telegraf(this.clientSecrets.botToken)
-
-      // this._app.utils.logger.send({
-      //   type: 'SUCCESS',
-      //   source: 'PUPPET',
-      //   puppetId: this._puppet.config.id,
-      //   message: 'Connected to Telegram bot',
-      // })
     } catch (error) {
       this._app.utils.logger.send({
         type: 'ERROR',
-        source: 'PUPPET',
-        puppetId: this._puppet.config.id,
-        message: 'Could not connect to Telegram bot',
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: 'Could not connect to Telegram bot',
+        },
       })
     }
 
@@ -136,4 +133,4 @@ export default {
   description: 'Wrapper for OpenAI interaction through LangChain.',
   key: 'telegram',
   plugin: TelegramClientPlugin,
-} satisfies AppPlugin
+} satisfies AbstractAppPlugin

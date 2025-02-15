@@ -27,21 +27,27 @@ export const plannerLoop = async (
   state['last-updated'] = date.valueOf()
 
   _app.utils.logger.send({
-    source: 'PUPPET',
-    puppetId: _puppet.config.id,
     type: 'LOG',
-    message: date.toLocaleString(),
+    origin: {
+      type: 'PUPPET',
+      id: _puppet.config.id,
+    },
+    data: {
+      message: date.toLocaleString(),
+    },
   })
 
   // NOTE: Check if any goals have been set.
   if (!goals || Object.keys(goals).length === 0) {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'LOG',
-      message: 'No goals have been set',
-      payload: {
-        currentState: state,
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: 'No goals have been set',
+        payload: { state },
       },
     })
 
@@ -52,10 +58,14 @@ export const plannerLoop = async (
   }
 
   _app.utils.logger.send({
-    source: 'PUPPET',
-    puppetId: _puppet.config.id,
     type: 'LOG',
-    message: 'Generating plans',
+    origin: {
+      type: 'PUPPET',
+      id: _puppet.config.id,
+    },
+    data: {
+      message: 'Generating plans',
+    },
   })
 
   // NOTE: Generate plans for the current goals.
@@ -64,13 +74,17 @@ export const plannerLoop = async (
   // NOTE: Check if any plans have been generated.
   if (!plans || plans.length === 0) {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'LOG',
-      message: 'No plan found for current goals',
-      payload: {
-        goals: Object.keys(goals),
-        currentState: state,
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: 'No plan found for current goals',
+        payload: {
+          goals: Object.keys(goals),
+          state,
+        },
       },
     })
 
@@ -87,13 +101,16 @@ export const plannerLoop = async (
   // NOTE: Check if picked plan is valid.
   if (!plan || plan.length === 0) {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'LOG',
-      message: 'No plan found for current goals',
-      payload: {
-        goals: Object.keys(goals),
-        currentState: state,
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: 'No plan found for current goals',
+        payload: {
+          goals: Object.keys(goals),
+        },
       },
     })
 
@@ -115,21 +132,29 @@ export const plannerLoop = async (
   // NOTE: Check if plan succeeded. Set retry timeout for the loop accordingly.
   if (isPlanSuccessful) {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'INFO',
-      message: 'Plan executed successfully',
-      payload: { currentState: state },
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: 'Plan executed successfully',
+        payload: { state },
+      },
     })
 
     await asyncSleep(config.AWAIT_PLANNING_FOR_X_SECONDS)
   } else {
     _app.utils.logger.send({
-      source: 'PUPPET',
-      puppetId: _puppet.config.id,
       type: 'WARNING',
-      message: 'Plan skipped',
-      payload: { currentState: state },
+      origin: {
+        type: 'PUPPET',
+        id: _puppet.config.id,
+      },
+      data: {
+        message: 'Plan skipped',
+        payload: { state },
+      },
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
