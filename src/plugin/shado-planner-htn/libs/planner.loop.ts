@@ -1,4 +1,4 @@
-import { asyncSleep } from '../../../core/libs/utils.async.ts'
+import { asyncForEach, asyncSleep } from '../../../core/libs/utils.async.ts'
 import { generatePlans } from './planner.generate.ts'
 import { executePlan } from './planner.execute.ts'
 import type { AppContext } from '../../../core/context/types.ts'
@@ -92,37 +92,43 @@ export const plannerLoop = async (
     return
   }
 
+  let arePlansExecuted = true
+
   // TODO: Pick a plan for every goal, execute synchronously if possible?
-  // NOTE: Pick random plan.
-  const plan = plans[Math.floor(Math.random() * plans.length)]
-
-  // NOTE: Check if picked plan is valid.
-  if (!plan || plan.length === 0) {
-    _app.utils.logger.send({
-      type: 'LOG',
-      origin: {
-        type: 'PUPPET',
-        id: _puppet.config.id,
-      },
-      data: {
-        message: 'No plan found for current goals',
-        payload: {
-          goals: Object.keys(_puppet.runtime.memory.goals),
-          // state: _puppet.runtime.memory.state,
+  // TODO: Add goal key? Then pick from multiple options per goal.
+  await asyncForEach(plans, async (plan: HtnTask[]) => {
+    // NOTE: Check if picked plan is valid.
+    if (!plan || plan.length === 0) {
+      _app.utils.logger.send({
+        type: 'LOG',
+        origin: {
+          type: 'PUPPET',
+          id: _puppet.config.id,
         },
-      },
-    })
+        data: {
+          message: 'No plan found for current goals',
+          payload: {
+            goals: Object.keys(_puppet.runtime.memory.goals),
+            // state: _puppet.runtime.memory.state,
+          },
+        },
+      })
 
-    await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
-    plannerLoop(tasksPool, _puppet, _app)
+      await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
+      plannerLoop(tasksPool, _puppet, _app)
 
-    return
-  }
+      return
+    }
 
-  const isPlanSuccessful = await executePlan(plan, _puppet, _app)
+    const isPlanExecuted = await executePlan(plan, _puppet, _app)
 
-  // NOTE: Check if plan succeeded. Set retry timeout for the loop accordingly.
-  if (isPlanSuccessful) {
+    if (!isPlanExecuted) {
+      arePlansExecuted = false
+    }
+  })
+
+  // NOTE: Check if plans succeeded. Set retry timeout for the loop accordingly.
+  if (arePlansExecuted) {
     _app.utils.logger.send({
       type: 'INFO',
       origin: {
@@ -130,7 +136,7 @@ export const plannerLoop = async (
         id: _puppet.config.id,
       },
       data: {
-        message: 'Plan executed',
+        message: 'All plans executed successfully',
         payload: { state: _puppet.runtime.memory.state },
       },
     })
@@ -144,7 +150,7 @@ export const plannerLoop = async (
         id: _puppet.config.id,
       },
       data: {
-        message: 'Plan skipped',
+        message: 'Some plans skipped',
         payload: { state: _puppet.runtime.memory.state },
       },
     })
