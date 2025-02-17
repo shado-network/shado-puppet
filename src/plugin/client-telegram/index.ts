@@ -5,6 +5,7 @@ import type { FmtString } from 'telegraf/format'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { TelegramMessage } from './types.ts'
 
 class TelegramClientPlugin {
   config = {
@@ -18,7 +19,7 @@ class TelegramClientPlugin {
   clientSecrets: any = {}
 
   threads: string[] = []
-  messages: any[] = []
+  messages: TelegramMessage[] = []
 
   //
 
@@ -75,19 +76,29 @@ class TelegramClientPlugin {
     process.once('SIGTERM', () => this.client.stop('SIGTERM'))
   }
 
-  _storeMessage = async (ctx) => {
-    const newMessage = {
+  _storeMessage = async (ctx: any) => {
+    const message: TelegramMessage = {
       id: ctx.message.message_id,
-      from: ctx.message.from.first_name,
-      from_id: ctx.message.from.id,
-      message: ctx.message.text,
-      isRead: false,
-      ctx,
+      text: ctx.message.text,
+      is_read: false,
+      //
+      from: {
+        id: ctx.message.from.id,
+        name: ctx.message.from.first_name,
+      },
+      metadata: {
+        chat: { type: ctx.message.chat.type },
+        replyFn: async (message: string) => {
+          await ctx.reply(message, {
+            reply_to_message_id: ctx.message.message_id,
+          })
+        },
+      },
     }
 
-    this.messages.push(newMessage)
+    this.messages.push(message)
 
-    return newMessage
+    return message
   }
 
   getMessageThreads = () => {
@@ -99,21 +110,19 @@ class TelegramClientPlugin {
   }
 
   getMessages = () => {
-    return this.messages.filter((message) => !message.isRead)
+    return this.messages.filter((message) => !message.is_read)
   }
 
   clearReadMessages = () => {
-    this.messages = this.messages.filter((message) => !message.isRead)
+    this.messages = this.messages.filter((message) => !message.is_read)
   }
 
   sendMessage = async (message: string | FmtString, chatId: string) => {
     const newCtx = await this.client.telegram.sendMessage(chatId, message)
   }
 
-  replyToMessage = async (message: string, ctx) => {
-    const newCtx = await ctx.reply(message, {
-      reply_to_message_id: ctx.message.message_id,
-    })
+  replyToMessage = async (message: string, replyFn) => {
+    const newCtx = await replyFn(message)
   }
 
   markAsRead = async (messageId: number) => {
@@ -123,8 +132,9 @@ class TelegramClientPlugin {
       return
     }
 
-    message.isRead = true
-    // TODO: Purge?
+    message.is_read = true
+
+    // TODO: Purge message?
   }
 }
 

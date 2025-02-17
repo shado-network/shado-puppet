@@ -1,7 +1,8 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { SEC_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { HtnTask } from '../types.ts'
+import type { TelegramMessage } from '../../../client-telegram/types.ts'
+import type { HtnTask, TriggerProps } from '../types.ts'
 
 export default {
   identifier: 'telegram-read-messages',
@@ -53,8 +54,8 @@ export default {
 
         // NOTE: Loop through messages.
         props._puppet.runtime.memory.state?.['telegram-messages'].forEach(
-          async (message) => {
-            if (message.isRead) {
+          async (message: TelegramMessage) => {
+            if (message.is_read) {
               return
             }
 
@@ -69,12 +70,18 @@ export default {
               },
               data: {
                 message: 'Got a Telegram message',
-                payload: { message: message.message },
+                payload: { message: message.text },
               },
             })
 
             // NOTE: Should reply to message?
-            if (!_shouldReplyToMessage(props, message.ctx)) {
+            if (
+              !_shouldReplyToMessage(
+                props,
+                message.metadata.chat.type,
+                message.text,
+              )
+            ) {
               props._app.utils.logger.send({
                 type: 'LOG',
                 origin: {
@@ -83,7 +90,7 @@ export default {
                 },
                 data: {
                   message: 'Chose to ignore Telegram message:',
-                  payload: { message: message.message },
+                  payload: { message: message.text },
                 },
               })
 
@@ -98,10 +105,10 @@ export default {
             if (
               !props._puppet.runtime.clients['telegram']
                 .getMessageThreads()
-                .includes(`telegram-${message.from_id}`)
+                .includes(`telegram-${message.from.id}`)
             ) {
               props._puppet.runtime.clients['telegram'].addMessageThread(
-                `telegram-${message.from_id}`,
+                `telegram-${message.from.id}`,
               )
 
               firstMessageInThread = true
@@ -110,17 +117,17 @@ export default {
             if (firstMessageInThread) {
               messages = [
                 new SystemMessage(props._puppet.config.bio.join('\n')),
-                new HumanMessage(message.message),
+                new HumanMessage(message.text),
               ]
             } else {
-              messages = [new HumanMessage(message.message)]
+              messages = [new HumanMessage(message.text)]
             }
 
             // NOTE: Generate a response.
             const response = await (
               props._puppet.runtime.model as any
             ).getMessagesResponse(messages, {
-              thread: `telegram-${message.from_id}`,
+              thread: `telegram-${message.from.id}`,
             })
 
             // console.log(
@@ -131,7 +138,7 @@ export default {
             // NOTE: Send the reply.
             await props._puppet.runtime.clients['telegram'].replyToMessage(
               response as string,
-              message.ctx,
+              message.metadata.replyFn,
             )
 
             replied.push(true)
@@ -165,20 +172,24 @@ export default {
   },
 } satisfies HtnTask
 
-const _shouldReplyToMessage = (props, ctx) => {
+const _shouldReplyToMessage = (
+  props: TriggerProps,
+  chatType: string,
+  messageText: string,
+) => {
   // NOTE: Check if it's in a private chat.
-  const isInPrivateChat = ctx.message.chat.type === 'private'
+  const isInPrivateChat = chatType === 'private'
 
-  // TODO: Do not get from .env directly.
+  // TODO: Do not get from .env directly. Get from puppet secrets?
   // NOTE: Check if they are mentioned.
   const isMentioned =
-    ctx.message.text.includes(
+    messageText.includes(
       `@${process.env[`TELEGRAM_${props._puppet.config.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
-    ctx.message.text.includes(
+    messageText.includes(
       `${process.env[`TELEGRAM_${props._puppet.config.id.toUpperCase()}_BOT_HANDLE`]}`,
     ) ||
-    ctx.message.text.includes(`${props._puppet.config.name}`)
+    messageText.includes(`${props._puppet.config.name}`)
 
   // NOTE: Check if there is a mention of swarm members.
   // const isFromSwarmPuppet = [
