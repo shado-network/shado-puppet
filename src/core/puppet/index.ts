@@ -1,3 +1,5 @@
+import EventEmitter from 'events'
+
 import { _app } from '../../core/context/index.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from './types.ts'
@@ -36,6 +38,7 @@ export class Puppet {
       this.instance.runtime.model = await this._setModelPlugin(
         this.instance.config.model.provider,
       )
+      this.instance.runtime.events = this._setEventsPlugin()
       this.instance.runtime.clients = await this._setClientPlugins(
         this.instance.config.clients,
       )
@@ -79,6 +82,7 @@ export class Puppet {
       //
       planner: undefined,
       model: undefined,
+      events: undefined,
       clients: undefined,
       //
       memory: {
@@ -86,7 +90,7 @@ export class Puppet {
         state: {},
       },
       knowledge: undefined,
-    }
+    } satisfies PuppetInstance['runtime']
   }
 
   _getPuppetConfig = async (puppetId: PuppetInstance['config']['id']) => {
@@ -184,6 +188,39 @@ export class Puppet {
         },
         data: {
           message: `No model plugin loaded!"`,
+          payload: { error },
+        },
+      })
+
+      return undefined
+    }
+  }
+
+  _setEventsPlugin = () => {
+    try {
+      const events = new EventEmitter()
+
+      _app.utils.logger.send({
+        type: 'SUCCESS',
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Loaded events plugin`,
+        },
+      })
+
+      return events
+    } catch (error) {
+      _app.utils.logger.send({
+        type: 'ERROR',
+        origin: {
+          type: 'PUPPET',
+          id: this.instance.config.id,
+        },
+        data: {
+          message: `Could not load events plugin!`,
           payload: { error },
         },
       })

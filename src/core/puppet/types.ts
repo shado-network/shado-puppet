@@ -1,3 +1,6 @@
+// TODO: AbstractEvents?
+import type { EventEmitter } from 'events'
+
 export type PuppetInstance = {
   runtime: PuppetRuntime
   config: PuppetConfig
@@ -8,6 +11,8 @@ export type PuppetRuntime = {
   //
   planner?: undefined | unknown
   model: undefined | unknown
+  // TODO: AbstractEvents?
+  events: undefined | EventEmitter
   clients: {
     [key: string]: any
   }

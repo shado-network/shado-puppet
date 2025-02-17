@@ -27,6 +27,18 @@ export const generatePlans = async (
     }
   })
 
+  _puppet.runtime.events.emit('planner', {
+    timestamp: Date.now(),
+    source: 'shado-planner-htn',
+    data: {
+      identifier: 'puppetGoals',
+      goals: {
+        reached: goalsReached,
+        unreached: goalsUnreached,
+      },
+    },
+  })
+
   // NOTE: Check if current goals have all been reached.
   if (goalsUnreached.length === 0) {
     // NOTE: Debug log!

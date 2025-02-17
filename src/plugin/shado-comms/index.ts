@@ -1,20 +1,30 @@
+import { v4 as uuidv4 } from 'uuid'
+
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import type { FastifyInstance } from 'fastify'
 
+import WebSocket, { WebSocketServer } from 'ws'
+
+import { broadcast } from './libs/utils.websocket.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
-import type { ShadoCommsResponse } from './types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
+import type { ShadoCommsHttpResponse, ShadoCommsWsResponse } from './types.ts'
 
 class ShadoCommsPlugin {
   config = {}
 
   //
 
-  server: FastifyInstance
-  serverConfig: any = {}
-  serverSecrets: any = {}
+  httpServer: FastifyInstance
+  httpServerConfig: any = {}
+  httpServerSecrets: any = {}
+
+  wsServer: WebSocketServer
+  wsServerConfig: any = {}
+  wsServerSecrets: any = {}
+  wsConnections: { [key: string]: WebSocket } = {}
 
   //
 
@@ -32,21 +42,33 @@ class ShadoCommsPlugin {
     this._app = _app
     this._puppet = _puppet
 
-    this.serverConfig = {
-      ...this.serverConfig,
-      ...clientConfig,
+    this.httpServerConfig = {
+      ...this.httpServerConfig,
+      ...clientConfig.http,
     }
 
-    this.serverSecrets = {
-      ...this.serverSecrets,
-      ...clientSecrets,
+    this.httpServerSecrets = {
+      ...this.httpServerSecrets,
+      ...clientSecrets.http,
     }
 
+    this.wsServerConfig = {
+      ...this.wsServerConfig,
+      ...clientConfig.ws,
+    }
+
+    this.wsServerSecrets = {
+      ...this.wsServerSecrets,
+      ...clientSecrets.ws,
+    }
+
+    // NOTE: HTTP Server
     try {
-      this.server = Fastify({
+      this.httpServer = Fastify({
         // logger: true,
       })
-      this.server.register(cors, {
+
+      this.httpServer.register(cors, {
         allowedHeaders: '*',
       })
     } catch (error) {
@@ -57,19 +79,16 @@ class ShadoCommsPlugin {
           id: this._puppet.config.id,
         },
         data: {
-          message: 'Could not create Shadō Comms server',
+          message: 'Could not create Shadō Comms http server',
         },
       })
     }
 
-    this._init()
-  }
-
-  _init = async () => {
-    this._addRoutes()
-
+    // NOTE: WebSocket Server
     try {
-      await this.server.listen({ port: this.serverConfig.port })
+      this.wsServer = new WebSocketServer({
+        port: this.wsServerConfig.port,
+      })
 
       this._app.utils.logger.send({
         type: 'SUCCESS',
@@ -78,7 +97,7 @@ class ShadoCommsPlugin {
           id: this._puppet.config.id,
         },
         data: {
-          message: `Started Shadō Comms server at port ${this.serverConfig.port}`,
+          message: `Started Shadō Comms websocket server at port ${this.wsServerConfig.port}`,
         },
       })
     } catch (error) {
@@ -89,12 +108,58 @@ class ShadoCommsPlugin {
           id: this._puppet.config.id,
         },
         data: {
-          message: 'Could not start Shadō Comms server',
+          message: 'Could not create Shadō Comms websocket server',
+        },
+      })
+    }
+
+    this._init()
+  }
+
+  _init = async () => {
+    this._addHttpRoutes()
+    this._addWebSocketEvents()
+
+    // NOTE: HTTP Server
+    try {
+      await this.httpServer.listen({
+        port: this.httpServerConfig.port,
+      })
+
+      this._app.utils.logger.send({
+        type: 'SUCCESS',
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: `Started Shadō Comms http server at port ${this.httpServerConfig.port}`,
+        },
+      })
+    } catch (error) {
+      this._app.utils.logger.send({
+        type: 'ERROR',
+        origin: {
+          type: 'PUPPET',
+          id: this._puppet.config.id,
+        },
+        data: {
+          message: 'Could not start Shadō Comms http server',
         },
       })
 
-      // this.server.log.error(error)
+      // this.httpServer.log.error(error)
       // process.exit(1)
+    }
+
+    // NOTE: WebSocket Server
+    try {
+      this.wsServer.on('connection', (connection) => {
+        const connectionId = uuidv4()
+        this.wsConnections[connectionId] = connection
+      })
+    } catch (error) {
+      // console.log(error)
     }
   }
 
@@ -108,17 +173,17 @@ class ShadoCommsPlugin {
         message: 'Something went wrong',
         error: error,
       },
-    } satisfies ShadoCommsResponse
+    } satisfies ShadoCommsHttpResponse
   }
 
-  _addRoutes = () => {
+  _addHttpRoutes = () => {
     // NOTE: Root
-    this.server.get('/', async (request, reply) => {
+    this.httpServer.get('/', async (request, reply) => {
       return {}
     })
 
     // NOTE: Health check
-    this.server.get('/ping', async (request, reply) => {
+    this.httpServer.get('/ping', async (request, reply) => {
       try {
         return {
           status: 'success',
@@ -126,14 +191,14 @@ class ShadoCommsPlugin {
           data: {
             message: 'PONG',
           },
-        } satisfies ShadoCommsResponse
+        } satisfies ShadoCommsHttpResponse
       } catch (error) {
         return this._defaultRouteError(error)
       }
     })
 
     // NOTE: Puppet data
-    this.server.get('/puppet', async (request, reply) => {
+    this.httpServer.get('/puppet', async (request, reply) => {
       try {
         return {
           status: 'success',
@@ -144,14 +209,25 @@ class ShadoCommsPlugin {
               id: this._puppet.config.id,
               name: this._puppet.config.name,
               image: undefined,
-              port: this.serverConfig.port,
+              port: this.httpServerConfig.httPort,
             },
           },
-        } satisfies ShadoCommsResponse
+        } satisfies ShadoCommsHttpResponse
       } catch (error) {
         return this._defaultRouteError(error)
       }
     })
+  }
+
+  _addWebSocketEvents = () => {
+    // NOTE: From puppet planner plugin.
+    this._puppet.runtime.events.on(
+      'planner',
+      (payload: ShadoCommsWsResponse) => {
+        // console.log('!!!', payload)
+        broadcast(this.wsConnections, JSON.stringify(payload), false)
+      },
+    )
   }
 }
 
@@ -160,4 +236,4 @@ export default {
   description: 'First party intra-communication utility.',
   key: 'comms',
   plugin: ShadoCommsPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin

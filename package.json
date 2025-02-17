@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.3",
+    "@types/ws": "^8.5.14",
     "@types/yargs": "^17.0.33",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
@@ -35,6 +36,7 @@
     "telegraf": "^4.16.3",
     "twitter-api-v2": "^1.19.0",
     "uuid": "^11.0.5",
+    "ws": "^8.18.0",
     "yargs": "^17.7.2"
   }
 }

@@ -16,7 +16,11 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 class ShadoPlannerHtnPlugin {
-  config: { tasksPath: string }
+  config = {
+    tasksPath: path.join(__dirname, 'tasks'),
+    // TODO: Implement logger conditional.
+    showLogs: true,
+  }
 
   //
 
@@ -34,8 +38,6 @@ class ShadoPlannerHtnPlugin {
   constructor(_puppet: PuppetInstance, _app: AppContext) {
     this._app = _app
     this._puppet = _puppet
-
-    this.config = { tasksPath: path.join(__dirname, 'tasks') }
   }
 
   init = async () => {
@@ -45,11 +47,6 @@ class ShadoPlannerHtnPlugin {
         // TODO: Make this nicer?
         ...this._puppet.config.planner.config.goals,
       }
-
-      // console.log('!!!', {
-      //   'telegram-has-client': Boolean(this._puppet.runtime.clients['telegram']),
-      //   'twitter-has-client': Boolean(this._puppet.runtime.clients['twitter']),
-      // })
 
       this._puppet.runtime.memory.state = {
         'last-started': 0,
@@ -92,6 +89,15 @@ class ShadoPlannerHtnPlugin {
   startPlanner = () => {
     const date = new Date()
     this._puppet.runtime.memory.state['last-started'] = date.valueOf()
+
+    this._puppet.runtime.events.emit('planner', {
+      timestamp: Date.now(),
+      source: 'shado-planner-htn',
+      data: {
+        identifier: 'puppetState',
+        state: this._puppet.runtime.memory.state,
+      },
+    })
 
     plannerLoop(
       // TODO: Make it so it stays dynamic?

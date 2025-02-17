@@ -8,15 +8,12 @@ export const executePlan = async (
   _puppet: PuppetInstance,
   _app: AppContext,
 ) => {
-  _app.utils.logger.send({
-    type: 'INFO',
-    origin: {
-      type: 'PUPPET',
-      id: _puppet.config.id,
-    },
+  _puppet.runtime.events.emit('planner', {
+    timestamp: Date.now(),
+    source: 'shado-planner-htn',
     data: {
-      message: 'Executing plan',
-      payload: { currentPlan: plan },
+      identifier: 'puppetPlan',
+      plan: plan,
     },
   })
 

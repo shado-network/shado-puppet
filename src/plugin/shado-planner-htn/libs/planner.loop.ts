@@ -16,19 +16,17 @@ export const plannerLoop = async (
   _app: AppContext,
 ) => {
   // NOTE: Disable for debugging purposes.
-  console.clear()
+  // console.clear()
 
   const date = new Date()
   _puppet.runtime.memory.state['last-updated'] = date.valueOf()
 
-  _app.utils.logger.send({
-    type: 'LOG',
-    origin: {
-      type: 'PUPPET',
-      id: _puppet.config.id,
-    },
+  _puppet.runtime.events.emit('planner', {
+    timestamp: Date.now(),
+    source: 'shado-planner-htn',
     data: {
-      message: date.toLocaleString(),
+      identifier: 'puppetState',
+      state: _puppet.runtime.memory.state,
     },
   })
 
@@ -45,7 +43,7 @@ export const plannerLoop = async (
       },
       data: {
         message: 'No goals have been set',
-        payload: { state: _puppet.runtime.memory.state },
+        // payload: { state: _puppet.runtime.memory.state },
       },
     })
 
@@ -55,16 +53,16 @@ export const plannerLoop = async (
     return
   }
 
-  _app.utils.logger.send({
-    type: 'LOG',
-    origin: {
-      type: 'PUPPET',
-      id: _puppet.config.id,
-    },
-    data: {
-      message: 'Generating plans',
-    },
-  })
+  // _app.utils.logger.send({
+  //   type: 'LOG',
+  //   origin: {
+  //     type: 'PUPPET',
+  //     id: _puppet.config.id,
+  //   },
+  //   data: {
+  //     message: 'Generating plans',
+  //   },
+  // })
 
   // NOTE: Generate plans for the current goals.
   const plans = await generatePlans(tasksPool, _puppet, _app)
@@ -79,10 +77,10 @@ export const plannerLoop = async (
       },
       data: {
         message: 'No plan found for current goals',
-        payload: {
-          goals: Object.keys(_puppet.runtime.memory.goals),
-          state: _puppet.runtime.memory.state,
-        },
+        // payload: {
+        //   goals: Object.keys(_puppet.runtime.memory.goals),
+        //   state: _puppet.runtime.memory.state,
+        // },
       },
     })
 
@@ -107,10 +105,10 @@ export const plannerLoop = async (
         },
         data: {
           message: 'No plan found for current goals',
-          payload: {
-            goals: Object.keys(_puppet.runtime.memory.goals),
-            // state: _puppet.runtime.memory.state,
-          },
+          // payload: {
+          //   goals: Object.keys(_puppet.runtime.memory.goals),
+          //   state: _puppet.runtime.memory.state,
+          // },
         },
       })
 
@@ -137,7 +135,7 @@ export const plannerLoop = async (
       },
       data: {
         message: 'All plans executed successfully',
-        payload: { state: _puppet.runtime.memory.state },
+        // payload: { state: _puppet.runtime.memory.state },
       },
     })
 
@@ -151,12 +149,21 @@ export const plannerLoop = async (
       },
       data: {
         message: 'Some plans skipped',
-        payload: { state: _puppet.runtime.memory.state },
+        // payload: { state: _puppet.runtime.memory.state },
       },
     })
 
     await asyncSleep(config.RETRY_PLANNING_IN_X_SECONDS)
   }
+
+  _puppet.runtime.events.emit('planner', {
+    timestamp: Date.now(),
+    source: 'shado-planner-htn',
+    data: {
+      identifier: 'puppetState',
+      state: _puppet.runtime.memory.state,
+    },
+  })
 
   // NOTE: Enter the planning loop after timeout.
   plannerLoop(tasksPool, _puppet, _app)

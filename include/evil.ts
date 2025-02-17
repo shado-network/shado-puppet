@@ -53,7 +53,12 @@ const puppetConfig: PuppetConfig = {
     {
       identifier: 'shado-comms',
       config: {
-        port: 10110,
+        http: {
+          port: 10111,
+        },
+        ws: {
+          port: 10112,
+        },
       },
       secrets: {},
     },
@@ -75,15 +80,6 @@ const puppetConfig: PuppetConfig = {
         accessSecret: process.env['TWITTER_EVIL_ACCESS_SECRET'],
       },
     },
-    // {
-    //   identifier: 'client-twitter',
-    //   config: {},
-    //   secrets: {
-    //     username: process.env['TWITTER_EVIL_USERNAME'],
-    //     password: process.env['TWITTER_EVIL_PASSWORD'],
-    //     email: process.env['TWITTER_EVIL_EMAIL'],
-    //   },
-    // },
   ],
   //
   bio: [
