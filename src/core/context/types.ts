@@ -1,5 +1,9 @@
 import type { Puppet } from '../../core/puppet'
-import type { AbstractAppPlugin, AbstractLogger } from '../abstract/types.ts'
+import type {
+  AbstractPlugin,
+  AbstractLogger,
+  AbstractSandbox,
+} from '../abstract/types.ts'
 
 export type AppContext = {
   config: {
@@ -10,10 +14,11 @@ export type AppContext = {
     puppets: Puppet[]
   }
   plugins: {
-    [key: string]: AbstractAppPlugin
+    [key: string]: AbstractPlugin
   }
   utils: {
     // TODO: Update to the proper type from the plugin?
     logger: undefined | AbstractLogger
+    sandbox: undefined | AbstractSandbox
   }
 }

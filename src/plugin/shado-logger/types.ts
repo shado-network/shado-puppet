@@ -1,19 +1,9 @@
-import { AbstractLoggerMessage } from '../../core/abstract/types.ts'
-import { PuppetInstance } from '../../core/puppet/types.ts'
+import type { PuppetInstance } from '../../core/puppet/types.ts'
+import type { AbstractLoggerMessage } from '../../core/abstract/types.ts'
 
 export type ShadoLoggerConfig = {
-  clients: {
-    sandbox: boolean
-    console: boolean
-    [key: string]: boolean
-  }
-  sandboxClients: {
-    // TODO: Update to the proper type from the plugin.
-    telegram: undefined | any
-    [key: string]: any
-  }
-  //
-  [key: string]: any
+  showIcon: boolean
+  showUser: boolean
 }
 
 export type ShadoLoggerMessage = AbstractLoggerMessage & {

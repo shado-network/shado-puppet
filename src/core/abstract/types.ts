@@ -15,7 +15,16 @@ export type AbstractLoggerMessage = {
   }
 }
 
-export type AbstractAppPlugin = {
+export type AbstractSandbox = {
+  send: (sandboxMessage: AbstractSandboxMessage) => void
+}
+
+// TODO: Enhance!
+export type AbstractSandboxMessage = {
+  [key: string]: any
+}
+
+export type AbstractPlugin = {
   identifier: string
   description: string
   key: string

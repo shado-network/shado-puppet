@@ -8,7 +8,7 @@ import { cookies } from './libs/utils.ts'
 import { asyncSleep } from '../../core/libs/utils.async.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
 
 // TODO: Find a better way.
 const __filename = fileURLToPath(import.meta.url)
@@ -248,4 +248,4 @@ export default {
   description: 'Wrapper for OpenAI interaction through LangChain.',
   key: 'twitter',
   plugin: TwitterClientPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin

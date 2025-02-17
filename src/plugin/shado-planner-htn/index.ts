@@ -9,7 +9,7 @@ import { importTasks } from './libs/utils.tasks.ts'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
 import type { HtnTask } from './tasks/types.ts'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -133,4 +133,4 @@ export default {
   description: 'First party runtime planner utility.',
   key: 'planner',
   plugin: ShadoPlannerHtnPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin

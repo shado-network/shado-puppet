@@ -3,7 +3,7 @@ import type { ChatOpenAIFields, ClientOptions } from '@langchain/openai'
 import type { BaseLanguageModelInput } from '@langchain/core/language_models/base'
 
 import type { AppContext } from '../../core/context/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
 
 class DeepSeekAdapterPlugin {
   // TODO: Get from puppet file.
@@ -67,4 +67,4 @@ export default {
   description: 'Wrapper for DeepSeek interaction through LangChain.',
   key: 'model',
   plugin: DeepSeekAdapterPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin

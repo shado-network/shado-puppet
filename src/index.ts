@@ -41,9 +41,15 @@ _app.plugins = await registerPlugins(_app.config.pluginsPath)
 
 // TODO: Update to the proper type from the plugin?
 _app.utils.logger = new _app.plugins['shado-logger'].plugin([
-  'sandbox',
-  'console',
+  'shado-screen',
+  'node-console',
 ])
+
+// TODO: Update to the proper type from the plugin?
+_app.utils.sandbox = new _app.plugins['shado-sandbox'].plugin(
+  ['shado-screen', 'logger', 'telegram'],
+  _app.utils.logger,
+)
 
 //
 

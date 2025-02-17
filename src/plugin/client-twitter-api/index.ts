@@ -3,7 +3,7 @@ import type { IClientSettings, TwitterApiTokens } from 'twitter-api-v2'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
 
 class TwitterApiClientPlugin {
   config = {}
@@ -112,7 +112,7 @@ class TwitterApiClientPlugin {
 
   sendMessage = async (message: string) => {
     if (this._app.config.sandboxMode) {
-      this._app.utils.logger.send({
+      this._app.utils.sandbox.send({
         type: 'SANDBOX',
         origin: {
           type: 'PUPPET',
@@ -128,7 +128,6 @@ class TwitterApiClientPlugin {
     }
 
     const response = await this.client.v2.tweet(message)
-
     // console.log('!!!', 'client-twitter | sendMessage()', { response })
   }
 }
@@ -138,4 +137,4 @@ export default {
   description: 'Wrapper for OpenAI interaction through LangChain.',
   key: 'twitter',
   plugin: TwitterApiClientPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin

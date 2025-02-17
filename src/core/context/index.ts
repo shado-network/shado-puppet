@@ -18,5 +18,6 @@ export const _app: AppContext = {
   plugins: {},
   utils: {
     logger: undefined,
+    sandbox: undefined,
   },
 }

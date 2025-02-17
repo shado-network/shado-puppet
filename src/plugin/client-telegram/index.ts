@@ -4,7 +4,7 @@ import type { FmtString } from 'telegraf/format'
 
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
-import type { AbstractAppPlugin } from '../../core/abstract/types.ts'
+import type { AbstractPlugin } from '../../core/abstract/types.ts'
 import type { TelegramMessage } from './types.ts'
 
 class TelegramClientPlugin {
@@ -143,4 +143,4 @@ export default {
   description: 'Wrapper for OpenAI interaction through LangChain.',
   key: 'telegram',
   plugin: TelegramClientPlugin,
-} satisfies AbstractAppPlugin
+} satisfies AbstractPlugin
