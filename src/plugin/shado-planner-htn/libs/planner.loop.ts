@@ -3,7 +3,7 @@ import { generatePlans } from './planner.generate.ts'
 import { executePlan } from './planner.execute.ts'
 import type { AppContext } from '../../../core/context/types.ts'
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { HtnTask } from '../tasks/types.ts'
+import type { HtnTask } from '../types.ts'
 
 const config = {
   AWAIT_PLANNING_FOR_X_SECONDS: 1,

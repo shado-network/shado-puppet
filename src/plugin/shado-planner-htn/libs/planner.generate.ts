@@ -1,7 +1,7 @@
 import { asyncForEach } from '../../../core/libs/utils.async.ts'
 import type { AppContext } from '../../../core/context/types.ts'
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { HtnTask } from '../tasks/types.ts'
+import type { HtnGoal, HtnTask } from '../types.ts'
 
 export const generatePlans = async (
   tasksPool: HtnTask[],
@@ -10,20 +10,20 @@ export const generatePlans = async (
 ) => {
   const plans: HtnTask[][] = []
 
-  const goalsReached = []
-  const goalsUnreached = []
+  const goalsReached: HtnGoal[] = []
+  const goalsUnreached: HtnGoal[] = []
 
   // NOTE: Loop through current goals and categorise into reached and unreached.
-  Object.keys(_puppet.runtime.memory.goals || {}).forEach((goalIdentifier) => {
-    const goalResult = _puppet.runtime.memory.goals[goalIdentifier]({
+  _puppet.runtime.memory.goals.forEach((goal) => {
+    const goalResult = goal.evaluator({
       _puppet,
       _app,
     })
 
     if (goalResult) {
-      goalsReached.push(goalIdentifier)
+      goalsReached.push(goal)
     } else {
-      goalsUnreached.push(goalIdentifier)
+      goalsUnreached.push(goal)
     }
   })
 
@@ -50,10 +50,10 @@ export const generatePlans = async (
   // console.log('!!!', 'goalsUnreached', goalsUnreached)
 
   // NOTE: Loop through unreached goals, try to find related tasks.
-  await asyncForEach(goalsUnreached, async (goalIdentifier: string) => {
+  await asyncForEach(goalsUnreached, async (goal: HtnGoal) => {
     // NOTE: Check if there is a task in the pool that could achieve the goal.
     const relatedTasks = tasksPool.filter((task) => {
-      return Boolean(task.effects[goalIdentifier])
+      return Boolean(task.effects[goal.identifier])
     })
 
     // NOTE: No related tasks found.

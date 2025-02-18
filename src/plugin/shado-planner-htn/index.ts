@@ -10,7 +10,7 @@ import { importTasks } from './libs/utils.tasks.ts'
 import type { AppContext } from '../../core/context/types.ts'
 import type { PuppetInstance } from '../../core/puppet/types.ts'
 import type { AbstractPlugin } from '../../core/abstract/types.ts'
-import type { HtnTask } from './tasks/types.ts'
+import type { HtnTask } from './types.ts'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -42,11 +42,11 @@ class ShadoPlannerHtnPlugin {
 
   init = async () => {
     try {
-      this._puppet.runtime.memory.goals = {
+      this._puppet.runtime.memory.goals = [
         ...this._puppet.runtime.memory.goals,
         // TODO: Make this nicer?
         ...this._puppet.config.planner.config.goals,
-      }
+      ]
 
       this._puppet.runtime.memory.state = {
         'last-started': 0,

@@ -1,7 +1,8 @@
-import type { HtnTask } from '../types.ts'
+import type { HtnTask } from '../../types.ts'
 
 export default {
   identifier: 'twitter-get-messages',
+  description: 'Retrieve messages from Twitter.',
 
   conditions: {
     'twitter-has-client': (props) =>

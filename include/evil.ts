@@ -13,26 +13,32 @@ const puppetConfig: PuppetConfig = {
     config: {
       // TODO: How to make this more low to no-code?
       // TODO: How will devs know about tasks that can fulfill the goals?
-      goals: {
+      goals: [
         // Telegram
-        // NOTE: Wants to reply no longer than 1 second ago.
-        'telegram-last-replied': (props: any) => {
-          // 'telegram-last-replied': (props: GoalProps) => {
-          return (
-            props._puppet.runtime.memory.state?.['telegram-last-replied'] >=
-            Date.now() - 1 * SEC_IN_MSEC
-          )
+        {
+          identifier: 'telegram-last-replied',
+          description: 'Reply to Telegram message within 1 second.',
+          // NOTE: Wants to reply no longer than 1 second ago.
+          evaluator: (props) => {
+            return (
+              props._puppet.runtime.memory.state?.['telegram-last-replied'] >=
+              Date.now() - 1 * SEC_IN_MSEC
+            )
+          },
         },
-        // Twitter
-        // NOTE: Wants to reply no longer than 3 minutes ago.
-        'twitter-last-sent': (props: any) => {
-          // 'twitter-last-sent': (props: GoalProps) => {
-          return (
-            props._puppet.runtime.memory.state?.['twitter-last-sent'] >=
-            Date.now() - 3 * MIN_IN_MSEC
-          )
+        {
+          // Twitter
+          identifier: 'twitter-last-sent',
+          description: 'Tweet on Twitter every 3 minutes.',
+          // NOTE: Wants to reply no longer than 3 minutes ago.
+          evaluator: (props) => {
+            return (
+              props._puppet.runtime.memory.state?.['twitter-last-sent'] >=
+              Date.now() - 3 * MIN_IN_MSEC
+            )
+          },
         },
-      },
+      ],
     },
   },
   model: {

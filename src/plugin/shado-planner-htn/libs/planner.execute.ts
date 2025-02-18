@@ -1,7 +1,7 @@
 import { asyncForEach, asyncEvery } from '../../../core/libs/utils.async.ts'
 import type { AppContext } from '../../../core/context/types.ts'
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { HtnTask } from '../tasks/types.ts'
+import type { HtnTask } from '../types.ts'
 
 export const executePlan = async (
   plan: any[],

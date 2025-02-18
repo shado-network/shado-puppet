@@ -1,10 +1,11 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { HtnTask } from '../types.ts'
+import type { HtnTask } from '../../types.ts'
 
 export default {
   identifier: 'twitter-send-message',
+  description: 'Post a message to Twitter.',
 
   conditions: {
     'twitter-has-client': (props) =>

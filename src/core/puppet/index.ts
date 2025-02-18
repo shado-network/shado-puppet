@@ -86,7 +86,7 @@ export class Puppet {
       clients: undefined,
       //
       memory: {
-        goals: {},
+        goals: [],
         state: {},
       },
       knowledge: undefined,

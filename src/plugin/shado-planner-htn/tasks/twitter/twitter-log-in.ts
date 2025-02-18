@@ -1,8 +1,9 @@
 import { MIN_IN_MSEC } from '../../../../core/libs/constants.ts'
-import type { HtnTask } from '../types.ts'
+import type { HtnTask } from '../../types.ts'
 
 export default {
   identifier: 'twitter-log-in',
+  description: 'Log in to Twitter.',
 
   conditions: {
     'twitter-has-client': (props) =>

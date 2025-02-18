@@ -1,5 +1,5 @@
 import type { PuppetInstance } from '../../../core/puppet/types.ts'
-import type { HtnTask } from './types.ts'
+import type { HtnTask } from '../types.ts'
 
 export const tasksPool = (
   _puppet: PuppetInstance,

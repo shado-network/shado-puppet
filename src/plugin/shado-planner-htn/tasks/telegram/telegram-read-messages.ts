@@ -2,10 +2,11 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { SEC_IN_MSEC } from '../../../../core/libs/constants.ts'
 import type { TelegramMessage } from '../../../client-telegram/types.ts'
-import type { HtnTask, TriggerProps } from '../types.ts'
+import type { HtnTask, TriggerProps } from '../../types.ts'
 
 export default {
   identifier: 'telegram-read-messages',
+  description: 'Reply to retrieved Telegram messages.',
 
   conditions: {
     'telegram-has-client': (props) =>

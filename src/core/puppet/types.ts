@@ -1,6 +1,8 @@
 // TODO: AbstractEvents?
 import type { EventEmitter } from 'events'
 
+import type { HtnGoal } from '../../plugin/shado-planner-htn/types'
+
 export type PuppetInstance = {
   runtime: PuppetRuntime
   config: PuppetConfig
@@ -21,9 +23,7 @@ export type PuppetRuntime = {
     state?: {
       [key: string]: any
     }
-    goals?: {
-      [key: string]: (props: any) => boolean
-    }
+    goals?: HtnGoal[]
     [key: string]: any
   }
   knowledge?: unknown
@@ -36,9 +36,7 @@ export type PuppetConfig = {
   planner: {
     provider: 'shado-planner-htn' | 'shado-planner-sm' | 'shado-planner-bt'
     config: {
-      goals: {
-        [key: string]: (props: any) => boolean
-      }
+      goals?: HtnGoal[]
       [key: string]: any
     }
   }

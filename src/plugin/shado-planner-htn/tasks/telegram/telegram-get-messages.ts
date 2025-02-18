@@ -1,7 +1,9 @@
-import type { HtnTask } from '../types.ts'
+import type { HtnTask } from '../../types.ts'
 
 export default {
   identifier: 'telegram-get-messages',
+  description: 'Retrieve messages received on Telegram.',
+
   conditions: {
     'telegram-has-client': (props) =>
       props._puppet.runtime.memory.state?.['telegram-has-client'] === true,

@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { asyncForEach } from '../../../core/libs/utils.async.ts'
-import type { HtnTask } from '../tasks/types.ts'
+import type { HtnTask } from '../types.ts'
 
 export const importTasks = async (tasksPath: string) => {
   const imports: HtnTask[] = []
