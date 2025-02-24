@@ -9,21 +9,29 @@
     // "types": ["node"],
     //
     "rootDir": ".",
-    "outDir": "dist",
+    "outDir": "./dist",
     "incremental": false,
     "removeComments": true,
     //
+    "noEmit": false,
+    "emitDeclarationOnly": false,
     "allowJs": true,
     "checkJs": false,
-    "allowArbitraryExtensions": true,
-    "allowImportingTsExtensions": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    // "allowArbitraryExtensions": true,
+    // "allowImportingTsExtensions": true,
+    "declaration": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleDetection": "force",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    //
+    "paths": {
+      "@/*": ["./app/*"],
+      "@core/*": ["./app/core/*"],
+      "@plugins/*": ["./app/plugin/*"],
+      "@includes/*": ["./include/*"]
+    }
   },
-  "include": ["src", "include"],
+  "include": ["app", "include"],
   "exclude": ["node_modules", "dist"]
 }

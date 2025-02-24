@@ -38,5 +38,5 @@ The `--puppets` argument expects one or more puppet ids that have been set in th
 pnpm dev --puppets="good,evil"
 
 # Production mode
-pnpm start --puppets="good,evil"
+pnpm build && pnpm start --puppets="good,evil"
 ```

@@ -1,5 +1,5 @@
-import { MIN_IN_MSEC, SEC_IN_MSEC } from '../src/core/libs/constants.ts'
-import type { PuppetConfig } from '../src/core/puppet/types.ts'
+import { MIN_IN_MSEC, SEC_IN_MSEC } from '@core/libs/constants.js'
+import type { PuppetConfig } from '@core/puppet/types'
 
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.good' })
