@@ -1,4 +1,4 @@
-import { SEC_IN_MSEC } from './constants.js'
+import { SEC_IN_MSEC } from '@/libs/constants.js'
 
 export const asyncForEach = async (array: any[], callback: any) => {
   for (let i = 0; i < array.length; i++) {

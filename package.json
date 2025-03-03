@@ -5,38 +5,35 @@
   "description": "",
   "keywords": [],
   "author": "Shadō Network",
-  "private": true,
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "watch": "tsc -w",
-    "dev": "bash ./scripts/dev.sh",
-    "build": "bash ./scripts/build.sh",
-    "start": "bash ./scripts/start.sh"
+    "build": "tsup ./src",
+    "watch": "tsup ./src --watch"
   },
   "devDependencies": {
     "@types/node": "^22.9.3",
-    "@types/ws": "^8.5.14",
-    "@types/yargs": "^17.0.33",
     "prettier": "^3.5.2",
-    "tsc-alias": "^1.8.10",
-    "tsx": "^4.19.3",
+    "tsup": "^8.3.6",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@fastify/cors": "^10.0.2",
-    "@langchain/anthropic": "^0.3.11",
     "@langchain/core": "^0.3.29",
     "@langchain/langgraph": "^0.2.39",
-    "@langchain/openai": "^0.3.17",
-    "agent-twitter-client": "^0.0.18",
-    "dotenv": "^16.4.5",
-    "fastify": "^5.2.1",
-    "langchain": "^0.3.11",
-    "telegraf": "^4.16.3",
-    "twitter-api-v2": "^1.19.0",
-    "uuid": "^11.0.5",
-    "ws": "^8.18.0",
-    "yargs": "^17.7.2"
-  }
+    "langchain": "^0.3.11"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts"
 }

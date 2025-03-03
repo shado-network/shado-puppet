@@ -26,12 +26,9 @@
     "resolveJsonModule": true,
     //
     "paths": {
-      "@/*": ["./app/*"],
-      "@core/*": ["./app/core/*"],
-      "@plugins/*": ["./app/plugin/*"],
-      "@includes/*": ["./include/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["app", "include"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
