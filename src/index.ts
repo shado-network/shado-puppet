@@ -71,7 +71,7 @@ export class ShadoPuppet {
       )
       this.planner = plugin
 
-      this._context.utils.logger.send({
+      this._context.utils.logger?.send({
         type: 'SUCCESS',
         origin: {
           type: 'PUPPET',
@@ -82,7 +82,7 @@ export class ShadoPuppet {
         },
       })
     } catch (error) {
-      this._context.utils.logger.send({
+      this._context.utils.logger?.send({
         type: 'ERROR',
         origin: {
           type: 'PUPPET',
@@ -110,7 +110,7 @@ export class ShadoPuppet {
       )
       this.model = plugin
 
-      this._context.utils.logger.send({
+      this._context.utils.logger?.send({
         type: 'SUCCESS',
         origin: {
           type: 'PUPPET',
@@ -121,7 +121,7 @@ export class ShadoPuppet {
         },
       })
     } catch (error) {
-      this._context.utils.logger.send({
+      this._context.utils.logger?.send({
         type: 'ERROR',
         origin: {
           type: 'PUPPET',
@@ -148,7 +148,7 @@ export class ShadoPuppet {
         const plugin = new client.plugin(...client.props)
         this.clients[client.plugin.metadata.key] = plugin
 
-        this._context.utils.logger.send({
+        this._context.utils.logger?.send({
           type: 'SUCCESS',
           origin: {
             type: 'PUPPET',
@@ -159,7 +159,7 @@ export class ShadoPuppet {
           },
         })
       } catch (error) {
-        this._context.utils.logger.send({
+        this._context.utils.logger?.send({
           type: 'ERROR',
           origin: {
             type: 'PUPPET',
@@ -177,7 +177,7 @@ export class ShadoPuppet {
   //
 
   setup = () => {
-    this._context.utils.logger.send({
+    this._context.utils.logger?.send({
       type: 'LOG',
       origin: {
         type: 'PUPPET',
@@ -195,7 +195,7 @@ export class ShadoPuppet {
   }
 
   start = async () => {
-    this._context.utils.logger.send({
+    this._context.utils.logger?.send({
       type: 'LOG',
       origin: {
         type: 'PUPPET',
@@ -208,10 +208,10 @@ export class ShadoPuppet {
 
     // NOTE: Start the planner loop.
     try {
-      await this.planner.setup()
-      this.planner.start()
+      await this.planner?.setup()
+      this.planner?.start()
     } catch (error) {
-      this._context.utils.logger.send({
+      this._context.utils.logger?.send({
         type: 'ERROR',
         origin: {
           type: 'PUPPET',

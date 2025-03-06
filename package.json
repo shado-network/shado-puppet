@@ -8,19 +8,21 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "build": "tsup ./src",
-    "watch": "tsup ./src --watch"
-  },
-  "devDependencies": {
-    "@types/node": "^22.9.3",
-    "prettier": "^3.5.2",
-    "tsup": "^8.3.6",
-    "typescript": "^5.7.2"
+    "build": "npm run clean && tsup ./src",
+    "watch": "tsup ./src --watch",
+    "clean": "rimraf ./dist"
   },
   "dependencies": {
     "@langchain/core": "^0.3.29",
     "@langchain/langgraph": "^0.2.39",
     "langchain": "^0.3.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "prettier": "^3.5.2",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.2"
   },
   "files": [
     "dist",

@@ -2,12 +2,12 @@
 
 By Shadō Network.
 
-This framework is a work in progress! Breaking changes might occur, use at your own discretion.
+> This framework is a work in progress! Breaking changes might occur, use at your own discretion.
 
 ## Installation
 
 - Clone the `@shado-network/shado-puppet` repository and navigate into the new directory
-- Run `pnpm install` to install the framework dependencies
+- Run `npm install` to install the framework dependencies
 
 ## Configuration
 
@@ -35,8 +35,8 @@ The `--puppets` argument expects one or more puppet ids that have been set in th
 
 ```sh
 # Development mode
-pnpm dev --puppets="good,evil"
+npm run dev --puppets="good,evil"
 
 # Production mode
-pnpm build && pnpm start --puppets="good,evil"
+npm run build && npm run start --puppets="good,evil"
 ```
